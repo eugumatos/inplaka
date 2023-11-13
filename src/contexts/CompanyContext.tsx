@@ -1,41 +1,125 @@
-import { ReactNode, createContext, useReducer } from "react";
+import { ReactNode, createContext, useReducer, useContext } from "react";
+import { CompanyFormData } from "@/schemas/CompanySchemaValidation";
+import { ICompany } from "@/domains/company";
 import { companyReducer } from "@/reducers/companyReducer";
+import {
+  createCompany,
+  destroyCompany,
+  getCompanies,
+  updateCompany,
+} from "@/services/company";
+import { toast } from "react-toastify";
 
 interface CompanyContextProps {
-  children: ReactNode;
+  children?: ReactNode;
+  companies?: Array<ICompany>;
 }
 
-const CompanyContext = createContext({});
+interface CompanyProviderProps {
+  isLoading: boolean;
+  isError: boolean;
+  companies: Array<ICompany>;
+  addCompany: (company: CompanyFormData) => void;
+  editCompany: (company: CompanyFormData) => void;
+  removeCompany: (company: ICompany) => void;
+}
 
-const initialState = {
-  companies: [],
-};
+const CompanyContext = createContext<CompanyProviderProps>(
+  {} as CompanyProviderProps
+);
 
-export function CompanyProvider({ children }: CompanyContextProps) {
-  const [state, dispatch] = useReducer(companyReducer, initialState);
+function CompanyProvider({ companies = [], children }: CompanyContextProps) {
+  const [state, dispatch] = useReducer(companyReducer, {
+    companies,
+    isLoading: false,
+    isError: false,
+  });
 
-  function addEmployee(company) {
-    dispatch({
-      type: "ADD_EMPLOYEE",
-      payload: employee,
-    });
+  async function addCompany(company: CompanyFormData) {
+    try {
+      dispatch({ type: "LOADING" });
+      await createCompany(company);
+
+      const newCompanies = await getCompanies();
+
+      dispatch({ type: "RELOAD_COMPANY", payload: newCompanies });
+
+      toast.success("Empresa criada com sucesso!");
+    } catch (error) {
+      dispatch({ type: "ERROR" });
+      toast.error("Erro ao criar empresa");
+    }
   }
 
-  function editEmployee(company) {
-    dispatch({
-      type: "EDIT_EMPLOYEE",
-      payload: employee,
-    });
+  async function editCompany(company: CompanyFormData) {
+    try {
+      dispatch({ type: "LOADING" });
+
+      const findIdCompany = state.companies.find(
+        (c) => c.cnpj === company.cnpj
+      );
+
+      if (!findIdCompany) {
+        throw new Error("ID Company not found!");
+      }
+
+      await updateCompany(findIdCompany.id, company);
+      const newCompanies = await getCompanies();
+
+      dispatch({ type: "RELOAD_COMPANY", payload: newCompanies });
+
+      toast.success("Empresa editada com sucesso!");
+    } catch (error) {
+      dispatch({ type: "ERROR" });
+      toast.error("Erro ao editar empresa");
+    }
   }
 
-  function removeEmployee(id) {
-    dispatch({
-      type: "REMOVE_EMPLOYEE",
-      payload: id,
-    });
+  async function removeCompany(company: ICompany) {
+    try {
+      dispatch({ type: "LOADING" });
+
+      const findIdCompany = state.companies.find(
+        (c) => c.cnpj === company.cnpj
+      );
+
+      if (!findIdCompany) {
+        throw new Error("ID Company not found!");
+      }
+
+      await destroyCompany(findIdCompany.id);
+
+      const companies = await getCompanies();
+
+      dispatch({ type: "RELOAD_COMPANY", payload: companies });
+
+      toast.success("Empresa removida com sucesso!");
+    } catch (error) {
+      dispatch({ type: "ERROR" });
+      toast.error("Erro ao remover empresa");
+    }
   }
 
   return (
-    <CompanyContext.Provider value={{}}>{children}</CompanyContext.Provider>
+    <CompanyContext.Provider
+      value={{
+        isError: state.isError,
+        isLoading: state.isLoading,
+        companies: state.companies,
+        addCompany,
+        removeCompany,
+        editCompany,
+      }}
+    >
+      {children}
+    </CompanyContext.Provider>
   );
 }
+
+function useCompanies() {
+  const context = useContext(CompanyContext);
+
+  return context;
+}
+
+export { CompanyProvider, useCompanies };

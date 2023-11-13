@@ -1,59 +1,35 @@
-import { StateProps, ActionProps } from "@/domains/reducer";
-import {
-  getCompanies,
-  createCompany,
-  updateCompany,
-  destroyCompany,
-} from "@/services/company";
+import { ICompany } from "@/domains/company";
 
-export const initialState = {
-  isLoading: false,
-  error: false,
-  copmanies: [],
+type State = {
+  companies: Array<ICompany>;
+  isLoading: boolean;
+  isError: boolean;
 };
 
-export default async function companyReducer(state, action) {
+type Action =
+  | { type: "RELOAD_COMPANY"; payload: Array<ICompany> }
+  | { type: "LOADING" }
+  | { type: "ERROR" };
+
+export function companyReducer(state: State, action: Action): State {
   switch (action.type) {
-    case "ADD_COMPANY":
+    case "RELOAD_COMPANY":
       try {
-        await createCompany(action.payload);
-
         return {
-          ...state,
-          companies: [...state.data, action.payload],
+          companies: action.payload,
+          isLoading: false,
+          isError: false,
         };
-      } catch (error) {}
-    case "EDIT_COMPANY":
-      try {
-        await updateCompany(action.payload.id, action.payload.data);
-
-        const updatedCompany = action.payload;
-
-        const updatedCompanies = state.companies.map((company) => {
-          if (company.id === updatedCompany.id) {
-            return updatedCompany;
-          }
-          return company;
-        });
-
-        return {
-          ...state,
-          companies: updatedCompanies,
-        };
-      } catch (error) {}
-    case "REMOVE_COMPANY":
-      try {
-        await destroyCompany(action.payload.id);
-
-        return {
-          ...state,
-          companies: state.companies.filter(
-            (company) => company.id !== action.payload
-          ),
-        };
-      } catch (error) {}
-
+      } catch (error) {
+        return { ...state, isLoading: false, isError: true };
+      }
+    case "LOADING": {
+      return { ...state, isLoading: true, isError: false };
+    }
+    case "ERROR": {
+      return { ...state, isLoading: false, isError: true };
+    }
     default:
-      return state;
+      return { ...state };
   }
 }
