@@ -10,9 +10,14 @@ import {
   Thead,
   Tooltip,
   Tr,
+  Spinner,
+  Center,
+  Input,
+  InputGroup,
+  InputLeftElement,
 } from "@chakra-ui/react";
-import { RiDeleteBinLine, RiEditLine } from "react-icons/ri";
-import { Column, useTable } from "react-table";
+import { RiDeleteBinLine, RiEditLine, RiSearchLine } from "react-icons/ri";
+import { Column, useGlobalFilter, useTable } from "react-table";
 
 import { MAX_ITEMS_PER_PAGE_DEFAULT } from "@/constants";
 import { Pagination } from "../Pagination";
@@ -20,6 +25,7 @@ import { Pagination } from "../Pagination";
 interface DataTableProps<T extends object> {
   data: T[];
   columns: Column[];
+  isLoading?: boolean;
   itemsPerPage?: number;
 
   onRowEdit?: (row: any) => void;
@@ -29,6 +35,7 @@ interface DataTableProps<T extends object> {
 export function DataTable<T extends object>({
   data,
   columns,
+  isLoading,
   itemsPerPage,
   onRowEdit,
   onRowDelete,
@@ -36,11 +43,23 @@ export function DataTable<T extends object>({
   const shouldRenderActions = !!onRowEdit || !!onRowDelete;
   const maxItemsPerPage = itemsPerPage ?? MAX_ITEMS_PER_PAGE_DEFAULT;
 
-  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
-    useTable({
+  const {
+    getTableProps,
+    getTableBodyProps,
+    headerGroups,
+    rows,
+    prepareRow,
+    state,
+    setGlobalFilter,
+  } = useTable(
+    {
       columns,
       data,
-    });
+    },
+    useGlobalFilter
+  );
+
+  const [search, setSearch] = useState(state.globalFilter);
 
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -59,6 +78,20 @@ export function DataTable<T extends object>({
       borderRadius={6}
       borderColor="gray.100"
     >
+      <InputGroup maxW="26%" mb={4}>
+        <InputLeftElement>
+          <RiSearchLine />
+        </InputLeftElement>
+
+        <Input
+          placeholder="Buscar"
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setGlobalFilter(e.target.value);
+          }}
+        />
+      </InputGroup>
       <Table {...getTableProps()}>
         {headerGroups.map((headerGroup) => (
           <>
@@ -80,7 +113,8 @@ export function DataTable<T extends object>({
             </Thead>
           </>
         ))}
-        <Tbody {...getTableBodyProps()}>
+
+        <Tbody hidden={isLoading} {...getTableBodyProps()}>
           {currentTableData.map((row) => {
             prepareRow(row);
 
@@ -128,7 +162,14 @@ export function DataTable<T extends object>({
           })}
         </Tbody>
       </Table>
-      <Box px={4}>
+
+      {isLoading && (
+        <Center my={10}>
+          <Spinner size="lg" />
+        </Center>
+      )}
+
+      <Box hidden={isLoading} px={4}>
         <Pagination
           totalCountOfRegisters={data.length}
           currentPage={currentPage}
