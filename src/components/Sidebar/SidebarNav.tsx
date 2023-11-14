@@ -56,7 +56,7 @@ export function SidebarNav() {
         <NavLink href="/automation" icon={RiMindMap}>
           Condições de Pagamento
         </NavLink>
-        <NavLink href="/automation" icon={RiShoppingCartLine}>
+        <NavLink href="/pedido" icon={RiShoppingCartLine}>
           Pedidos de Venda
         </NavLink>
       </NavSection>
