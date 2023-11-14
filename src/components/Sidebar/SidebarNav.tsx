@@ -50,7 +50,7 @@ export function SidebarNav() {
         <NavLink href="/automation" icon={RiServiceLine}>
           Serviços
         </NavLink>
-        <NavLink href="/automation" icon={RiBankCard2Line}>
+        <NavLink href="/forma-pagamento" icon={RiBankCard2Line}>
           Formas de Pagamento
         </NavLink>
         <NavLink href="/automation" icon={RiMindMap}>
