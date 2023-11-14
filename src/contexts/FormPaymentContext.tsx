@@ -100,7 +100,7 @@ function FormPaymentProvider({
       toast.success("Forma de pagamento removida com sucesso!");
     } catch (error) {
       dispatch({ type: "ERROR" });
-      toast.error("Erro ao forma de pagamento");
+      toast.error("Erro ao remover forma de pagamento");
     }
   }
 
