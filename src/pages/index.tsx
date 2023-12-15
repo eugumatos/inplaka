@@ -106,12 +106,15 @@ export default function Dashboard() {
           <Box p={["6", "8"]} pb="4" bg="green.300" borderRadius={8}>
             <HStack align="center">
               <Icon as={RiShoppingCartLine} color="white" fontSize="28" />
-              <Text color="white" fontSize="lg">
-                Pedidos realizados <br />
-                <Text fontSize="15">
+              <Flex direction="column">
+                <Text color="white" fontSize="lg">
+                  Pedidos realizados
+                </Text>
+
+                <Text fontSize="15" color="#fff">
                   <strong>Essa semana</strong>
                 </Text>
-              </Text>
+              </Flex>
               <Heading color="white" marginLeft="auto" size="lg">
                 85
               </Heading>

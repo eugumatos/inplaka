@@ -17,7 +17,7 @@ interface HomeProps {
 
 export default function Pedido({ orders }: HomeProps) {
   const formOrder = useForm<OrderFormData>({
-    resolver: yupResolver(orderFormSchema),
+    // resolver: yupResolver(orderFormSchema),
   });
 
   return (

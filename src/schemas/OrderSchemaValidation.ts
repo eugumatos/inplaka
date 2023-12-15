@@ -1,3 +1,5 @@
+import { IProduct } from "@/domains/product";
+import { IService } from "@/domains/service";
 import * as yup from "yup";
 
 export const orderFormSchema = yup.object().shape({
@@ -5,6 +7,15 @@ export const orderFormSchema = yup.object().shape({
   vendedor: yup.string().required("Campo obrigatório"),
   formaPagamento: yup.string(),
   desconto: yup.number(),
+  produtos: yup.object(),
+  servicos: yup.object(),
+  id: yup.string(),
 });
 
-export type OrderFormData = yup.InferType<typeof orderFormSchema>;
+type IOrderFormData = yup.InferType<typeof orderFormSchema>;
+
+export interface OrderFormData extends IOrderFormData {
+  produtos: IProduct[];
+  servicos: IService[];
+  total: number;
+}

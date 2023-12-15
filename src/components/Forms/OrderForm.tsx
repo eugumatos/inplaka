@@ -1,4 +1,4 @@
-import { useMemo, useRef, useEffect, useState } from "react";
+import { useMemo, useRef, useEffect, useState, FormEventHandler } from "react";
 import {
   Box,
   Divider,
@@ -25,39 +25,62 @@ import {
   RiBankCard2Line,
 } from "react-icons/ri";
 import { Column } from "react-table";
+import { useFormContext } from "react-hook-form";
+import { useDebounce } from "@/hooks/useDebounce";
 import { AsyncSelect } from "@/components/Select/AsyncSelect";
 import { PopoverPlaqueForm } from "@/containers/Order/PopoverPlaqueForm";
 import { OrderFormData } from "@/schemas/OrderSchemaValidation";
-import { getClients } from "@/services/clients";
-import { getSellers } from "@/services/seller";
-import { useFormContext } from "react-hook-form";
-import { IClient } from "@/domains/client";
-import { ISeller } from "@/domains/seller";
-import { IService } from "@/domains/service";
-import { IProduct } from "@/domains/product";
-import { getFormPayments } from "@/services/form-payment";
-import { IFormPayment } from "@/domains/form-payment";
 import { DataTable } from "@/components/Table";
 import { Input } from "@/components/Input";
 import { InputQuantity } from "@/components/Input/InputQuantity";
 import { filterText } from "@/utils/filterText";
 import { currency } from "@/utils/currency";
+import { useOrderForm } from "@/containers/Order/hooks/useOrderForm";
 import { toast } from "react-toastify";
-import { getProducts } from "@/services/product";
-import { getServices } from "@/services/service";
 
-export function OrderForm() {
+interface OrderFormProps {
+  onSubmit: FormEventHandler<HTMLFormElement>;
+}
+
+export function OrderForm({ onSubmit }: OrderFormProps) {
   const {
+    control,
     register,
-    formState: { errors },
     watch,
+    formState: { errors },
     setValue,
+    getValues,
   } = useFormContext<OrderFormData>();
 
   const containerTotalRef = useRef<null | HTMLDivElement>(null);
 
-  const [products, setProducts] = useState<IProduct[] | []>([]);
-  const [services, setServices] = useState<IService[] | []>([]);
+  const {
+    products,
+    services,
+    loadServicesAndProducts,
+    clientOptions,
+    sellerOptions,
+    paymentOptions,
+    updateProductAmount,
+    updateServiceAmount,
+    updateProductPlaque,
+    removeProductPlaque,
+    calculateTotal,
+  } = useOrderForm();
+
+  const clientValue = watch<any>("cliente")?.label || "";
+  const sellerValue = watch<any>("vendedor")?.label || "";
+  const paymentFormValue = watch<any>("formaPagamento")?.label || "";
+
+  const productFormValues = watch<any>("produtos") || "";
+  const serviceFormValues = watch<any>("servicos") || "";
+
+  const { subTotalProducts, subTotalServices, total } = calculateTotal();
+
+  const [totalValue, setTotalValue] = useState(0);
+  const [discountFormValue, setDiscountFormValue] = useState(0);
+
+  const discount = useDebounce(String(discountFormValue), 500);
 
   const columns = useMemo(
     (): Column[] => [
@@ -79,81 +102,35 @@ export function OrderForm() {
     containerTotalRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  async function loadClientOptions(value: string) {
-    try {
-      const clients = await getClients();
-      const options = clients
-        .map((client) => ({
-          value: client.id,
-          label: client.apelido,
-        }))
-        .filter((item) =>
-          item.label.toLocaleUpperCase().includes(value.toUpperCase())
-        );
+  function handleSubmit() {
+    const formValues = getValues();
 
-      return options;
-    } catch (error) {
-      toast.warning("Erro ao carregar clientes");
+    const formattedValues = Object.assign(formValues, {
+      produtos: products.filter((p) => p.quantidade > 0),
+      services: services.filter((s) => s.quantidade > 0),
+      total: total,
+    });
 
-      return [];
-    }
+    console.log(formattedValues);
   }
 
-  async function loadSellerOptions(value: string) {
-    try {
-      const sellers = await getSellers();
-      const options = sellers
-        .map((seller) => ({
-          value: seller.id,
-          label: seller.apelido,
-        }))
-        .filter((item) =>
-          item.label.toLocaleUpperCase().includes(value.toUpperCase())
-        );
-
-      return options;
-    } catch (error) {
-      toast.warning("Erro ao carregar vendedores");
-
-      return [];
+  useEffect(() => {
+    if (total > Number(discount)) {
+      setTotalValue(total - Number(discount));
     }
-  }
-
-  async function loadFormPaymentOptions(value: string) {
-    try {
-      const formPayments = await getFormPayments();
-      const options = formPayments
-        .map((formPayment) => ({
-          value: formPayment.id,
-          label: formPayment.descricao,
-        }))
-        .filter((item: { label: string }) =>
-          item.label.toLocaleUpperCase().includes(value.toUpperCase())
-        );
-
-      return options;
-    } catch (error) {
-      toast.warning("Erro ao carregar vendedores");
-
-      return [];
-    }
-  }
+  }, [total, discount]);
 
   useEffect(() => {
     async function getDataTable() {
       try {
-        const products = await getProducts();
-        const services = await getServices();
-
-        setProducts(products);
-        setServices(services);
+        await loadServicesAndProducts();
       } catch (error) {
         toast.warning("Erro ao listar produtos e serviços");
       }
     }
 
     getDataTable();
-  }, []);
+  }, [loadServicesAndProducts]);
 
   return (
     <form>
@@ -164,17 +141,26 @@ export function OrderForm() {
           <HStack mt={5} gap={4} alignItems="center">
             <Box flex={1}>
               <FormLabel>Cliente:</FormLabel>
-              <AsyncSelect name="cliente" loadOptions={loadClientOptions} />
+              <AsyncSelect
+                control={control}
+                loadOptions={clientOptions}
+                name="cliente"
+              />
             </Box>
             <Box flex={1}>
               <FormLabel>Vendedor:</FormLabel>
-              <AsyncSelect name="vendedor" loadOptions={loadSellerOptions} />
+              <AsyncSelect
+                control={control}
+                loadOptions={sellerOptions}
+                name="vendedor"
+              />
             </Box>
             <Box flex={1}>
               <FormLabel>Forma pagamento:</FormLabel>
               <AsyncSelect
+                control={control}
+                loadOptions={paymentOptions}
                 name="formaPagamento"
-                loadOptions={loadFormPaymentOptions}
               />
             </Box>
           </HStack>
@@ -184,26 +170,52 @@ export function OrderForm() {
               <Tab>Produtos</Tab>
               <Tab>Serviços</Tab>
             </TabList>
-            <TabPanels>
-              <TabPanel>
+            <TabPanels mt={5}>
+              <TabPanel p={0}>
                 <DataTable
                   columns={columns}
                   data={products}
                   itemsPerPage={5}
-                  customnAction={() => (
+                  customnAction={(row) => (
                     <Flex gap={4} justify="flex-end">
-                      <InputQuantity maxW="50%" />
-                      <PopoverPlaqueForm />
+                      <InputQuantity
+                        key={row.id}
+                        name="produto"
+                        maxQ={row.unidade}
+                        maxW="50%"
+                        value={row.quantidade}
+                        onChangeQuantity={(value) => {
+                          updateProductAmount(row, value);
+                        }}
+                      />
+                      <Box>
+                        <PopoverPlaqueForm
+                          product={row}
+                          updateProductPlaque={updateProductPlaque}
+                          removeProductPlaque={removeProductPlaque}
+                          isDisabled={+row.unidade <= 0}
+                        />
+                      </Box>
                     </Flex>
                   )}
                 />
               </TabPanel>
-              <TabPanel>
+              <TabPanel p={0}>
                 <DataTable
                   columns={columns}
                   data={services}
                   itemsPerPage={5}
-                  customnAction={() => <InputQuantity maxW="50%" />}
+                  customnAction={(row) => (
+                    <InputQuantity
+                      key={row.id}
+                      name="servico"
+                      maxQ={row.unidade}
+                      maxW="50%"
+                      onChangeQuantity={(value) => {
+                        updateServiceAmount(row, value);
+                      }}
+                    />
+                  )}
                 />
               </TabPanel>
             </TabPanels>
@@ -236,45 +248,89 @@ export function OrderForm() {
                 <Text size="md" fontWeight="bold">
                   Cliente:
                 </Text>
+                <Text size="md">{clientValue}</Text>
               </Flex>
               <Flex gap={2}>
                 <Icon as={RiStoreLine} boxSize={5} />
                 <Text size="md" fontWeight="bold">
                   Vendedor:
                 </Text>
+                <Text size="md">{sellerValue}</Text>
               </Flex>
               <Flex gap={2}>
                 <Icon as={RiBankCard2Line} boxSize={5} />
                 <Text size="md" fontWeight="bold">
                   Forma de pagamento:
                 </Text>
-                <Text size="md"></Text>
+                <Text size="md">{paymentFormValue}</Text>
               </Flex>
             </VStack>
           </Box>
         </Flex>
 
-        <Box w="100%">
-          <Text size="md">Subtotal:</Text>
-          <Text size="md">Frete:</Text>
-          <Text fontSize={20} fontWeight="bold" my={2}>
-            {" "}
-            Total da venda:
-          </Text>
+        {products
+          .filter((product) => product.quantidade > 0)
+          .map((product) => (
+            <Flex key={product.id} justify="flex-start" my={1}>
+              <Flex gap={1}>
+                <Text fontSize="sm" fontWeight="bold">
+                  {product.quantidade}x
+                </Text>
+                <Text fontSize="sm">{product.descricao}</Text>
+              </Flex>
+            </Flex>
+          ))}
+
+        {services
+          .filter((service) => service.quantidade > 0)
+          .map((service) => (
+            <Flex key={service.id} justify="flex-start" my={1}>
+              <Flex gap={1}>
+                <Text fontSize="sm" fontWeight="bold">
+                  {service.quantidade}x
+                </Text>
+                <Text fontSize="sm">{service.descricao}</Text>
+              </Flex>
+            </Flex>
+          ))}
+
+        <Box w="100%" mt={4}>
+          <Text size="md">Subtotal: {currency(subTotalProducts)}</Text>
+          <Text size="md">Serviços: {currency(subTotalServices)}</Text>
+          <Flex my={2}>
+            <Text fontSize={20} fontWeight="bold">
+              {" "}
+              Total da venda:
+            </Text>
+            <Text ml={2} fontSize={20}>
+              {currency(totalValue)}
+            </Text>
+          </Flex>
           <InputGroup>
             {/* eslint-disable-next-line react/no-children-prop */}
             <InputLeftAddon children="R$" />
-            <Input type="number" name="desconto" placeholder="Ex: 5000" />
+            <Input
+              type="number"
+              placeholder="Ex: 5000"
+              value={discountFormValue === 0 ? "" : discountFormValue}
+              {...register("desconto", {
+                valueAsNumber: true,
+                onChange: (e) => {
+                  setDiscountFormValue(e.target.value);
+                },
+              })}
+            />
           </InputGroup>
           <Button
-            mt={4}
+            my={4}
             w="100%"
-            type="submit"
+            type="button"
             color="gray.50"
             bg="green.400"
             _hover={{
               bg: "green.500",
             }}
+            onClick={handleSubmit}
           >
             CONCLUIR
           </Button>

@@ -7,4 +7,5 @@ export interface IService {
   codigo_servico_nfse: string;
   aliquota_nfse: number;
   unidade: string;
+  quantidade: number;
 }

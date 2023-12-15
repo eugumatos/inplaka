@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Box,
   Flex,
@@ -121,7 +121,7 @@ export function DataTable<T extends object>({
             prepareRow(row);
 
             return (
-              <>
+              <React.Fragment key={row.id}>
                 <Tr {...row.getRowProps()}>
                   {row.cells.map((cell) => (
                     <>
@@ -161,7 +161,7 @@ export function DataTable<T extends object>({
                     </Td>
                   )}
                 </Tr>
-              </>
+              </React.Fragment>
             );
           })}
         </Tbody>
@@ -175,6 +175,7 @@ export function DataTable<T extends object>({
 
       <Box hidden={isLoading} px={4}>
         <Pagination
+          registerPerPage={itemsPerPage}
           totalCountOfRegisters={data.length}
           currentPage={currentPage}
           onPageChange={setCurrentPage}

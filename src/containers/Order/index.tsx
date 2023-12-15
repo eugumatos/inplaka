@@ -1,26 +1,38 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Box, Button, Flex, Heading, useDisclosure } from "@chakra-ui/react";
 import { useFormContext } from "react-hook-form";
 import { Column } from "react-table";
 
 import { DataTable } from "@/components/Table";
-import { ModalDialog } from "@/components/Modals";
+import { DestroyModal } from "@/components/Modals/DestroyModal";
 import { useOrder } from "@/contexts/OrderContext";
 import { filterText } from "@/utils/filterText";
 import { formatDate } from "@/utils/formatDate";
 import { currency } from "@/utils/currency";
 import { OrderFormData } from "@/schemas/OrderSchemaValidation";
 import { OrderDrawer } from "./OrderDrawer";
+import { ModalDialog } from "@/components/Modals";
+import { IOrder } from "@/domains/order";
 
 export function Order() {
-  const { orders, isLoading } = useOrder();
+  const { orders, isLoading, addOrder, editOrder, removeOrder } = useOrder();
 
-  const { handleSubmit, reset, setValue, formState } =
-    useFormContext<OrderFormData>();
-
-  const hasErrors = formState.isValid;
+  const { setValue, handleSubmit } = useFormContext<OrderFormData>();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const customDisclosure = () => {
+    return {};
+  };
+
+  const disclosureDestroyModal = useDisclosure();
+
+  const [currentOrder, setCurrentOrder] = useState<IOrder | null>(null);
+
+  const submitOptions = {
+    create: handleSubmit(addOrder),
+    update: handleSubmit(editOrder),
+  };
 
   const columns = useMemo(
     (): Column[] => [
@@ -52,6 +64,34 @@ export function Order() {
     []
   );
 
+  const seekCurrentOrder = (order: IOrder) => {
+    const findOrder = orders.find((o) => order.id === o.id);
+
+    if (findOrder) {
+      setCurrentOrder(findOrder);
+    }
+  };
+
+  const renderDestroyModal = () => {
+    return (
+      <DestroyModal
+        isOpen={disclosureDestroyModal.isOpen}
+        onClose={disclosureDestroyModal.onClose}
+        onAction={() => {
+          if (currentOrder?.id) {
+            removeOrder(currentOrder.id);
+          }
+
+          disclosureDestroyModal.onClose();
+        }}
+      />
+    );
+  };
+
+  const handleUpdate = () => {
+    console.log("upadted order");
+  };
+
   return (
     <Box flex={1}>
       <Flex justifyContent="space-between" mb={8}>
@@ -71,9 +111,30 @@ export function Order() {
         </Button>
       </Flex>
 
-      <DataTable isLoading={isLoading} columns={columns} data={orders} />
+      <DataTable
+        isLoading={isLoading}
+        columns={columns}
+        data={orders}
+        onRowEdit={(row) => {
+          Object.keys(row).forEach((key: any) => {
+            return setValue(key, row[key]);
+          });
 
-      <OrderDrawer isOpen={isOpen} onClose={onClose} />
+          onOpen();
+        }}
+        onRowDelete={(row) => {
+          seekCurrentOrder(row);
+          disclosureDestroyModal.onOpen();
+        }}
+      />
+
+      <OrderDrawer
+        isOpen={isOpen}
+        onClose={onClose}
+        onSubmit={submitOptions.create}
+      />
+
+      {renderDestroyModal()}
     </Box>
   );
 }

@@ -1,5 +1,5 @@
 export interface IOrder {
-  id?: string;
+  id: string;
   cliente: string;
   vendedor: string;
   formaPagamento?: string;

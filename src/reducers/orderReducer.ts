@@ -7,13 +7,13 @@ type State = {
 };
 
 type Action =
-  | { type: "RELOAD_COMPANY"; payload: Array<IOrder> }
+  | { type: "RELOAD_ORDERS"; payload: Array<IOrder> }
   | { type: "LOADING" }
   | { type: "ERROR" };
 
 export function orderReducer(state: State, action: Action): State {
   switch (action.type) {
-    case "RELOAD_COMPANY":
+    case "RELOAD_ORDERS":
       try {
         return {
           orders: action.payload,

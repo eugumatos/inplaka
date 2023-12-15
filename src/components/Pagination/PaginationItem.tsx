@@ -17,8 +17,8 @@ export function PaginationItem({
         size="sm"
         fontSize="xs"
         width="4"
-        bg="gray.300"
         color="gray.200"
+        bg="blue.200"
         disabled
         _hover={{
           bg: "gray.300",
@@ -35,8 +35,8 @@ export function PaginationItem({
       size="sm"
       fontSize="xs"
       width="4"
+      bg="gray.300"
       color="gray.200"
-      bg="blue.200"
       _hover={{
         bg: "blue.100",
       }}
