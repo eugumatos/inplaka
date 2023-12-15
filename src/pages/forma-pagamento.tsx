@@ -15,13 +15,13 @@ interface FormPaymentProps {
 }
 
 export default function FormaPagamento({ formPayments }: FormPaymentProps) {
-  const formCompany = useForm<FormPaymentFormData>({
-    resolver: yupResolver(formPaymentFormSchema),
+  const formPayment = useForm<FormPaymentFormData>({
+    // resolver: yupResolver(formPaymentFormSchema),
   });
 
   return (
     <FormPaymentProvider formPayments={formPayments}>
-      <FormProvider {...formCompany}>
+      <FormProvider {...formPayment}>
         <FormPayment />
       </FormProvider>
     </FormPaymentProvider>

@@ -2,7 +2,7 @@ import { url } from "@/constants";
 import { IFormPayment } from "@/domains/form-payment";
 import { FormPaymentFormData } from "@/schemas/FormPaymentSchemaValidation";
 
-export async function getFormPayments() {
+export async function getFormPayments(): Promise<IFormPayment[]> {
   const res = await fetch(`${url}/FormaPagamento`);
 
   if (!res.ok) {

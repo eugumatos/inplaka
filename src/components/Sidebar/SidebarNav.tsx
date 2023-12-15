@@ -1,4 +1,4 @@
-import { Stack, Text } from "@chakra-ui/react";
+import { Stack } from "@chakra-ui/react";
 import {
   RiUser3Line,
   RiDashboardLine,
@@ -56,7 +56,7 @@ export function SidebarNav() {
         <NavLink href="/automation" icon={RiMindMap}>
           Condições de Pagamento
         </NavLink>
-        <NavLink href="/automation" icon={RiShoppingCartLine}>
+        <NavLink href="/pedido" icon={RiShoppingCartLine}>
           Pedidos de Venda
         </NavLink>
       </NavSection>
