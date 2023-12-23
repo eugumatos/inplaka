@@ -37,6 +37,7 @@ import { filterText } from "@/utils/filterText";
 import { currency } from "@/utils/currency";
 import { useOrderForm } from "@/containers/Order/hooks/useOrderForm";
 import { toast } from "react-toastify";
+import { IProduct } from "@/domains/product";
 
 interface OrderFormProps {
   onSubmit: FormEventHandler<HTMLFormElement>;
@@ -47,6 +48,7 @@ export function OrderForm({ onSubmit }: OrderFormProps) {
     control,
     register,
     watch,
+    trigger,
     formState: { errors },
     setValue,
     getValues,
@@ -71,9 +73,6 @@ export function OrderForm({ onSubmit }: OrderFormProps) {
   const clientValue = watch<any>("cliente")?.label || "";
   const sellerValue = watch<any>("vendedor")?.label || "";
   const paymentFormValue = watch<any>("formaPagamento")?.label || "";
-
-  const productFormValues = watch<any>("produtos") || "";
-  const serviceFormValues = watch<any>("servicos") || "";
 
   const { subTotalProducts, subTotalServices, total } = calculateTotal();
 
@@ -102,16 +101,34 @@ export function OrderForm({ onSubmit }: OrderFormProps) {
     containerTotalRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  function handleSubmit() {
+  async function handleSubmit() {
+    const isValid = await trigger();
+
+    if (!isValid) return;
+
     const formValues = getValues();
 
     const formattedValues = Object.assign(formValues, {
-      produtos: products.filter((p) => p.quantidade > 0),
+      cliente: formValues.cliente?.value,
+      vendedor: formValues.cliente?.value,
+      formaPagamento: formValues.cliente?.value,
+      produtos: products
+        .filter((p) => p.quantidade > 0)
+        .map((p: IProduct) => {
+          return {
+            ...p,
+            placa: JSON.stringify(p.placas),
+          };
+        }),
       services: services.filter((s) => s.quantidade > 0),
-      total: total,
+      valorPedido: total,
+      valorDesconto: discountFormValue,
+      percentualDesconto: discountFormValue,
+      valorTotal: total,
+      status: "ABERTO",
     });
 
-    console.log(formattedValues);
+    onSubmit(formattedValues);
   }
 
   useEffect(() => {
@@ -134,11 +151,11 @@ export function OrderForm({ onSubmit }: OrderFormProps) {
 
   return (
     <form>
-      <Box h="94vh" mt={2}>
+      <Box h="91vh" mt={2}>
         <Heading size="md">Dados do pedido</Heading>
 
         <Flex h="100%" direction="column" justify="space-between">
-          <HStack mt={5} gap={4} alignItems="center">
+          <HStack mt={2} gap={4} alignItems="center">
             <Box flex={1}>
               <FormLabel>Cliente:</FormLabel>
               <AsyncSelect
@@ -165,12 +182,12 @@ export function OrderForm({ onSubmit }: OrderFormProps) {
             </Box>
           </HStack>
 
-          <Tabs mt={5} isManual variant="enclosed">
+          <Tabs mt={3} isManual variant="enclosed">
             <TabList>
               <Tab>Produtos</Tab>
               <Tab>Serviços</Tab>
             </TabList>
-            <TabPanels mt={5}>
+            <TabPanels mt={2}>
               <TabPanel p={0}>
                 <DataTable
                   columns={columns}

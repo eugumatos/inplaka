@@ -1,6 +1,14 @@
 import React, { useMemo, useState } from "react";
-import { Box, Button, Flex, Heading, useDisclosure } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Flex,
+  Heading,
+  ModalFooter,
+  useDisclosure,
+} from "@chakra-ui/react";
 import { useFormContext } from "react-hook-form";
+import { PDFDownloadLink } from "@react-pdf/renderer";
 import { Column } from "react-table";
 
 import { DataTable } from "@/components/Table";
@@ -13,11 +21,14 @@ import { OrderFormData } from "@/schemas/OrderSchemaValidation";
 import { OrderDrawer } from "./OrderDrawer";
 import { ModalDialog } from "@/components/Modals";
 import { IOrder } from "@/domains/order";
+import { PDFDocument } from "./document";
 
 export function Order() {
   const { orders, isLoading, addOrder, editOrder, removeOrder } = useOrder();
 
   const { setValue, handleSubmit } = useFormContext<OrderFormData>();
+
+  const [formData, setFormData] = useState({});
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -25,6 +36,7 @@ export function Order() {
     return {};
   };
 
+  const disclosureCreateModal = useDisclosure();
   const disclosureDestroyModal = useDisclosure();
 
   const [currentOrder, setCurrentOrder] = useState<IOrder | null>(null);
@@ -70,6 +82,60 @@ export function Order() {
     if (findOrder) {
       setCurrentOrder(findOrder);
     }
+  };
+
+  const renderCreateModal = () => {
+    return (
+      <ModalDialog
+        maxWidth="40%"
+        textAction="Com valor"
+        textClose="Sem valor"
+        isOpen={disclosureCreateModal.isOpen}
+        onClose={disclosureCreateModal.onClose}
+        onAction={() => {
+          addOrder(formData as OrderFormData);
+          disclosureCreateModal.onClose();
+          onClose();
+        }}
+        noFooter
+      >
+        <Heading size="md">Deseja imprimir com ou sem valores</Heading>
+
+        <ModalFooter>
+          <PDFDownloadLink
+            document={<PDFDocument order={formData} shouldRenderValues />}
+            fileName={"pedido-com-valor.pdf"}
+          >
+            <Button
+              bg="pink.300"
+              color="gray.50"
+              mr={3}
+              _hover={{
+                bg: "pink.400",
+              }}
+            >
+              Com valor
+            </Button>
+          </PDFDownloadLink>
+          <PDFDownloadLink
+            document={
+              <PDFDocument order={formData} shouldRenderValues={false} />
+            }
+            fileName={"pedido-sem-valor.pdf"}
+          >
+            <Button
+              bg="gray.100"
+              color="gray.700"
+              _hover={{
+                bg: "gray.50",
+              }}
+            >
+              Sem valor
+            </Button>
+          </PDFDownloadLink>
+        </ModalFooter>
+      </ModalDialog>
+    );
   };
 
   const renderDestroyModal = () => {
@@ -131,10 +197,14 @@ export function Order() {
       <OrderDrawer
         isOpen={isOpen}
         onClose={onClose}
-        onSubmit={submitOptions.create}
+        onSubmit={(values) => {
+          setFormData(values);
+          disclosureCreateModal.onOpen();
+        }}
       />
 
       {renderDestroyModal()}
+      {renderCreateModal()}
     </Box>
   );
 }

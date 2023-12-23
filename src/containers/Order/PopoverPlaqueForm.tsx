@@ -28,7 +28,6 @@ import {
 } from "@chakra-ui/react";
 import { Input } from "@/components/Input";
 import { FullModal } from "@/components/Modals/FullModal";
-import { useOrderForm } from "@/containers/Order/hooks/useOrderForm";
 import { RiDeleteBin7Line, RiFullscreenFill } from "react-icons/ri";
 import { BsSignpostFill } from "react-icons/bs";
 import { toast } from "react-toastify";
@@ -56,12 +55,9 @@ export const PopoverPlaqueForm = ({
 
   const firstFieldRef = useRef(null);
 
-  const [plaqueList, setPlaqueList] = useState<Array<string> | []>([]);
-
-  const plaqueListData = plaqueList.map((item, key) => {
+  const plaqueListData = product.placas.map((item) => {
     return {
-      id: key,
-      descricao: upper(item),
+      name: upper(item),
     };
   });
 
@@ -74,7 +70,7 @@ export const PopoverPlaqueForm = ({
     (): Column[] => [
       {
         Header: "Placa",
-        accessor: "descricao",
+        accessor: "name",
       },
     ],
     []
@@ -281,11 +277,11 @@ export const PopoverPlaqueForm = ({
 
           <DataTable
             columns={columns}
-            data={product.placas}
+            data={plaqueListData}
             onRowDelete={(row) => {
-              removeProductPlaque(product.id, row);
+              removeProductPlaque(product.id, row.name);
 
-              toast.info(`Placa ${upper(row)} removida!`);
+              toast.info(`Placa ${upper(row.name)} removida!`);
             }}
           />
         </Container>

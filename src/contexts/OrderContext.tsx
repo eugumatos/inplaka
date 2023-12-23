@@ -36,9 +36,6 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
   });
 
   async function addOrder(order: OrderFormData) {
-    console.log(order);
-
-    /*
     try {
       dispatch({ type: "LOADING" });
 
@@ -53,7 +50,6 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
       dispatch({ type: "ERROR" });
       toast.error("Erro ao criar pedido.");
     }
-    */
   }
 
   async function editOrder(order: OrderFormData) {

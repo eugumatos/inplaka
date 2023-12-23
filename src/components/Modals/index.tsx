@@ -13,6 +13,8 @@ interface ModalDialogProps {
   isOpen: boolean;
   maxWidth: string;
   textAction?: string;
+  textClose?: string;
+  noFooter?: boolean;
 
   children: ReactNode;
   onClose: () => void;
@@ -23,6 +25,8 @@ export function ModalDialog({
   isOpen,
   maxWidth,
   textAction = "Criar",
+  textClose = "Cancelar",
+  noFooter = false,
   onClose,
   onAction,
   children,
@@ -35,7 +39,7 @@ export function ModalDialog({
 
         <ModalBody pb={6}>{children}</ModalBody>
 
-        <ModalFooter>
+        <ModalFooter hidden={noFooter}>
           <Button
             onClick={onAction}
             bg="pink.300"
@@ -55,7 +59,7 @@ export function ModalDialog({
             }}
             onClick={onClose}
           >
-            Cancelar
+            {textClose}
           </Button>
         </ModalFooter>
       </ModalContent>

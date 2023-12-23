@@ -221,7 +221,7 @@ export function useOrderForm(): UseOrderFormProps {
     [products]
   );
 
-  function calculateTotal() {
+  const calculateTotal = useCallback(() => {
     const selectedProducts = products.filter(
       (product) => product.quantidade > 0
     );
@@ -242,7 +242,7 @@ export function useOrderForm(): UseOrderFormProps {
       subTotalProducts: totalProducts,
       subTotalServices: totalServices,
     };
-  }
+  }, [products, services]);
 
   return {
     products,

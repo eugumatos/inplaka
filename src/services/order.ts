@@ -40,6 +40,40 @@ export async function createOrder(order: OrderFormData) {
   return res.json();
 }
 
+export async function createOrderProduct(order: OrderFormData) {
+  const res = await fetch(`${url}/PedidoVendaProduto`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(order),
+  });
+
+  if (!res.ok) {
+    // This will activate the closest `error.js` Error Boundary
+    throw new Error("Failed to fetch data");
+  }
+
+  return res.json();
+}
+
+export async function createOrderServico(order: OrderFormData) {
+  const res = await fetch(`${url}/PedidoVenda`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(order),
+  });
+
+  if (!res.ok) {
+    // This will activate the closest `error.js` Error Boundary
+    throw new Error("Failed to fetch data");
+  }
+
+  return res.json();
+}
+
 export async function updateOrder(id: string, order: OrderFormData) {
   const res = await fetch(`${url}/PedidoVenda/${id}`, {
     method: "PUT",
