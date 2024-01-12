@@ -1,6 +1,6 @@
 import * as yup from "yup";
 
-const userFormSchema = yup.object().shape({
+export const userFormSchema = yup.object().shape({
   name: yup.string().required("Campo obrigatório"),
   email: yup.string().required("Campo obrigatório"),
   password: yup.string().required("Campo obrigatório"),

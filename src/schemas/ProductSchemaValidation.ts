@@ -1,6 +1,6 @@
 import * as yup from "yup";
 
-const productFormSchema = yup.object().shape({
+export const productFormSchema = yup.object().shape({
   controlar_estoque: yup.string().required("Campo obrigatório"),
   valor_venda: yup.string().required("Campo obrigatório"),
   aliquota_ipi_nfe: yup.string().required("Campo obrigatório"),
