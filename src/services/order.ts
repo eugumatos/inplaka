@@ -1,7 +1,8 @@
 import { url } from "@/constants";
 import { OrderFormData } from "@/schemas/OrderSchemaValidation";
+import { IOrder } from "@/domains/order";
 
-export async function getOrders() {
+export async function getOrders(): Promise<IOrder[]> {
   const res = await fetch(`${url}/PedidoVenda`);
 
   if (!res.ok) {
@@ -12,7 +13,7 @@ export async function getOrders() {
   return res.json();
 }
 
-export async function geOrder(id: string) {
+export async function geOrder(id: string): Promise<IOrder> {
   const res = await fetch(`${url}/PedidoVenda/${id}`);
 
   if (!res.ok) {

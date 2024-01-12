@@ -1,20 +1,9 @@
 import { url } from "@/constants";
-import { ServiceFormData } from "@/schemas/ServiceSchemaValidation";
-import { IService } from "@/domains/service";
+import { UserFormData } from "@/schemas/UserSchemaValidation";
+import { IUser } from "@/domains/user";
 
-export async function getServices(): Promise<IService[]> {
-  const res = await fetch(`${url}/Servico`);
-
-  if (!res.ok) {
-    // This will activate the closest `error.js` Error Boundary
-    throw new Error("Failed to fetch data");
-  }
-
-  return res.json();
-}
-
-export async function getService(id: string): Promise<IService> {
-  const res = await fetch(`${url}/Servico/${id}`);
+export async function getUsers(): Promise<IUser[]> {
+  const res = await fetch(`${url}/Users`);
 
   if (!res.ok) {
     // This will activate the closest `error.js` Error Boundary
@@ -24,18 +13,29 @@ export async function getService(id: string): Promise<IService> {
   return res.json();
 }
 
-export async function createService(service: ServiceFormData) {
-  await fetch(`${url}/Servico`, {
+export async function getUser(id: string): Promise<IUser> {
+  const res = await fetch(`${url}/Users/${id}`);
+
+  if (!res.ok) {
+    // This will activate the closest `error.js` Error Boundary
+    throw new Error("Failed to fetch data");
+  }
+
+  return res.json();
+}
+
+export async function createUser(user: UserFormData) {
+  await fetch(`${url}/Users`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(service),
+    body: JSON.stringify(user),
   });
 }
 
-export async function destroyService(id: string): Promise<void> {
-  const res = await fetch(`${url}/Servico/${id}`, { method: "delete" });
+export async function destroyUser(id: string): Promise<void> {
+  const res = await fetch(`${url}/Users/${id}`, { method: "delete" });
 
   if (!res.ok) {
     // This will activate the closest `error.js` Error Boundary
@@ -43,13 +43,13 @@ export async function destroyService(id: string): Promise<void> {
   }
 }
 
-export async function updateService(id: string, service: ServiceFormData) {
-  const res = await fetch(`${url}/Servico/${id}`, {
+export async function updateUser(id: string, user: UserFormData) {
+  const res = await fetch(`${url}/Users/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(service),
+    body: JSON.stringify(user),
   });
 
   if (!res.ok) {

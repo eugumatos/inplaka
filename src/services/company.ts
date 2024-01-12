@@ -13,7 +13,7 @@ export async function getCompany(id: string): Promise<ICompany> {
   return res.json();
 }
 
-export async function getCompanies() {
+export async function getCompanies(): Promise<ICompany[]> {
   const res = await fetch(`${url}/Empresa`);
 
   if (!res.ok) {

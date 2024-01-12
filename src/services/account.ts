@@ -1,8 +1,20 @@
 import { url } from "@/constants";
 import { AccountFormData } from "@/schemas/AccountSchemaValidation";
+import { IAccount } from "@/domains/account";
 
-export async function getAccounts() {
+export async function getAccounts(): Promise<IAccount[]> {
   const res = await fetch(`${url}/Conta`);
+
+  if (!res.ok) {
+    // This will activate the closest `error.js` Error Boundary
+    throw new Error("Failed to fetch data");
+  }
+
+  return res.json();
+}
+
+export async function getAccount(id: string): Promise<IAccount> {
+  const res = await fetch(`${url}/Conta/${id}`);
 
   if (!res.ok) {
     // This will activate the closest `error.js` Error Boundary
