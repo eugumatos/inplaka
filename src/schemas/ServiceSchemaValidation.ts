@@ -1,6 +1,6 @@
 import * as yup from "yup";
 
-export const supplierFormSchema = yup.object().shape({
+export const serviceFormSchema = yup.object().shape({
   status: yup.string().required("Campo obrigatório"),
   descricao: yup.string().required("Campo obrigatório"),
   valor_venda: yup.string().required("Campo obrigatório"),
@@ -10,4 +10,4 @@ export const supplierFormSchema = yup.object().shape({
   unidade: yup.string().required("Campo obrigatório"),
 });
 
-export type SupplierFormData = yup.InferType<typeof supplierFormSchema>;
+export type ServiceFormData = yup.InferType<typeof serviceFormSchema>;

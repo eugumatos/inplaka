@@ -24,7 +24,7 @@ export function SidebarNav() {
         <NavLink href="/" icon={RiDashboardLine} color="gray.500">
           Dashboard
         </NavLink>
-        <NavLink href="/users" icon={RiContactsLine}>
+        <NavLink href="/usuario" icon={RiContactsLine}>
           Usuários
         </NavLink>
       </NavSection>
@@ -32,19 +32,19 @@ export function SidebarNav() {
         <NavLink href="/empresa" icon={RiBuilding2Line}>
           Empresas
         </NavLink>
-        <NavLink href="/automation" icon={RiAccountPinBoxLine}>
+        <NavLink href="/conta" icon={RiAccountPinBoxLine}>
           Contas
         </NavLink>
-        <NavLink href="/automation" icon={RiUser3Line}>
+        <NavLink href="/cliente" icon={RiUser3Line}>
           Clientes
         </NavLink>
-        <NavLink href="/automation" icon={RiStoreLine}>
+        <NavLink href="/vendedor" icon={RiStoreLine}>
           Vendedores
         </NavLink>
-        <NavLink href="/automation" icon={RiUserSharedLine}>
+        <NavLink href="/fornecedor" icon={RiUserSharedLine}>
           Fornecedores
         </NavLink>
-        <NavLink href="/automation" icon={RiProductHuntLine}>
+        <NavLink href="/produto" icon={RiProductHuntLine}>
           Produtos
         </NavLink>
         <NavLink href="/servico" icon={RiServiceLine}>
@@ -53,7 +53,7 @@ export function SidebarNav() {
         <NavLink href="/forma-pagamento" icon={RiBankCard2Line}>
           Formas de Pagamento
         </NavLink>
-        <NavLink href="/automation" icon={RiMindMap}>
+        <NavLink href="/condicao-pagamento" icon={RiMindMap}>
           Condições de Pagamento
         </NavLink>
         <NavLink href="/pedido" icon={RiShoppingCartLine}>
