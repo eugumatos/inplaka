@@ -1,10 +1,12 @@
-export interface ICompany {
-  razao_social: string;
-  fantasia: string;
-  telefone1: string;
-  telefone2: string;
+export interface ISupplier {
+  id: string;
+  status: string;
+  nome: string;
+  apelido: string;
+  telefone: string;
   celular: string;
   cnpj: string;
+  ie: string;
   email: string;
   ender_cep: string;
   ender_logradouro: string;
@@ -13,5 +15,6 @@ export interface ICompany {
   ender_bairro: string;
   ender_cidade: string;
   ender_uf: string;
-  id: string;
+  ender_cod_municipio: string;
+  ender_cod_pais: boolean;
 }

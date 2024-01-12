@@ -1,20 +1,9 @@
 import { url } from "@/constants";
-import { SellerFormData } from "@/schemas/SellerSchemaValidation";
-import { ISeller } from "@/domains/seller";
+import { SupplierFormData } from "@/schemas/SupplierSchemaValidation";
+import { ISupplier } from "@/domains/supplier";
 
-export async function getSellers(): Promise<ISeller[]> {
-  const res = await fetch(`${url}/Vendedor`);
-
-  if (!res.ok) {
-    // This will activate the closest `error.js` Error Boundary
-    throw new Error("Failed to fetch data");
-  }
-
-  return res.json();
-}
-
-export async function getSeller(id: string): Promise<ISeller> {
-  const res = await fetch(`${url}/Vendedor/${id}`);
+export async function getSuppliers(): Promise<ISupplier[]> {
+  const res = await fetch(`${url}/Fornecedor`);
 
   if (!res.ok) {
     // This will activate the closest `error.js` Error Boundary
@@ -24,8 +13,19 @@ export async function getSeller(id: string): Promise<ISeller> {
   return res.json();
 }
 
-export async function destroySeller(id: string): Promise<void> {
-  const res = await fetch(`${url}/Vendedor/${id}`, { method: "delete" });
+export async function getSupplier(id: string): Promise<ISupplier> {
+  const res = await fetch(`${url}/Fornecedor/${id}`);
+
+  if (!res.ok) {
+    // This will activate the closest `error.js` Error Boundary
+    throw new Error("Failed to fetch data");
+  }
+
+  return res.json();
+}
+
+export async function destroySupplier(id: string): Promise<void> {
+  const res = await fetch(`${url}/Fornecedor/${id}`, { method: "delete" });
 
   if (!res.ok) {
     // This will activate the closest `error.js` Error Boundary
@@ -33,8 +33,8 @@ export async function destroySeller(id: string): Promise<void> {
   }
 }
 
-export async function createSeller(seller: SellerFormData) {
-  const res = await fetch(`${url}/Vendedor`, {
+export async function createSupplier(seller: SupplierFormData) {
+  const res = await fetch(`${url}/Fornecedor`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -48,8 +48,8 @@ export async function createSeller(seller: SellerFormData) {
   }
 }
 
-export async function updateSeller(id: string, seller: SellerFormData) {
-  const res = await fetch(`${url}/Vendedor/${id}`, {
+export async function updateSupplier(id: string, seller: SupplierFormData) {
+  const res = await fetch(`${url}/Fornecedor/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",

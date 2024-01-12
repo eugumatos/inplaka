@@ -1,8 +1,8 @@
 import { url } from "@/constants";
-import { ServiceFormData } from "@/schemas/ServiceSchemaValidation";
+import { AccountFormData } from "@/schemas/AccountSchemaValidation";
 
-export async function getServices() {
-  const res = await fetch(`${url}/Servico`);
+export async function getAccounts() {
+  const res = await fetch(`${url}/Conta`);
 
   if (!res.ok) {
     // This will activate the closest `error.js` Error Boundary
@@ -12,8 +12,8 @@ export async function getServices() {
   return res.json();
 }
 
-export async function createService(service: ServiceFormData) {
-  await fetch(`${url}/Servico`, {
+export async function createAccount(service: AccountFormData) {
+  await fetch(`${url}/Conta`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -22,8 +22,8 @@ export async function createService(service: ServiceFormData) {
   });
 }
 
-export async function destroyService(id: string): Promise<void> {
-  const res = await fetch(`${url}/Servico/${id}`, { method: "delete" });
+export async function destroyAccount(id: string): Promise<void> {
+  const res = await fetch(`${url}/Conta/${id}`, { method: "delete" });
 
   if (!res.ok) {
     // This will activate the closest `error.js` Error Boundary
@@ -31,8 +31,8 @@ export async function destroyService(id: string): Promise<void> {
   }
 }
 
-export async function updateService(id: string, service: ServiceFormData) {
-  const res = await fetch(`${url}/Servico/${id}`, {
+export async function updateAccount(id: string, service: AccountFormData) {
+  const res = await fetch(`${url}/Conta/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",

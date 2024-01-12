@@ -4,7 +4,3 @@ export interface IFormPayment {
   plano_contas: string;
   status: string;
 }
-
-export interface FormPayments {
-  formPayments: IFormPayment[];
-}
