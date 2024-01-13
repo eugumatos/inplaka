@@ -13,7 +13,7 @@ export async function getOrders(): Promise<IOrder[]> {
   return res.json();
 }
 
-export async function geOrder(id: string): Promise<IOrder> {
+export async function getOrder(id: string): Promise<IOrder> {
   const res = await fetch(`${url}/PedidoVenda/${id}`);
 
   if (!res.ok) {

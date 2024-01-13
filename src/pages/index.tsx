@@ -160,20 +160,20 @@ export default function Dashboard() {
           flex="1"
           gap="4"
           minChildWidth="320px"
-          align="flex-start"
+          alignItems="flex-start"
           mt={8}
         >
           <Box p={["6", "8"]} pb="4" bg="white" borderRadius={8}>
             <Text fontSize="lg" mb="4">
               Taxa de etiquetas geradas essa semana
             </Text>
-            <Chart options={options} series={series} type="area" />
+            <Chart options={options as any} series={series} type="area" />
           </Box>
           <Box p={["6", "8"]} pb="4" bg="white" borderRadius={8}>
             <Text fontSize="lg" mb="4">
               Taxa de pedidos realizados no último mês
             </Text>
-            <Chart options={options} series={series} type="area" />
+            <Chart options={options as any} series={series} type="area" />
           </Box>
         </SimpleGrid>
       </Flex>

@@ -35,7 +35,7 @@ export const getServerSideProps: GetServerSideProps = async ({
   req,
   params,
 }) => {
-  const { id } = params;
+  const { id }: any = params;
 
   const response = await getOrder(String(id));
 

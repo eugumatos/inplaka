@@ -281,7 +281,7 @@ export const PopoverPlaqueForm = ({
 
           <DataTable
             columns={columns}
-            data={product.placas}
+            data={product.placas as any}
             onRowDelete={(row) => {
               removeProductPlaque(product.id, row);
 
