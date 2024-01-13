@@ -8,7 +8,13 @@ import {
   getClients,
   updateClient,
 } from "@/services/clients";
+import { getSellers } from "@/services/seller";
 import { toast } from "react-toastify";
+
+interface SelectProps {
+  label: string;
+  value: string;
+}
 
 interface ClientContextProps {
   children?: ReactNode;
@@ -22,6 +28,7 @@ interface ClientProviderProps {
   addClient: (client: ClientFormData) => void;
   editClient: (client: ClientFormData) => void;
   removeClient: (client: IClient) => void;
+  sellerOptions: (value: string) => Promise<SelectProps[]>;
 }
 
 const ClientContext = createContext<ClientProviderProps>(
@@ -35,9 +42,30 @@ function ClientProvider({ clients = [], children }: ClientContextProps) {
     isError: false,
   });
 
+  async function sellerOptions(value: string) {
+    try {
+      const sellers = await getSellers();
+      const options = sellers
+        .map((seller) => ({
+          value: seller.id,
+          label: seller.apelido,
+        }))
+        .filter((item) =>
+          item.label.toLocaleUpperCase().includes(value.toUpperCase())
+        );
+
+      return options;
+    } catch (error) {
+      toast.warning("Erro ao carregar vendedores");
+
+      return [];
+    }
+  }
+
   async function addClient(client: ClientFormData) {
     try {
       dispatch({ type: "LOADING" });
+
       await createClient(client);
 
       const newClients = await getClients();
@@ -105,6 +133,7 @@ function ClientProvider({ clients = [], children }: ClientContextProps) {
         addClient,
         removeClient,
         editClient,
+        sellerOptions,
       }}
     >
       {children}

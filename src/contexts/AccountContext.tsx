@@ -36,6 +36,8 @@ function AccountProvider({ accounts = [], children }: AccountContextProps) {
   });
 
   async function addAccount(account: AccountFormData) {
+    console.log(account);
+    /*
     try {
       dispatch({ type: "LOADING" });
       await createAccount(account);
@@ -49,6 +51,7 @@ function AccountProvider({ accounts = [], children }: AccountContextProps) {
       dispatch({ type: "ERROR" });
       toast.error("Erro ao criar conta");
     }
+    */
   }
 
   async function editAccount(account: AccountFormData) {

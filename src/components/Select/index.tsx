@@ -36,12 +36,14 @@ const SelectBase: ForwardRefRenderFunction<
       isInvalid={!!error}
     >
       <FormLabel>{label}</FormLabel>
-      <SelectChakra borderColor="gray.100" color="gray.800" ref={ref} {...rest}>
-        {!!defaultOption ? (
-          <option>{defaultOption}</option>
-        ) : (
-          <option>Selecione uma opção</option>
-        )}
+      <SelectChakra
+        borderColor="gray.100"
+        color="gray.800"
+        defaultValue={defaultOption}
+        ref={ref}
+        {...rest}
+      >
+        {!defaultOption && <option>Selecione uma opção</option>}
         {children}
       </SelectChakra>
       {!!error && <FormErrorMessage>{error?.message}</FormErrorMessage>}

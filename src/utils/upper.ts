@@ -1,3 +1,3 @@
 export function upper(text?: string) {
-  return text ? text.toUpperCase() : ''
+  return text ? text.toUpperCase() : "";
 }

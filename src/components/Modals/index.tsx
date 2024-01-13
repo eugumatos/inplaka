@@ -28,7 +28,12 @@ export function ModalDialog({
   children,
 }: ModalDialogProps) {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} closeOnOverlayClick={false}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      scrollBehavior="inside"
+      closeOnOverlayClick={false}
+    >
       <ModalOverlay />
       <ModalContent maxW={maxWidth}>
         <ModalCloseButton />
