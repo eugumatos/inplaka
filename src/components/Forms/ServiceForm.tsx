@@ -1,11 +1,14 @@
 import { Input } from "@/components/Input";
 import { ServiceFormData } from "@/schemas/ServiceSchemaValidation";
 import { Box, Flex, Heading } from "@chakra-ui/react";
+import { InputCurrency } from "@/components/Input/InputCurrency";
+import { Select } from "@/components/Select";
 import { useFormContext } from "react-hook-form";
 
 export function ServiceForm() {
   const {
     register,
+    control,
     formState: { errors },
   } = useFormContext<ServiceFormData>();
 
@@ -53,13 +56,12 @@ export function ServiceForm() {
           />
 
           <InputCurrency
-            control={controlField}
+            control={control}
             maxLength={10}
             label="Unidade"
             placeholder="Ex: 12"
-            disableGroupSeparators
-            error={errorField.unidade}
-            {...registerField("unidade")}
+            error={errors.unidade}
+            {...register("unidade")}
           />
 
           <Select
