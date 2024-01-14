@@ -48,8 +48,8 @@ export async function createClient(client: ClientFormData) {
   }
 }
 
-export async function updateClient(id: string, company: ClientFormData) {
-  const res = await fetch(`${url}/Cliente/${id}`, {
+export async function updateClient(company: ClientFormData) {
+  const res = await fetch(`${url}/Cliente`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",

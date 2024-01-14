@@ -9,7 +9,10 @@ export const clientFormSchema = yup.object().shape({
   rg_ie: yup.string(),
   matricula: yup.string(),
   consumidor_final: yup.string(),
-  vendedorPadrao: yup.object(),
+  vendedorPadrao: yup.object({
+    label: yup.string(),
+    value: yup.string(),
+  }),
   ender_uf: yup.string(),
   ender_cep: yup.string(),
   ender_bairro: yup.string(),

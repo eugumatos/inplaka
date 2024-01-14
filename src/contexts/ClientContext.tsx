@@ -66,6 +66,11 @@ function ClientProvider({ clients = [], children }: ClientContextProps) {
     try {
       dispatch({ type: "LOADING" });
 
+      Object.assign(client, {
+        consumidor_final: Boolean(client.consumidor_final),
+        vendedorPadrao: client.vendedorPadrao.value,
+      });
+
       await createClient(client);
 
       const newClients = await getClients();
@@ -83,13 +88,12 @@ function ClientProvider({ clients = [], children }: ClientContextProps) {
     try {
       dispatch({ type: "LOADING" });
 
-      const findClientId = state.clients.find((c) => c.nome === client.nome);
+      Object.assign(client, {
+        consumidor_final: Boolean(client.consumidor_final),
+        vendedorPadrao: client.vendedorPadrao.value,
+      });
 
-      if (!findClientId) {
-        throw new Error("Client ID not found!");
-      }
-
-      await updateClient(findClientId.id, client);
+      await updateClient(client);
       const newClients = await getClients();
 
       dispatch({ type: "RELOAD_CLIENT", payload: newClients });
