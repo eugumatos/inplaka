@@ -20,11 +20,11 @@ function generatePagesArray(from: number, to: number) {
 
 export function Pagination({
   totalCountOfRegisters,
-  registerPerPage = 10,
+  registerPerPage = 8,
   currentPage = 1,
   onPageChange,
 }: PaginationProps) {
-  const lastPage = Math.floor(totalCountOfRegisters / registerPerPage);
+  const lastPage = Math.ceil(totalCountOfRegisters / registerPerPage);
 
   const previusPages =
     currentPage > 1

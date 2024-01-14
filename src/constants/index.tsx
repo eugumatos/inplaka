@@ -1,7 +1,7 @@
 export const url = "https://app-inplaka-dev2.azurewebsites.net/api";
 export const viacep_url = "https://viacep.com.br/ws";
 
-export const MAX_ITEMS_PER_PAGE_DEFAULT = 10;
+export const MAX_ITEMS_PER_PAGE_DEFAULT = 8;
 
 export const states = [
   { name: "Acre", uf: "AC" },

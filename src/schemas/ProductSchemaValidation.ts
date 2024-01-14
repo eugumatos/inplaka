@@ -7,6 +7,10 @@ export const productFormSchema = yup.object().shape({
   descricao: yup.string().required("Campo obrigatório"),
   unidade: yup.string().required("Campo obrigatório"),
   status: yup.string().required("Campo obrigatório"),
+  csosn: yup.string(),
+  codigo_barras: yup.string(),
+  obriga_placa: yup.string(),
+  nao_usar_para_nota_fiscal: yup.string(),
 });
 
 export type ProductFormData = yup.InferType<typeof productFormSchema>;

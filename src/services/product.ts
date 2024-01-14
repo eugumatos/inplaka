@@ -48,8 +48,8 @@ export async function createProduct(product: ProductFormData) {
   }
 }
 
-export async function updateProduct(id: string, product: ProductFormData) {
-  const res = await fetch(`${url}/Produto/${id}`, {
+export async function updateProduct(product: ProductFormData) {
+  const res = await fetch(`${url}/Produto`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",

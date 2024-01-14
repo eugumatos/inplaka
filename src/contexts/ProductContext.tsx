@@ -9,6 +9,7 @@ import {
   updateProduct,
 } from "@/services/product";
 import { toast } from "react-toastify";
+import currency from "currency.js";
 
 interface ProductContextProps {
   children?: ReactNode;
@@ -38,6 +39,14 @@ function ProductProvider({ products = [], children }: ProductContextProps) {
   async function addProduct(product: ProductFormData) {
     try {
       dispatch({ type: "LOADING" });
+
+      Object.assign(product, {
+        controlar_estoque: Boolean(product.controlar_estoque),
+        obriga_placa: Boolean(product.obriga_placa),
+        nao_usar_para_nota_fiscal: Boolean(product.nao_usar_para_nota_fiscal),
+        valor_venda: currency(product.valor_venda),
+      });
+
       await createProduct(product);
 
       const newProducts = await getProducts();
@@ -55,15 +64,14 @@ function ProductProvider({ products = [], children }: ProductContextProps) {
     try {
       dispatch({ type: "LOADING" });
 
-      const findProductId = state.products.find(
-        (p) => p.descricao === product.descricao
-      );
+      Object.assign(product, {
+        controlar_estoque: Boolean(product.controlar_estoque),
+        obriga_placa: Boolean(product.obriga_placa),
+        nao_usar_para_nota_fiscal: Boolean(product.nao_usar_para_nota_fiscal),
+        valor_venda: currency(product.valor_venda),
+      });
 
-      if (!findProductId) {
-        throw new Error("Product ID not found!");
-      }
-
-      await updateProduct(findProductId.id, product);
+      await updateProduct(product);
       const newProducts = await getProducts();
 
       dispatch({ type: "RELOAD_PRODUCTS", payload: newProducts });
