@@ -19,6 +19,13 @@ interface UserProviderProps {
   removeUser: (user: IUser) => void;
 }
 
+export enum userRoleTitle {
+  ADMINISTRADOR = 0,
+  VENDEDOR = 1,
+  FINANCEIRO = 2,
+  BACKOFFICE = 3,
+}
+
 const UserContext = createContext<UserProviderProps>({} as UserProviderProps);
 
 function UserProvider({ users = [], children }: UserContextProps) {
@@ -31,6 +38,7 @@ function UserProvider({ users = [], children }: UserContextProps) {
   async function addUser(user: UserFormData) {
     try {
       dispatch({ type: "LOADING" });
+
       await createUser(user);
 
       const newUsers = await getUsers();
@@ -48,13 +56,7 @@ function UserProvider({ users = [], children }: UserContextProps) {
     try {
       dispatch({ type: "LOADING" });
 
-      const findUserId = state.users.find((u) => u.email === user.email);
-
-      if (!findUserId) {
-        throw new Error("User ID not found!");
-      }
-
-      await updateUser(findUserId.id, user);
+      await updateUser(user);
       const newUsers = await getUsers();
 
       dispatch({ type: "RELOAD_USERS", payload: newUsers });

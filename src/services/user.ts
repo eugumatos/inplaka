@@ -43,8 +43,8 @@ export async function destroyUser(id: string): Promise<void> {
   }
 }
 
-export async function updateUser(id: string, user: UserFormData) {
-  const res = await fetch(`${url}/Users/${id}`, {
+export async function updateUser(user: UserFormData) {
+  const res = await fetch(`${url}/Users`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
