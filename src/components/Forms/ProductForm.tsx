@@ -46,7 +46,7 @@ export function ProductForm() {
             mt={4}
             label="CSOSN"
             maxLength={4}
-            placeholder="Ex: NCMSH"
+            placeholder="Ex: CSOSN"
             {...register("csosn")}
           />
 
@@ -54,8 +54,8 @@ export function ProductForm() {
             mt={4}
             label="NCMSH"
             maxLength={8}
-            placeholder="Ex: CSOSN"
-            {...register("csosn")}
+            placeholder="Ex: NCMSH"
+            {...register("ncmsh")}
           />
 
           <Input

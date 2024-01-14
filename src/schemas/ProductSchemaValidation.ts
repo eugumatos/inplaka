@@ -8,6 +8,7 @@ export const productFormSchema = yup.object().shape({
   unidade: yup.string().required("Campo obrigatório"),
   status: yup.string().required("Campo obrigatório"),
   csosn: yup.string(),
+  ncmsh: yup.string(),
   codigo_barras: yup.string(),
   obriga_placa: yup.string(),
   nao_usar_para_nota_fiscal: yup.string(),
