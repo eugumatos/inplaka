@@ -50,11 +50,8 @@ export async function createPaymentTerm(paymentTerm: PaymentTermFormData) {
   }
 }
 
-export async function updatePaymentTerm(
-  id: string,
-  paymentTerm: PaymentTermFormData
-) {
-  const res = await fetch(`${url}/CondicaoPagamento/${id}`, {
+export async function updatePaymentTerm(paymentTerm: PaymentTermFormData) {
+  const res = await fetch(`${url}/CondicaoPagamento`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",

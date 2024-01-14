@@ -59,15 +59,7 @@ function PaymentTermProvider({
     try {
       dispatch({ type: "LOADING" });
 
-      const findPaymentTermId = state.paymentTerms.find(
-        (p) => p.descricao === paymentTerm.descricao
-      );
-
-      if (!findPaymentTermId) {
-        throw new Error("Payment Term ID not found!");
-      }
-
-      await updatePaymentTerm(findPaymentTermId.id, paymentTerm);
+      await updatePaymentTerm(paymentTerm);
       const newPaymentTerms = await getPaymentTerms();
 
       dispatch({ type: "RELOAD_PAYMENT_TERMS", payload: newPaymentTerms });
