@@ -48,8 +48,8 @@ export async function createSeller(seller: SellerFormData) {
   }
 }
 
-export async function updateSeller(id: string, seller: SellerFormData) {
-  const res = await fetch(`${url}/Vendedor/${id}`, {
+export async function updateSeller(seller: SellerFormData) {
+  const res = await fetch(`${url}/Vendedor`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",

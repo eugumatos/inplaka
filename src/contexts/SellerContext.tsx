@@ -55,13 +55,7 @@ function SellerProvider({ sellers = [], children }: SellerContextProps) {
     try {
       dispatch({ type: "LOADING" });
 
-      const findSellerId = state.sellers.find((s) => s.nome === seller.nome);
-
-      if (!findSellerId) {
-        throw new Error("Seller ID not found!");
-      }
-
-      await updateSeller(findSellerId.id, seller);
+      await updateSeller(seller);
       const newSellers = await getSellers();
 
       dispatch({ type: "RELOAD_SELLER", payload: newSellers });
