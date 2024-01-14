@@ -45,7 +45,7 @@ export function Company() {
       {
         Header: "Razão Social",
         accessor: "razao_social",
-        Cell: ({ value }) => filterText(value, 55),
+        Cell: ({ value }) => filterText(upper(value), 55),
       },
     ],
     []

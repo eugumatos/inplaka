@@ -48,8 +48,8 @@ export async function createCompany(company: CompanyFormData) {
   }
 }
 
-export async function updateCompany(id: string, company: CompanyFormData) {
-  const res = await fetch(`${url}/Empresa/${id}`, {
+export async function updateCompany(company: CompanyFormData) {
+  const res = await fetch(`${url}/Empresa/`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",

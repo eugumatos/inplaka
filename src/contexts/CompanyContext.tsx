@@ -55,15 +55,7 @@ function CompanyProvider({ companies = [], children }: CompanyContextProps) {
     try {
       dispatch({ type: "LOADING" });
 
-      const findIdCompany = state.companies.find(
-        (c) => c.cnpj === company.cnpj
-      );
-
-      if (!findIdCompany) {
-        throw new Error("ID Company not found!");
-      }
-
-      await updateCompany(findIdCompany.id, company);
+      await updateCompany(company);
       const newCompanies = await getCompanies();
 
       dispatch({ type: "RELOAD_COMPANY", payload: newCompanies });
