@@ -46,8 +46,8 @@ const InputCurrencyBase: ForwardRefRenderFunction<
               prefix="R$ "
               color="gray.800"
               borderColor="gray.100"
-              thousandSeparator="."
-              decimalSeparator=","
+              thousandSeparator=","
+              decimalSeparator="."
               {...rest}
             />
           </>

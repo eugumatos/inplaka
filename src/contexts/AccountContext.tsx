@@ -60,15 +60,7 @@ function AccountProvider({ accounts = [], children }: AccountContextProps) {
 
       dispatch({ type: "LOADING" });
 
-      const findAccountId = state.accounts.find(
-        (a) => a.descricao === account.descricao
-      );
-
-      if (!findAccountId) {
-        throw new Error("Account ID not found!");
-      }
-
-      await updateAccount(findAccountId.id, account);
+      await updateAccount(account);
       const newAccounts = await getAccounts();
 
       dispatch({ type: "RELOAD_ACCOUNT", payload: newAccounts });

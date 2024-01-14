@@ -43,8 +43,8 @@ export async function destroyAccount(id: string): Promise<void> {
   }
 }
 
-export async function updateAccount(id: string, service: AccountFormData) {
-  const res = await fetch(`${url}/Conta/${id}`, {
+export async function updateAccount(service: AccountFormData) {
+  const res = await fetch(`${url}/Conta`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
