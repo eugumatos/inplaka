@@ -55,15 +55,7 @@ function SupplierProvider({ suppliers = [], children }: SupplierContextProps) {
     try {
       dispatch({ type: "LOADING" });
 
-      const findSupplierId = state.suppliers.find(
-        (s) => s.apelido === supplier.apelido
-      );
-
-      if (!findSupplierId) {
-        throw new Error("Supplier ID not found!");
-      }
-
-      await updateSupplier(findSupplierId.id, supplier);
+      await updateSupplier(supplier);
       const newSuppliers = await getSuppliers();
 
       dispatch({ type: "RELOAD_SUPPLIER", payload: newSuppliers });
