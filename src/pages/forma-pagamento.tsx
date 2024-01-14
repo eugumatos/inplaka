@@ -16,7 +16,7 @@ interface FormPaymentProps {
 
 export default function FormaPagamento({ formPayments }: FormPaymentProps) {
   const formPayment = useForm<FormPaymentFormData>({
-    // resolver: yupResolver(formPaymentFormSchema),
+    resolver: yupResolver(formPaymentFormSchema),
   });
 
   return (

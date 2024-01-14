@@ -59,15 +59,7 @@ function FormPaymentProvider({
     try {
       dispatch({ type: "LOADING" });
 
-      const findIdFormPayment = state.formPayments.find(
-        (f) => f.descricao === formPayment.descricao
-      );
-
-      if (!findIdFormPayment) {
-        throw new Error("ID Form Payment not found!");
-      }
-
-      await updateFormPayment(findIdFormPayment.id, formPayment);
+      await updateFormPayment(formPayment);
       const newFormPayments = await getFormPayments();
 
       dispatch({ type: "RELOAD_FORM_PAYMENT", payload: newFormPayments });

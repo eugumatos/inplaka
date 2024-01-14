@@ -32,11 +32,8 @@ export async function destroyFormPayment(id: string): Promise<void> {
   }
 }
 
-export async function updateFormPayment(
-  id: string,
-  formPayment: FormPaymentFormData
-) {
-  const res = await fetch(`${url}/FormaPagamento/${id}`, {
+export async function updateFormPayment(formPayment: FormPaymentFormData) {
+  const res = await fetch(`${url}/FormaPagamento`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
