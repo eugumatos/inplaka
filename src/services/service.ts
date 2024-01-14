@@ -43,8 +43,8 @@ export async function destroyService(id: string): Promise<void> {
   }
 }
 
-export async function updateService(id: string, service: ServiceFormData) {
-  const res = await fetch(`${url}/Servico/${id}`, {
+export async function updateService(service: ServiceFormData) {
+  const res = await fetch(`${url}/Servico`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",

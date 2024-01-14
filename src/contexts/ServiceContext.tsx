@@ -9,6 +9,7 @@ import {
 } from "@/services/service";
 import { toast } from "react-toastify";
 import { ServiceFormData } from "@/schemas/ServiceSchemaValidation";
+import currency from "currency.js";
 
 interface ServiceContextProps {
   children?: ReactNode;
@@ -38,6 +39,12 @@ function ServiceProvider({ services = [], children }: ServiceContextProps) {
   async function addService(service: ServiceFormData) {
     try {
       dispatch({ type: "LOADING" });
+
+      Object.assign(service, {
+        nao_usar_para_nota_fiscal: Boolean(service.nao_usar_para_nota_fiscal),
+        valor_venda: currency(service.valor_venda),
+      });
+
       await createService(service);
 
       const newServices = await getServices();
@@ -55,15 +62,12 @@ function ServiceProvider({ services = [], children }: ServiceContextProps) {
     try {
       dispatch({ type: "LOADING" });
 
-      const findIdService = state.services.find(
-        (s) => s.descricao === service.descricao
-      );
+      Object.assign(service, {
+        nao_usar_para_nota_fiscal: Boolean(service.nao_usar_para_nota_fiscal),
+        valor_venda: currency(service.valor_venda),
+      });
 
-      if (!findIdService) {
-        throw new Error("ID Service not found!");
-      }
-
-      await updateService(findIdService.id, service);
+      await updateService(service);
       const newServices = await getServices();
 
       dispatch({ type: "RELOAD_SERVICE", payload: newServices });

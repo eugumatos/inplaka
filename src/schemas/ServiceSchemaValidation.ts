@@ -5,7 +5,7 @@ export const serviceFormSchema = yup.object().shape({
   descricao: yup.string().required("Campo obrigatório"),
   valor_venda: yup.string().required("Campo obrigatório"),
   nao_usar_para_nota_fiscal: yup.string().required("Campo obrigatório"),
-  codigo_servico_nfse: yup.number().required("Campo obrigatório"),
+  codigo_servico_nfse: yup.string(),
   aliquota_nfse: yup.string().required("Campo obrigatório"),
   unidade: yup.string().required("Campo obrigatório"),
 });
