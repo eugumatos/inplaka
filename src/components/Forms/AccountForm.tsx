@@ -46,11 +46,10 @@ export function AccountForm() {
           <Input
             mt={4}
             maxW="20%"
+            type="number"
             label="Agência"
             placeholder="Ex: 0489"
-            {...register("agencia", {
-              valueAsNumber: true,
-            })}
+            {...register("agencia")}
           />
 
           <Flex direction="column" flex={1} gap={2}>
@@ -81,7 +80,13 @@ export function AccountForm() {
             isRequired
           />
 
-          <Select mt={4} maxW="25%" label="Status" {...register("status")}>
+          <Select
+            mt={4}
+            maxW="25%"
+            label="Status"
+            defaultOption="ATIVO"
+            {...register("status")}
+          >
             <option value="ATIVO">ATIVO</option>
             <option value="INATIVO">INATIVO</option>
           </Select>

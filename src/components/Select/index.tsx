@@ -43,7 +43,7 @@ const SelectBase: ForwardRefRenderFunction<
         ref={ref}
         {...rest}
       >
-        {!defaultOption && <option>Selecione uma opção</option>}
+        {!defaultOption && <option value="">Selecione uma opção</option>}
         {children}
       </SelectChakra>
       {!!error && <FormErrorMessage>{error?.message}</FormErrorMessage>}

@@ -9,6 +9,7 @@ import {
   updateAccount,
 } from "@/services/account";
 import { toast } from "react-toastify";
+import currency from "currency.js";
 
 interface AccountContextProps {
   children?: ReactNode;
@@ -36,9 +37,9 @@ function AccountProvider({ accounts = [], children }: AccountContextProps) {
   });
 
   async function addAccount(account: AccountFormData) {
-    console.log(account);
-    /*
     try {
+      Object.assign(account, { saldo: currency(account.saldo) });
+
       dispatch({ type: "LOADING" });
       await createAccount(account);
 
@@ -51,11 +52,12 @@ function AccountProvider({ accounts = [], children }: AccountContextProps) {
       dispatch({ type: "ERROR" });
       toast.error("Erro ao criar conta");
     }
-    */
   }
 
   async function editAccount(account: AccountFormData) {
     try {
+      Object.assign(account, { saldo: currency(account.saldo) });
+
       dispatch({ type: "LOADING" });
 
       const findAccountId = state.accounts.find(
