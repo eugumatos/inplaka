@@ -15,8 +15,14 @@ import { filterText } from "@/utils/filterText";
 import { upper } from "@/utils/upper";
 
 export function Client() {
-  const { clients, isLoading, addClient, editClient, removeClient } =
-    useClients();
+  const {
+    clients,
+    sellerOptions,
+    isLoading,
+    addClient,
+    editClient,
+    removeClient,
+  } = useClients();
 
   const [currentClient, setCurrentClient] = useState<IClient | null>(null);
 
@@ -55,6 +61,16 @@ export function Client() {
 
     if (findClient) {
       setCurrentClient(findClient);
+    }
+  };
+
+  const seekSelectedOption = async (id: string) => {
+    const findSeller = (await sellerOptions("")).find(
+      (seller) => seller.value === id
+    );
+
+    if (findSeller) {
+      return findSeller;
     }
   };
 
@@ -141,9 +157,17 @@ export function Client() {
         columns={columns}
         data={clients}
         onRowEdit={(row) => {
-          Object.keys(row).forEach((key: any) => {
+          Object.keys(row).forEach(async (key: any) => {
+            if (key === "vendedorPadrao") {
+              const seller = await seekSelectedOption(row.vendedorPadrao);
+
+              return setValue(key, seller);
+            }
+
             return setValue(key, row[key]);
           });
+
+          disclosureFormEditModal.onOpen();
 
           disclosureFormEditModal.onOpen();
         }}

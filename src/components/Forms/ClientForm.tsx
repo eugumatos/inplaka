@@ -28,8 +28,6 @@ export function ClientForm() {
 
   const debounceCep = useDebounce(unmaskText(cep), 1000);
 
-  console.log(errors);
-
   useEffect(() => {
     async function searchAdress() {
       try {
