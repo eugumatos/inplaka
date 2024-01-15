@@ -2,7 +2,7 @@ import { Order } from "@/containers/Order";
 import { OrderProvider } from "@/contexts/OrderContext";
 import { IOrder } from "@/domains/order";
 import {
-  OrderFormData,
+  IOrderFormData,
   orderFormSchema,
 } from "@/schemas/OrderSchemaValidation";
 import { getOrders } from "@/services/order";
@@ -16,8 +16,8 @@ interface HomeProps {
 }
 
 export default function Pedido({ orders }: HomeProps) {
-  const formOrder = useForm<OrderFormData>({
-    // resolver: yupResolver(orderFormSchema),
+  const formOrder = useForm<IOrderFormData>({
+    resolver: yupResolver(orderFormSchema),
   });
 
   return (

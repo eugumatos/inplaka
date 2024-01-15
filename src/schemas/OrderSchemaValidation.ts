@@ -5,14 +5,12 @@ import * as yup from "yup";
 export const orderFormSchema = yup.object().shape({
   cliente: yup.string().required("Campo obrigatório"),
   vendedor: yup.string().required("Campo obrigatório"),
-  formaPagamento: yup.string(),
-  desconto: yup.number(),
-  produtos: yup.object(),
-  servicos: yup.object(),
+  formaPagamento: yup.string().required("Campo obrigatório"),
+  desconto: yup.string(),
   id: yup.string(),
 });
 
-type IOrderFormData = yup.InferType<typeof orderFormSchema>;
+export type IOrderFormData = yup.InferType<typeof orderFormSchema>;
 
 export interface OrderFormData extends IOrderFormData {
   produtos: IProduct[];

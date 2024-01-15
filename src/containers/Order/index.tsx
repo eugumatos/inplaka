@@ -9,47 +9,63 @@ import { useOrder } from "@/contexts/OrderContext";
 import { filterText } from "@/utils/filterText";
 import { formatDate } from "@/utils/formatDate";
 import { currency } from "@/utils/currency";
+import { upper } from "@/utils/upper";
 import { OrderFormData } from "@/schemas/OrderSchemaValidation";
-import { OrderDrawer } from "./OrderDrawer";
-import { ModalDialog } from "@/components/Modals";
 import { IOrder } from "@/domains/order";
+import { ModalDialog } from "@/components/Modals";
+import { OrderDrawer } from "./OrderDrawer";
+import { FinishingModal } from "./FinishingModal";
+import { useOrderForm } from "@/containers/Order/hooks/useOrderForm";
 
 export function Order() {
-  const { orders, isLoading, addOrder, editOrder, removeOrder } = useOrder();
+  const {
+    orders,
+    isLoading,
+    finishingModalShouldBeOpen,
+    closeFinishingModal,
+    addOrder,
+    editOrder,
+    removeOrder,
+    searchOrder,
+  } = useOrder();
 
-  const { setValue, handleSubmit } = useFormContext<OrderFormData>();
+  let isUpdate = false;
+
+  const { enableFormOrder, disableFormOrder, loadServicesAndProducts } =
+    useOrderForm();
+
+  const { setValue, handleSubmit, reset } = useFormContext<OrderFormData>();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const customDisclosure = () => {
-    return {};
-  };
-
   const disclosureDestroyModal = useDisclosure();
+
+  const [submitOption, setSubmitOption] = useState<"CREATE" | "UPDATE">(
+    "CREATE"
+  );
 
   const [currentOrder, setCurrentOrder] = useState<IOrder | null>(null);
 
-  const submitOptions = {
-    create: handleSubmit(addOrder),
-    update: handleSubmit(editOrder),
+  const subOption = {
+    CREATE: handleSubmit((values) => addOrder(values, onClose)),
+    UPDATE: handleSubmit((values) => editOrder(values, onClose)),
   };
 
   const columns = useMemo(
     (): Column[] => [
       {
+        Header: "Número",
+        accessor: "numero",
+      },
+      {
         Header: "Cliente",
-        accessor: "cliente",
-        Cell: ({ value }) => filterText(value, 20),
+        accessor: "clienteNome",
+        Cell: ({ value }) => filterText(upper(value), 20),
       },
       {
         Header: "Data Emissão",
         accessor: "dateCreated",
         Cell: ({ value }) => formatDate(value),
-      },
-      {
-        Header: "Vendedor",
-        accessor: "vendedor",
-        Cell: ({ value }) => filterText(value, 20),
       },
       {
         Header: "Valor do pedido",
@@ -59,6 +75,7 @@ export function Order() {
       {
         Header: "Status",
         accessor: "status",
+        Cell: ({ value }) => upper(value),
       },
     ],
     []
@@ -88,8 +105,13 @@ export function Order() {
     );
   };
 
-  const handleUpdate = () => {
-    console.log("upadted order");
+  const renderFinishingOrderModal = () => {
+    return (
+      <FinishingModal
+        isOpen={finishingModalShouldBeOpen}
+        onClose={closeFinishingModal}
+      />
+    );
   };
 
   return (
@@ -102,7 +124,12 @@ export function Order() {
           bg="pink.300"
           color="gray.50"
           size="md"
-          onClick={onOpen}
+          onClick={() => {
+            enableFormOrder();
+            setSubmitOption("CREATE");
+            reset({});
+            onOpen();
+          }}
           _hover={{
             bg: "pink.400",
           }}
@@ -115,10 +142,9 @@ export function Order() {
         isLoading={isLoading}
         columns={columns}
         data={orders}
-        onRowEdit={(row) => {
-          Object.keys(row).forEach((key: any) => {
-            return setValue(key, row[key]);
-          });
+        onRowEdit={async (row) => {
+          disableFormOrder();
+          setSubmitOption("UPDATE");
 
           onOpen();
         }}
@@ -130,11 +156,16 @@ export function Order() {
 
       <OrderDrawer
         isOpen={isOpen}
-        onClose={onClose}
-        onSubmit={submitOptions.create}
+        isUpdate={isUpdate}
+        onSubmit={subOption[submitOption]}
+        onClose={() => {
+          onClose();
+          reset({});
+        }}
       />
 
       {renderDestroyModal()}
+      {renderFinishingOrderModal()}
     </Box>
   );
 }

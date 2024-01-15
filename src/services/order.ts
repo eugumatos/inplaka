@@ -24,6 +24,19 @@ export async function getOrder(id: string): Promise<IOrder> {
   return res.json();
 }
 
+export async function validateExistingPlaques(placa: string): Promise<[]> {
+  const res = await fetch(
+    `${url}/PedidoVendaProduto/GetValidaPlacaJaExiste/${placa}`
+  );
+
+  if (!res.ok) {
+    // This will activate the closest `error.js` Error Boundary
+    throw new Error("Failed to fetch data");
+  }
+
+  return res.json();
+}
+
 export async function createOrder(order: OrderFormData) {
   const res = await fetch(`${url}/PedidoVenda`, {
     method: "POST",

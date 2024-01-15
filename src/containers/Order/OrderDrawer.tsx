@@ -1,4 +1,3 @@
-import { FormEventHandler } from "react";
 import {
   Drawer,
   DrawerOverlay,
@@ -10,18 +9,30 @@ import { OrderForm } from "@/components/Forms/OrderForm";
 
 interface OrderDraweProps {
   isOpen: boolean;
+  isUpdate: boolean;
   onClose: () => void;
-  onSubmit: FormEventHandler<HTMLFormElement>;
+  onSubmit: any;
 }
 
-export function OrderDrawer({ isOpen, onClose, onSubmit }: OrderDraweProps) {
+export function OrderDrawer({
+  isOpen,
+  isUpdate,
+  onClose,
+  onSubmit,
+}: OrderDraweProps) {
   return (
-    <Drawer onClose={onClose} isOpen={isOpen} size="xl">
+    <Drawer
+      onClose={onClose}
+      isOpen={isOpen}
+      size="xl"
+      closeOnOverlayClick={false}
+      closeOnEsc={false}
+    >
       <DrawerOverlay />
       <DrawerContent>
         <DrawerCloseButton />
         <DrawerBody>
-          <OrderForm onSubmit={onSubmit} />
+          <OrderForm isUpdate={isUpdate} onSubmit={onSubmit} />
         </DrawerBody>
       </DrawerContent>
     </Drawer>

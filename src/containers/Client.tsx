@@ -168,8 +168,6 @@ export function Client() {
           });
 
           disclosureFormEditModal.onOpen();
-
-          disclosureFormEditModal.onOpen();
         }}
         onRowDelete={(row) => {
           seekCurrentClient(row);

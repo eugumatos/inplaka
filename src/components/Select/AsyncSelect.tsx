@@ -1,14 +1,22 @@
+import { FormControl, FormLabel, FormErrorMessage } from "@chakra-ui/react";
 import {
   AsyncSelect as AsyncSelectChakra,
+  AsyncProps,
   chakraComponents,
 } from "chakra-react-select";
-import { Controller, Control } from "react-hook-form";
+import { Controller, Control, FieldError } from "react-hook-form";
 
 interface AsycnSelectProps {
+  mt?: number;
+  maxW?: string;
   placeHolder?: string;
   loadOptions: any;
-  name: string;
+  isRequired?: boolean;
   control: Control<any>;
+  name: string;
+  label?: string;
+  error?: FieldError;
+  onChangeOption?: (option: { value: string; label: string }) => void;
 }
 
 const asyncComponents = {
@@ -25,24 +33,49 @@ const asyncComponents = {
 };
 
 export const AsyncSelect = ({
+  mt,
+  maxW,
   name,
+  error,
   control,
+  label,
+  isRequired,
   placeHolder,
   loadOptions,
+  onChangeOption,
+  ...rest
 }: AsycnSelectProps) => {
+  const calculateMarginB = mt && mt + 2;
+
   return (
     <Controller
       control={control}
       name={name}
       render={({ field }) => (
-        <AsyncSelectChakra
-          {...field}
-          components={asyncComponents}
-          loadOptions={loadOptions}
-          placeholder={placeHolder || "Selecione uma opção"}
-          defaultOptions
-          cacheOptions
-        />
+        <FormControl
+          mt={mt}
+          mb={!!error ? 0 : calculateMarginB}
+          maxW={maxW}
+          isRequired={isRequired}
+          isInvalid={!!error}
+        >
+          <FormLabel>{label}</FormLabel>
+          <AsyncSelectChakra
+            ref={field.ref}
+            components={asyncComponents}
+            loadOptions={loadOptions}
+            placeholder={placeHolder || "Selecione uma opção"}
+            getOptionValue={(option: any) => option.value}
+            getOptionLabel={(option: any) => option.label}
+            onChange={(e) => {
+              onChangeOption && onChangeOption(e);
+              field.onChange(e?.value);
+            }}
+            defaultOptions
+            cacheOptions
+          />
+          {!!error && <FormErrorMessage>{error?.message}</FormErrorMessage>}
+        </FormControl>
       )}
     />
   );

@@ -33,23 +33,24 @@ import { OrderFormData } from "@/schemas/OrderSchemaValidation";
 import { DataTable } from "@/components/Table";
 import { Input } from "@/components/Input";
 import { InputQuantity } from "@/components/Input/InputQuantity";
+import { InputCurrency } from "@/components/Input/InputCurrency";
 import { filterText } from "@/utils/filterText";
-import { currency } from "@/utils/currency";
+import { currency as currencyFormat } from "@/utils/currency";
 import { useOrderForm } from "@/containers/Order/hooks/useOrderForm";
 import { toast } from "react-toastify";
 
 interface OrderFormProps {
-  onSubmit: FormEventHandler<HTMLFormElement>;
+  onSubmit: (order: OrderFormData) => void;
+  isUpdate: boolean;
 }
 
 export function OrderForm({ onSubmit }: OrderFormProps) {
   const {
     control,
-    register,
-    watch,
     formState: { errors },
-    setValue,
     getValues,
+
+    setValue,
   } = useFormContext<OrderFormData>();
 
   const containerTotalRef = useRef<null | HTMLDivElement>(null);
@@ -66,14 +67,12 @@ export function OrderForm({ onSubmit }: OrderFormProps) {
     updateProductPlaque,
     removeProductPlaque,
     calculateTotal,
+    isDisabledForm,
   } = useOrderForm();
 
-  const clientValue = watch<any>("cliente")?.label || "";
-  const sellerValue = watch<any>("vendedor")?.label || "";
-  const paymentFormValue = watch<any>("formaPagamento")?.label || "";
-
-  const productFormValues = watch<any>("produtos") || "";
-  const serviceFormValues = watch<any>("servicos") || "";
+  const [clientValue, setClientValue] = useState("");
+  const [sellerValue, setSellerValue] = useState("");
+  const [paymentFormValue, setPaymentFormValue] = useState("");
 
   const { subTotalProducts, subTotalServices, total } = calculateTotal();
 
@@ -91,8 +90,8 @@ export function OrderForm({ onSubmit }: OrderFormProps) {
       },
       {
         Header: "Valor venda",
-        accessor: "valor_venda",
-        Cell: ({ value }) => currency(value),
+        accessor: "valorUnitario",
+        Cell: ({ value }) => currencyFormat(value),
       },
     ],
     []
@@ -105,13 +104,23 @@ export function OrderForm({ onSubmit }: OrderFormProps) {
   function handleSubmit() {
     const formValues = getValues();
 
-    const formattedValues = Object.assign(formValues, {
-      produtos: products.filter((p) => p.quantidade > 0),
-      services: services.filter((s) => s.quantidade > 0),
-      total: total,
-    });
+    formValues.produtos = products.filter((p) => p.quantidade > 0);
+    formValues.servicos = services.filter((s) => s.quantidade > 0);
+    formValues.total = total;
 
-    console.log(formattedValues);
+    if (formValues.produtos.length === 0 && formValues.servicos.length === 0) {
+      toast.warning(
+        "É necessário adicionar pelo menos um produto ou serviço antes de realizar um pedido."
+      );
+
+      return;
+    }
+
+    setValue("produtos", formValues.produtos);
+    setValue("servicos", formValues.servicos);
+    setValue("total", formValues.total);
+
+    onSubmit(formValues);
   }
 
   useEffect(() => {
@@ -145,6 +154,8 @@ export function OrderForm({ onSubmit }: OrderFormProps) {
                 control={control}
                 loadOptions={clientOptions}
                 name="cliente"
+                onChangeOption={(c) => setClientValue(c.label)}
+                error={errors.cliente}
               />
             </Box>
             <Box flex={1}>
@@ -153,6 +164,8 @@ export function OrderForm({ onSubmit }: OrderFormProps) {
                 control={control}
                 loadOptions={sellerOptions}
                 name="vendedor"
+                onChangeOption={(s) => setSellerValue(s.label)}
+                error={errors.vendedor}
               />
             </Box>
             <Box flex={1}>
@@ -161,6 +174,8 @@ export function OrderForm({ onSubmit }: OrderFormProps) {
                 control={control}
                 loadOptions={paymentOptions}
                 name="formaPagamento"
+                onChangeOption={(f) => setPaymentFormValue(f.label)}
+                error={errors.formaPagamento}
               />
             </Box>
           </HStack>
@@ -295,32 +310,27 @@ export function OrderForm({ onSubmit }: OrderFormProps) {
           ))}
 
         <Box w="100%" mt={4}>
-          <Text size="md">Subtotal: {currency(subTotalProducts)}</Text>
-          <Text size="md">Serviços: {currency(subTotalServices)}</Text>
+          <Text size="md">Subtotal: {currencyFormat(subTotalProducts)}</Text>
+          <Text size="md">Serviços: {currencyFormat(subTotalServices)}</Text>
           <Flex my={2}>
             <Text fontSize={20} fontWeight="bold">
               {" "}
               Total da venda:
             </Text>
             <Text ml={2} fontSize={20}>
-              {currency(totalValue)}
+              {currencyFormat(totalValue)}
             </Text>
           </Flex>
-          <InputGroup>
-            {/* eslint-disable-next-line react/no-children-prop */}
-            <InputLeftAddon children="R$" />
-            <Input
-              type="number"
-              placeholder="Ex: 5000"
-              value={discountFormValue === 0 ? "" : discountFormValue}
-              {...register("desconto", {
-                valueAsNumber: true,
-                onChange: (e) => {
-                  setDiscountFormValue(e.target.value);
-                },
-              })}
+
+          <Flex direction="column" flex={1} gap={2}>
+            <InputCurrency
+              mt={2}
+              name="desconto"
+              placeholder="Ex: R$ 100,00"
+              control={control}
             />
-          </InputGroup>
+          </Flex>
+
           <Button
             my={4}
             w="100%"

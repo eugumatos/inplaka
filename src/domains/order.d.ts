@@ -1,4 +1,5 @@
 export interface IOrder {
+  [x: string]: any;
   id: string;
   cliente: string;
   vendedor: string;

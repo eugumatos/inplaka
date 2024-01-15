@@ -12,5 +12,6 @@ export interface IProduct {
   aliquota_ipi_nfe: string;
   nao_usar_para_nota_fiscal: boolean | string;
   quantidade: number;
+  placa: string;
   placas: Array<string>;
 }

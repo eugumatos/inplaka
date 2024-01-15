@@ -56,15 +56,6 @@ export const PopoverPlaqueForm = ({
 
   const firstFieldRef = useRef(null);
 
-  const [plaqueList, setPlaqueList] = useState<Array<string> | []>([]);
-
-  const plaqueListData = plaqueList.map((item, key) => {
-    return {
-      id: key,
-      descricao: upper(item),
-    };
-  });
-
   const [plaque, setPlaque] = useState("");
 
   const shouldDisabledAddButton =
@@ -281,7 +272,11 @@ export const PopoverPlaqueForm = ({
 
           <DataTable
             columns={columns}
-            data={product.placas as any}
+            data={
+              product.placas.map((p) => {
+                return { descricao: p };
+              }) as any
+            }
             onRowDelete={(row) => {
               removeProductPlaque(product.id, row);
 

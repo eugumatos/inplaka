@@ -7,6 +7,8 @@ import { IProduct } from "@/domains/product";
 import { IService } from "@/domains/service";
 import { getProducts } from "@/services/product";
 import { getServices } from "@/services/service";
+import { IClient } from "@/domains/client";
+import { IOrder } from "@/domains/order";
 
 interface SelectProps {
   label: string;
@@ -23,7 +25,13 @@ interface FormValues {
 interface UseOrderFormProps {
   products: IProduct[];
   services: IService[];
-  loadServicesAndProducts: () => void;
+  clients: IClient[];
+  isDisabledForm: boolean;
+  disableFormOrder: () => void;
+  enableFormOrder: () => void;
+  loadServicesAndProducts: (order?: IOrder) => void;
+  currentOrder: IOrder;
+  loadCurrentOrder: (order: IOrder) => void;
   clientOptions: (value: string) => Promise<SelectProps[]>;
   sellerOptions: (value: string) => Promise<SelectProps[]>;
   paymentOptions: (value: string) => Promise<SelectProps[]>;
@@ -41,9 +49,43 @@ interface UseOrderFormProps {
 export function useOrderForm(): UseOrderFormProps {
   const [products, setProducts] = useState<IProduct[]>([]);
   const [services, setServices] = useState<IService[]>([]);
+  const [clients, setClients] = useState<IClient[]>([]);
+
+  const [currentOrder, setCurrentOrder] = useState<IOrder>({} as IOrder);
+
+  const [isDisabledForm, setIsDisabledForm] = useState(false);
+
+  const loadCurrentOrder = (order: IOrder) => {
+    setCurrentOrder(order);
+  };
 
   const loadServicesAndProducts = useCallback(async () => {
     try {
+      if (currentOrder.id) {
+        const formattedProducts = currentOrder.produtos?.map((product) => {
+          return {
+            ...product,
+            placas:
+              product.quantidade > 1
+                ? product.placa?.split(",")
+                : [product.placa],
+          };
+        });
+
+        const formattedServices = currentOrder.servicos?.map((service) => {
+          return {
+            ...service,
+          };
+        });
+
+        console.log(formattedProducts, formattedServices);
+
+        setProducts(formattedProducts as any);
+        setServices(formattedServices as any);
+
+        return;
+      }
+
       const products: IProduct[] = await getProducts();
       const services: IService[] = await getServices();
 
@@ -51,13 +93,16 @@ export function useOrderForm(): UseOrderFormProps {
         return {
           ...product,
           quantidade: 0,
+          placa: "",
           placas: [],
+          valorUnitario: product.valor_venda,
         };
       });
 
       const formattedServices = services.map((service) => {
         return {
           ...service,
+          valorUnitario: service.valor_venda,
           quantidade: 0,
         };
       });
@@ -69,9 +114,20 @@ export function useOrderForm(): UseOrderFormProps {
     }
   }, []);
 
+  function disableFormOrder() {
+    setIsDisabledForm(true);
+  }
+
+  function enableFormOrder() {
+    setIsDisabledForm(false);
+  }
+
   async function clientOptions(value: string) {
     try {
       const clients = await getClients();
+
+      setClients(clients);
+
       const options = clients
         .map((client) => ({
           value: client.id,
@@ -247,7 +303,13 @@ export function useOrderForm(): UseOrderFormProps {
   return {
     products,
     services,
+    clients,
+    isDisabledForm,
+    loadCurrentOrder,
+    disableFormOrder,
+    enableFormOrder,
     loadServicesAndProducts,
+    currentOrder,
     clientOptions,
     sellerOptions,
     paymentOptions,
