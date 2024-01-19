@@ -131,7 +131,7 @@ export function Client() {
   };
 
   return (
-    <Box flex={1}>
+    <Box w="100%" flex={1}>
       <Flex justifyContent="space-between" mb={8}>
         <Heading as="h3" fontSize={26}>
           Clientes
