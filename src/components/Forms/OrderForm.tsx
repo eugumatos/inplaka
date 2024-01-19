@@ -10,8 +10,6 @@ import {
   VStack,
   Icon,
   Text,
-  InputGroup,
-  InputLeftAddon,
   Tabs,
   TabList,
   TabPanel,
@@ -27,38 +25,40 @@ import {
 import { Column } from "react-table";
 import { useFormContext } from "react-hook-form";
 import { useDebounce } from "@/hooks/useDebounce";
+import { Select } from "@/components/Select";
 import { AsyncSelect } from "@/components/Select/AsyncSelect";
 import { PopoverPlaqueForm } from "@/containers/Order/PopoverPlaqueForm";
 import { OrderFormData } from "@/schemas/OrderSchemaValidation";
 import { DataTable } from "@/components/Table";
-import { Input } from "@/components/Input";
 import { InputQuantity } from "@/components/Input/InputQuantity";
 import { InputCurrency } from "@/components/Input/InputCurrency";
 import { filterText } from "@/utils/filterText";
 import { currency as currencyFormat } from "@/utils/currency";
 import { useOrderForm } from "@/containers/Order/hooks/useOrderForm";
 import { toast } from "react-toastify";
+import currency from "currency.js";
 
 interface OrderFormProps {
+  id?: string;
   onSubmit: (order: OrderFormData) => void;
-  isUpdate: boolean;
 }
 
-export function OrderForm({ onSubmit }: OrderFormProps) {
+export function OrderForm({ id, onSubmit }: OrderFormProps) {
   const {
+    register,
     control,
+    watch,
     formState: { errors },
     getValues,
-
     setValue,
   } = useFormContext<OrderFormData>();
 
   const containerTotalRef = useRef<null | HTMLDivElement>(null);
 
   const {
+    isLoading,
     products,
     services,
-    loadServicesAndProducts,
     clientOptions,
     sellerOptions,
     paymentOptions,
@@ -67,17 +67,12 @@ export function OrderForm({ onSubmit }: OrderFormProps) {
     updateProductPlaque,
     removeProductPlaque,
     calculateTotal,
-    isDisabledForm,
-  } = useOrderForm();
-
-  const [clientValue, setClientValue] = useState("");
-  const [sellerValue, setSellerValue] = useState("");
-  const [paymentFormValue, setPaymentFormValue] = useState("");
+  } = useOrderForm({ id });
 
   const { subTotalProducts, subTotalServices, total } = calculateTotal();
 
   const [totalValue, setTotalValue] = useState(0);
-  const [discountFormValue, setDiscountFormValue] = useState(0);
+  const [discountFormValue, setDiscountFormValue] = useState<any>(0);
 
   const discount = useDebounce(String(discountFormValue), 500);
 
@@ -97,9 +92,9 @@ export function OrderForm({ onSubmit }: OrderFormProps) {
     []
   );
 
-  const onScrollToTotal = () => {
+  function onScrollToTotal() {
     containerTotalRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  }
 
   function handleSubmit() {
     const formValues = getValues();
@@ -123,64 +118,61 @@ export function OrderForm({ onSubmit }: OrderFormProps) {
     onSubmit(formValues);
   }
 
+  const currentClient = watch("cliente") as any;
+  const currentSeller = watch("vendedor") as any;
+  const currentPaymentOption = watch("formaPagamento") as any;
+
+  const statusOption = watch("status");
+
+  const shouldDisabledOption =
+    (!!id && statusOption === "ABERTO") || statusOption === "CANCELADO";
+
   useEffect(() => {
     if (total > Number(discount)) {
       setTotalValue(total - Number(discount));
     }
   }, [total, discount]);
 
-  useEffect(() => {
-    async function getDataTable() {
-      try {
-        await loadServicesAndProducts();
-      } catch (error) {
-        toast.warning("Erro ao listar produtos e serviços");
-      }
-    }
-
-    getDataTable();
-  }, [loadServicesAndProducts]);
-
   return (
     <form>
-      <Box h="94vh" mt={2}>
+      <Box h="100vh">
         <Heading size="md">Dados do pedido</Heading>
 
-        <Flex h="100%" direction="column" justify="space-between">
+        <Flex direction="column" gap={4} justify="space-between">
           <HStack mt={5} gap={4} alignItems="center">
             <Box flex={1}>
               <FormLabel>Cliente:</FormLabel>
               <AsyncSelect
                 control={control}
                 loadOptions={clientOptions}
-                name="cliente"
-                onChangeOption={(c) => setClientValue(c.label)}
-                error={errors.cliente}
+                value={currentClient}
+                error={errors.cliente?.label}
+                {...register("cliente")}
               />
             </Box>
             <Box flex={1}>
               <FormLabel>Vendedor:</FormLabel>
               <AsyncSelect
                 control={control}
+                value={currentSeller}
                 loadOptions={sellerOptions}
-                name="vendedor"
-                onChangeOption={(s) => setSellerValue(s.label)}
-                error={errors.vendedor}
+                error={errors.vendedor?.label}
+                {...register("vendedor")}
               />
             </Box>
             <Box flex={1}>
               <FormLabel>Forma pagamento:</FormLabel>
               <AsyncSelect
                 control={control}
+                value={currentPaymentOption}
                 loadOptions={paymentOptions}
-                name="formaPagamento"
-                onChangeOption={(f) => setPaymentFormValue(f.label)}
-                error={errors.formaPagamento}
+                error={errors.formaPagamento?.label}
+                {...register("formaPagamento")}
               />
             </Box>
           </HStack>
 
-          <Tabs mt={5} isManual variant="enclosed">
+          <Tabs isManual variant="enclosed">
             <TabList>
               <Tab>Produtos</Tab>
               <Tab>Serviços</Tab>
@@ -188,6 +180,7 @@ export function OrderForm({ onSubmit }: OrderFormProps) {
             <TabPanels mt={5}>
               <TabPanel p={0}>
                 <DataTable
+                  isLoading={isLoading}
                   columns={columns}
                   data={products}
                   itemsPerPage={5}
@@ -198,6 +191,7 @@ export function OrderForm({ onSubmit }: OrderFormProps) {
                         name="produto"
                         maxQ={row.unidade}
                         maxW="50%"
+                        forceDisabled={!!id}
                         value={row.quantidade}
                         onChangeQuantity={(value) => {
                           updateProductAmount(row, value);
@@ -208,7 +202,7 @@ export function OrderForm({ onSubmit }: OrderFormProps) {
                           product={row}
                           updateProductPlaque={updateProductPlaque}
                           removeProductPlaque={removeProductPlaque}
-                          isDisabled={+row.unidade <= 0}
+                          isDisabled={+row.unidade <= 0 || !!id}
                         />
                       </Box>
                     </Flex>
@@ -217,6 +211,7 @@ export function OrderForm({ onSubmit }: OrderFormProps) {
               </TabPanel>
               <TabPanel p={0}>
                 <DataTable
+                  isLoading={isLoading}
                   columns={columns}
                   data={services}
                   itemsPerPage={5}
@@ -224,6 +219,7 @@ export function OrderForm({ onSubmit }: OrderFormProps) {
                     <InputQuantity
                       key={row.id}
                       name="servico"
+                      forceDisabled={!!id}
                       maxQ={row.unidade}
                       maxW="50%"
                       onChangeQuantity={(value) => {
@@ -255,7 +251,7 @@ export function OrderForm({ onSubmit }: OrderFormProps) {
 
       <Box ref={containerTotalRef} h="100vh">
         <Flex h="78%" direction="column" align="space-between">
-          <Box mt={10}>
+          <Box>
             <Heading size="lg">Total</Heading>
             <VStack mt={10} spacing={3} align="stretch" justify="center">
               <Flex gap={2}>
@@ -263,21 +259,21 @@ export function OrderForm({ onSubmit }: OrderFormProps) {
                 <Text size="md" fontWeight="bold">
                   Cliente:
                 </Text>
-                <Text size="md">{clientValue}</Text>
+                <Text size="md">{currentClient?.label}</Text>
               </Flex>
               <Flex gap={2}>
                 <Icon as={RiStoreLine} boxSize={5} />
                 <Text size="md" fontWeight="bold">
                   Vendedor:
                 </Text>
-                <Text size="md">{sellerValue}</Text>
+                <Text size="md">{currentSeller?.label}</Text>
               </Flex>
               <Flex gap={2}>
                 <Icon as={RiBankCard2Line} boxSize={5} />
                 <Text size="md" fontWeight="bold">
                   Forma de pagamento:
                 </Text>
-                <Text size="md">{paymentFormValue}</Text>
+                <Text size="md">{currentPaymentOption?.label}</Text>
               </Flex>
             </VStack>
           </Box>
@@ -323,12 +319,27 @@ export function OrderForm({ onSubmit }: OrderFormProps) {
           </Flex>
 
           <Flex direction="column" flex={1} gap={2}>
-            <InputCurrency
-              mt={2}
-              name="desconto"
-              placeholder="Ex: R$ 100,00"
-              control={control}
-            />
+            {!id ? (
+              <InputCurrency
+                mt={2}
+                name="desconto"
+                placeholder="Ex: R$ 100,00"
+                control={control}
+                onChange={(e) => setDiscountFormValue(currency(e.target.value))}
+              />
+            ) : (
+              <Select
+                label="Status"
+                defaultOption="ATIVO"
+                {...register("status")}
+              >
+                <option value="ABERTO" disabled={shouldDisabledOption}>
+                  ABERTO
+                </option>
+                <option value="FINALIZADO">FINALIZADO</option>
+                <option value="CANCELADO">CANCELADO</option>
+              </Select>
+            )}
           </Flex>
 
           <Button

@@ -8,15 +8,15 @@ import {
 import { OrderForm } from "@/components/Forms/OrderForm";
 
 interface OrderDraweProps {
+  id?: string;
   isOpen: boolean;
-  isUpdate: boolean;
   onClose: () => void;
   onSubmit: any;
 }
 
 export function OrderDrawer({
+  id,
   isOpen,
-  isUpdate,
   onClose,
   onSubmit,
 }: OrderDraweProps) {
@@ -32,7 +32,7 @@ export function OrderDrawer({
       <DrawerContent>
         <DrawerCloseButton />
         <DrawerBody>
-          <OrderForm isUpdate={isUpdate} onSubmit={onSubmit} />
+          <OrderForm id={id} onSubmit={onSubmit} />
         </DrawerBody>
       </DrawerContent>
     </Drawer>

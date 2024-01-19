@@ -11,17 +11,17 @@ export interface IOrder {
   status?: string;
   observacao?: string;
   produtos?: Array<{
+    id: string;
     produto: string;
     quantidade: number;
-    placa?: string;
-    descricao?: string;
-    valorUnitario?: number;
+    placa: string;
+    descricao: string;
+    valorUnitario: number;
   }>;
   servicos?: Array<{
     servico: string;
     quantidade: number;
-    placa?: string;
-    descricao?: string;
-    valorUnitario?: number;
+    descricao: string;
+    valorUnitario: number;
   }>;
 }

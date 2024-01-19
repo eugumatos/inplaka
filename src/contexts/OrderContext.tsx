@@ -10,15 +10,13 @@ import {
 import {
   createOrder,
   getOrders,
-  getOrder,
-  updateOrder,
   destroyOrder,
   validateExistingPlaques,
+  updateOrder,
 } from "@/services/order";
 import { OrderFormData } from "@/schemas/OrderSchemaValidation";
 import { generateCode } from "@/utils/generateCode";
 import { toast } from "react-toastify";
-import { useOrderForm } from "@/containers/Order/hooks/useOrderForm";
 
 interface OrderContextProps {
   children?: ReactNode;
@@ -32,7 +30,6 @@ interface OrderProviderProps {
   order: any;
   finishingModalShouldBeOpen: boolean;
   closeFinishingModal: () => void;
-  searchOrder: (id: string) => Promise<IOrder | undefined>;
   addOrder: (order: OrderFormData, close?: () => void) => void;
   editOrder: (order: OrderFormData, close?: () => void) => void;
   removeOrder: (id: string) => void;
@@ -74,8 +71,6 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
     isError: false,
   });
 
-  const { loadCurrentOrder } = useOrderForm();
-
   const [finishingModalShouldBeOpen, setFinishingModalShouldBeOpen] =
     useState(false);
 
@@ -90,6 +85,9 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
       dispatch({ type: "LOADING" });
 
       Object.assign(order, {
+        cliente: order.cliente.value,
+        vendedor: order.vendedor.value,
+        formaPagamento: order.formaPagamento.value,
         valorPedido: order.total,
         valorDesconto: order.desconto,
         valorTotal: order.total,
@@ -111,7 +109,7 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
                     .map((p) => p)
                     .join(",")
                 : Array.from(Array(product.quantidade).keys())
-                    .map((p) => `INPLK-${generateCode()}`)
+                    .map(() => `INPLK-${generateCode()}`)
                     .join(","),
             quantidade: product.quantidade,
             valorUnitario: product.valor_venda,
@@ -160,8 +158,6 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
   }
 
   async function editOrder(order: OrderFormData, close?: () => void) {
-    console.log("update:", order.cliente);
-    /*
     try {
       const findIdOrder = state.orders.find((o) => o.id === order.id);
 
@@ -169,27 +165,27 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
         throw new Error("ID Order not found!");
       }
 
+      Object.assign(order, {
+        cliente: order.cliente.value,
+        vendedor: order.vendedor.value,
+        formaPagamento: order.formaPagamento.value,
+      });
+
       await updateOrder(findIdOrder.id, order);
+
+      setOrder(order);
+      close && close();
+
       const updatedOrders = await getOrders();
 
       dispatch({ type: "RELOAD_ORDERS", payload: updatedOrders });
 
       toast.success("Forma de pagamento editada com sucesso!");
+      setFinishingModalShouldBeOpen(true);
     } catch (error) {
       dispatch({ type: "ERROR" });
       toast.error("Erro ao editar pedido.");
-    }
-    */
-  }
-
-  async function searchOrder(id: string): Promise<IOrder | undefined> {
-    try {
-      const order = await getOrder(id);
-      loadCurrentOrder(order);
-
-      return order;
-    } catch (error) {
-      toast.error("Erro ao carregar pedido.");
+      close && close();
     }
   }
 
@@ -219,7 +215,6 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
         order: order,
         addOrder,
         editOrder,
-        searchOrder,
         removeOrder,
         finishingModalShouldBeOpen,
         closeFinishingModal,

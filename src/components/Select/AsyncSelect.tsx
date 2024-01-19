@@ -1,10 +1,14 @@
 import { FormControl, FormLabel, FormErrorMessage } from "@chakra-ui/react";
 import {
   AsyncSelect as AsyncSelectChakra,
-  AsyncProps,
   chakraComponents,
 } from "chakra-react-select";
 import { Controller, Control, FieldError } from "react-hook-form";
+
+export interface SelectProps {
+  value: string;
+  label: string;
+}
 
 interface AsycnSelectProps {
   mt?: number;
@@ -16,7 +20,8 @@ interface AsycnSelectProps {
   name: string;
   label?: string;
   error?: FieldError;
-  onChangeOption?: (option: { value: string; label: string }) => void;
+  value?: SelectProps;
+  onChangeOption?: (option: SelectProps) => void;
 }
 
 const asyncComponents = {
@@ -39,11 +44,11 @@ export const AsyncSelect = ({
   error,
   control,
   label,
+  value,
   isRequired,
   placeHolder,
   loadOptions,
   onChangeOption,
-  ...rest
 }: AsycnSelectProps) => {
   const calculateMarginB = mt && mt + 2;
 
@@ -64,12 +69,13 @@ export const AsyncSelect = ({
             ref={field.ref}
             components={asyncComponents}
             loadOptions={loadOptions}
+            value={value}
             placeholder={placeHolder || "Selecione uma opção"}
             getOptionValue={(option: any) => option.value}
             getOptionLabel={(option: any) => option.label}
-            onChange={(e) => {
+            onChange={(e: any) => {
               onChangeOption && onChangeOption(e);
-              field.onChange(e?.value);
+              field.onChange(e);
             }}
             defaultOptions
             cacheOptions

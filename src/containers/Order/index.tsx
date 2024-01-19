@@ -12,10 +12,9 @@ import { currency } from "@/utils/currency";
 import { upper } from "@/utils/upper";
 import { OrderFormData } from "@/schemas/OrderSchemaValidation";
 import { IOrder } from "@/domains/order";
-import { ModalDialog } from "@/components/Modals";
+import { useOrderForm } from "./hooks/useOrderForm";
 import { OrderDrawer } from "./OrderDrawer";
 import { FinishingModal } from "./FinishingModal";
-import { useOrderForm } from "@/containers/Order/hooks/useOrderForm";
 
 export function Order() {
   const {
@@ -26,15 +25,15 @@ export function Order() {
     addOrder,
     editOrder,
     removeOrder,
-    searchOrder,
   } = useOrder();
 
-  let isUpdate = false;
+  const {
+    seekSelectedClientOption,
+    seekSelectedSellerOption,
+    seekSelectedPaymentOption,
+  } = useOrderForm({ noFetch: true });
 
-  const { enableFormOrder, disableFormOrder, loadServicesAndProducts } =
-    useOrderForm();
-
-  const { setValue, handleSubmit, reset } = useFormContext<OrderFormData>();
+  const { handleSubmit, setValue, reset } = useFormContext<OrderFormData>();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -125,7 +124,6 @@ export function Order() {
           color="gray.50"
           size="md"
           onClick={() => {
-            enableFormOrder();
             setSubmitOption("CREATE");
             reset({});
             onOpen();
@@ -142,10 +140,32 @@ export function Order() {
         isLoading={isLoading}
         columns={columns}
         data={orders}
-        onRowEdit={async (row) => {
-          disableFormOrder();
+        onRowEdit={(row) => {
           setSubmitOption("UPDATE");
 
+          Object.keys(row).forEach(async (key: any) => {
+            if (key === "cliente") {
+              const client = await seekSelectedClientOption(row.cliente);
+
+              return setValue(key, client);
+            }
+            if (key === "vendedor") {
+              const seller = await seekSelectedSellerOption(row.vendedor);
+
+              return setValue(key, seller);
+            }
+            if (key === "formaPagamento") {
+              const paymentOption = await seekSelectedPaymentOption(
+                row.formaPagamento
+              );
+
+              return setValue(key, paymentOption);
+            }
+
+            return setValue(key, row[key]);
+          });
+
+          seekCurrentOrder(row);
           onOpen();
         }}
         onRowDelete={(row) => {
@@ -155,11 +175,12 @@ export function Order() {
       />
 
       <OrderDrawer
+        id={currentOrder?.id}
         isOpen={isOpen}
-        isUpdate={isUpdate}
         onSubmit={subOption[submitOption]}
         onClose={() => {
           onClose();
+          setCurrentOrder(null);
           reset({});
         }}
       />

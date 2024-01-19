@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { toast } from "react-toastify";
 import { getClients } from "@/services/clients";
 import { getSellers } from "@/services/seller";
@@ -7,34 +7,30 @@ import { IProduct } from "@/domains/product";
 import { IService } from "@/domains/service";
 import { getProducts } from "@/services/product";
 import { getServices } from "@/services/service";
+import { getOrder } from "@/services/order";
 import { IClient } from "@/domains/client";
-import { IOrder } from "@/domains/order";
 
 interface SelectProps {
   label: string;
   value: string;
 }
 
-interface FormValues {
-  [key: string]: {
-    quantidade?: string;
-    valorUnitario?: number;
-  };
+interface IUseOrderFormProps {
+  id?: string;
+  noFetch?: boolean;
 }
 
 interface UseOrderFormProps {
+  isLoading: boolean;
   products: IProduct[];
   services: IService[];
   clients: IClient[];
-  isDisabledForm: boolean;
-  disableFormOrder: () => void;
-  enableFormOrder: () => void;
-  loadServicesAndProducts: (order?: IOrder) => void;
-  currentOrder: IOrder;
-  loadCurrentOrder: (order: IOrder) => void;
   clientOptions: (value: string) => Promise<SelectProps[]>;
   sellerOptions: (value: string) => Promise<SelectProps[]>;
   paymentOptions: (value: string) => Promise<SelectProps[]>;
+  seekSelectedClientOption: (id: string) => void;
+  seekSelectedSellerOption: (id: string) => void;
+  seekSelectedPaymentOption: (id: string) => void;
   updateProductAmount: (product: IProduct, amount: number) => void;
   updateServiceAmount: (product: IService, amount: number) => void;
   updateProductPlaque: (id: string, name: string) => void;
@@ -46,83 +42,17 @@ interface UseOrderFormProps {
   };
 }
 
-export function useOrderForm(): UseOrderFormProps {
+export function useOrderForm({
+  id,
+  noFetch = false,
+}: IUseOrderFormProps): UseOrderFormProps {
   const [products, setProducts] = useState<IProduct[]>([]);
   const [services, setServices] = useState<IService[]>([]);
   const [clients, setClients] = useState<IClient[]>([]);
 
-  const [currentOrder, setCurrentOrder] = useState<IOrder>({} as IOrder);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [isDisabledForm, setIsDisabledForm] = useState(false);
-
-  const loadCurrentOrder = (order: IOrder) => {
-    setCurrentOrder(order);
-  };
-
-  const loadServicesAndProducts = useCallback(async () => {
-    try {
-      if (currentOrder.id) {
-        const formattedProducts = currentOrder.produtos?.map((product) => {
-          return {
-            ...product,
-            placas:
-              product.quantidade > 1
-                ? product.placa?.split(",")
-                : [product.placa],
-          };
-        });
-
-        const formattedServices = currentOrder.servicos?.map((service) => {
-          return {
-            ...service,
-          };
-        });
-
-        console.log(formattedProducts, formattedServices);
-
-        setProducts(formattedProducts as any);
-        setServices(formattedServices as any);
-
-        return;
-      }
-
-      const products: IProduct[] = await getProducts();
-      const services: IService[] = await getServices();
-
-      const formattedProducts = products.map((product) => {
-        return {
-          ...product,
-          quantidade: 0,
-          placa: "",
-          placas: [],
-          valorUnitario: product.valor_venda,
-        };
-      });
-
-      const formattedServices = services.map((service) => {
-        return {
-          ...service,
-          valorUnitario: service.valor_venda,
-          quantidade: 0,
-        };
-      });
-
-      setProducts(formattedProducts);
-      setServices(formattedServices);
-    } catch (error) {
-      throw new Error("Erro ao listar produtos e serviços");
-    }
-  }, []);
-
-  function disableFormOrder() {
-    setIsDisabledForm(true);
-  }
-
-  function enableFormOrder() {
-    setIsDisabledForm(false);
-  }
-
-  async function clientOptions(value: string) {
+  const clientOptions = useCallback(async (value: string) => {
     try {
       const clients = await getClients();
 
@@ -143,9 +73,9 @@ export function useOrderForm(): UseOrderFormProps {
 
       return [];
     }
-  }
+  }, []);
 
-  async function sellerOptions(value: string) {
+  const sellerOptions = useCallback(async (value: string) => {
     try {
       const sellers = await getSellers();
       const options = sellers
@@ -163,9 +93,9 @@ export function useOrderForm(): UseOrderFormProps {
 
       return [];
     }
-  }
+  }, []);
 
-  async function paymentOptions(value: string) {
+  const paymentOptions = useCallback(async (value: string) => {
     try {
       const formPayments = await getFormPayments();
       const options = formPayments
@@ -183,7 +113,37 @@ export function useOrderForm(): UseOrderFormProps {
 
       return [];
     }
-  }
+  }, []);
+
+  const seekSelectedClientOption = async (id: string) => {
+    const findClient = (await clientOptions("")).find(
+      (client) => client.value === id
+    );
+
+    if (findClient) {
+      return findClient;
+    }
+  };
+
+  const seekSelectedSellerOption = async (id: string) => {
+    const findSeller = (await sellerOptions("")).find(
+      (seller) => seller.value === id
+    );
+
+    if (findSeller) {
+      return findSeller;
+    }
+  };
+
+  const seekSelectedPaymentOption = async (id: string) => {
+    const findPaymentOption = (await paymentOptions("")).find(
+      (paymentOption) => paymentOption.value === id
+    );
+
+    if (findPaymentOption) {
+      return findPaymentOption;
+    }
+  };
 
   const updateProductAmount = useCallback(
     (product: IProduct, amount: number) => {
@@ -277,7 +237,7 @@ export function useOrderForm(): UseOrderFormProps {
     [products]
   );
 
-  function calculateTotal() {
+  const calculateTotal = useCallback(() => {
     const selectedProducts = products.filter(
       (product) => product.quantidade > 0
     );
@@ -298,21 +258,125 @@ export function useOrderForm(): UseOrderFormProps {
       subTotalProducts: totalProducts,
       subTotalServices: totalServices,
     };
-  }
+  }, [products, services]);
+
+  useEffect(() => {
+    setIsLoading(true);
+
+    async function loadServiceAndProducts() {
+      try {
+        const products: IProduct[] = await getProducts();
+        const services: IService[] = await getServices();
+
+        const formattedProducts = products.map((product) => {
+          return {
+            ...product,
+            quantidade: 0,
+            placa: "",
+            placas: [],
+            valorUnitario: product.valor_venda,
+          };
+        });
+
+        const formattedServices = services.map((service) => {
+          return {
+            ...service,
+            valorUnitario: service.valor_venda,
+            quantidade: 0,
+          };
+        });
+
+        setProducts(formattedProducts);
+        setServices(formattedServices);
+      } catch (error) {
+        throw new Error("Erro ao listar produtos e serviços");
+      }
+    }
+
+    async function loadServiceAnOrdersById() {
+      if (!id) return;
+
+      try {
+        const products: IProduct[] = await getProducts();
+        const services: IService[] = await getServices();
+
+        const response = await getOrder(id);
+
+        const selectedProducts = products.map((item) => {
+          const macthingItem = response.produtos?.find(
+            (product) => product.produto === item.id
+          );
+
+          return macthingItem
+            ? {
+                ...item,
+                descricao: macthingItem.descricao,
+                placa: macthingItem.placa,
+                quantidade: macthingItem.quantidade,
+                placas:
+                  macthingItem.quantidade > 1
+                    ? macthingItem.placa?.split(",")
+                    : [macthingItem.placa],
+                valorUnitario: macthingItem.valorUnitario,
+              }
+            : {
+                ...item,
+                descricao: item.descricao,
+                quantidade: 0,
+                placa: "",
+                placas: [],
+                valorUnitario: item.valor_venda,
+              };
+        });
+
+        const selectedServices = services.map((item) => {
+          const macthingItem = response.servicos?.find(
+            (service) => service.servico === item.id
+          );
+
+          return macthingItem
+            ? {
+                ...item,
+                descricao: macthingItem.descricao,
+                valorUnitario: macthingItem.valorUnitario,
+                quantidade: macthingItem.quantidade,
+              }
+            : {
+                ...item,
+                valorUnitario: item.valor_venda,
+                quantidade: 0,
+              };
+        });
+
+        setProducts(selectedProducts);
+        setServices(selectedServices);
+      } catch (error) {
+        throw new Error("Erro ao carregar pedido!");
+      }
+    }
+
+    if (!noFetch) {
+      if (id) {
+        loadServiceAnOrdersById();
+      } else {
+        loadServiceAndProducts();
+      }
+    }
+
+    setIsLoading(false);
+  }, [id, noFetch]);
 
   return {
+    isLoading,
     products,
     services,
     clients,
-    isDisabledForm,
-    loadCurrentOrder,
-    disableFormOrder,
-    enableFormOrder,
-    loadServicesAndProducts,
-    currentOrder,
     clientOptions,
     sellerOptions,
     paymentOptions,
+    seekSelectedClientOption,
+    seekSelectedSellerOption,
+    seekSelectedPaymentOption,
     updateProductAmount,
     updateServiceAmount,
     updateProductPlaque,

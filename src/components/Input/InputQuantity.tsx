@@ -13,13 +13,17 @@ interface InputQuantity extends InputProps {
   name: string;
   maxQ?: number;
   maxW?: string;
+  forceDisabled?: boolean;
   onChangeQuantity?: (value: number) => void;
 }
 
 const InputQuantityBase: ForwardRefRenderFunction<
   HTMLInputElement,
   InputQuantity
-> = ({ name, maxQ = 999, maxW, onChangeQuantity, ...rest }, ref) => {
+> = (
+  { name, maxQ = 999, maxW, onChangeQuantity, forceDisabled, ...rest },
+  ref
+) => {
   const validateQuantity = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (Number(e.target.value) > maxQ) {
       toast.warning("Quantidade indisponível!");
@@ -36,7 +40,7 @@ const InputQuantityBase: ForwardRefRenderFunction<
     min: 0,
     max: maxQ,
     defaultValue: 0,
-    isDisabled: maxQ === 0 || !!maxQ === false,
+    isDisabled: maxQ === 0 || !!maxQ === false || forceDisabled,
     onBlur: validateQuantity,
     onChange: (valueAsString, valueAsNumber) =>
       onChangeQuantity && onChangeQuantity(valueAsNumber),

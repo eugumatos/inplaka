@@ -3,10 +3,38 @@ import { IService } from "@/domains/service";
 import * as yup from "yup";
 
 export const orderFormSchema = yup.object().shape({
-  cliente: yup.string().required("Campo obrigatório"),
-  vendedor: yup.string().required("Campo obrigatório"),
-  formaPagamento: yup.string().required("Campo obrigatório"),
+  cliente: yup.object().shape({
+    value: yup
+      .string()
+      .nullable("Campo obrigatório")
+      .required("Campo obrigatório"),
+    label: yup
+      .string()
+      .nullable("Campo obrigatório")
+      .required("Campo obrigatório"),
+  }),
+  vendedor: yup.object().shape({
+    value: yup
+      .string()
+      .nullable("Campo obrigatório")
+      .required("Campo obrigatório"),
+    label: yup
+      .string()
+      .nullable("Campo obrigatório")
+      .required("Campo obrigatório"),
+  }),
+  formaPagamento: yup.object().shape({
+    value: yup
+      .string()
+      .nullable("Campo obrigatório")
+      .required("Campo obrigatório"),
+    label: yup
+      .string()
+      .nullable("Campo obrigatório")
+      .required("Campo obrigatório"),
+  }),
   desconto: yup.string(),
+  status: yup.string(),
   id: yup.string(),
 });
 

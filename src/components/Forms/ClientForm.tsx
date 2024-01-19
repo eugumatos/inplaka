@@ -25,6 +25,7 @@ export function ClientForm() {
   const { sellerOptions } = useClients();
 
   const cep = watch("ender_cep") || "";
+  const seller = watch("vendedorPadrao") as any;
 
   const debounceCep = useDebounce(unmaskText(cep), 1000);
 
@@ -114,6 +115,7 @@ export function ClientForm() {
             <FormLabel>Vendedor:</FormLabel>
             <AsyncSelect
               control={control}
+              value={seller}
               loadOptions={sellerOptions}
               {...register("vendedorPadrao")}
             />
