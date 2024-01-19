@@ -1,27 +1,41 @@
 import { useDisclosure, UseDisclosureReturn } from "@chakra-ui/react";
-import { useEffect, createContext, useContext, ReactNode } from "react";
+import {
+  useState,
+  useEffect,
+  createContext,
+  useContext,
+  ReactNode,
+} from "react";
 import { useRouter } from "next/router";
 
 interface SidebarDrawerProviderProps {
   children: ReactNode;
 }
 
-type SidebarDrawerContextData = UseDisclosureReturn;
+type SidebarDrawerContextData = {
+  isOpen: boolean;
+  onClose: () => void;
+  onOpen: () => void;
+};
 
 const SidebarDrawerContext = createContext({} as SidebarDrawerContextData);
 
 export function SidebarDrawerProvider({
   children,
 }: SidebarDrawerProviderProps) {
-  const disclosure = useDisclosure();
+  const [isOpen, setIsOpen] = useState(false);
+
   const router = useRouter();
 
+  const onClose = () => setIsOpen(false);
+  const onOpen = () => setIsOpen(true);
+
   useEffect(() => {
-    disclosure.onClose();
-  }, [router.asPath, disclosure]);
+    onClose();
+  }, [router.asPath]);
 
   return (
-    <SidebarDrawerContext.Provider value={disclosure}>
+    <SidebarDrawerContext.Provider value={{ isOpen, onOpen, onClose }}>
       {children}
     </SidebarDrawerContext.Provider>
   );
