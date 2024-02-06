@@ -13,10 +13,17 @@ import {
   destroyOrder,
   validateExistingPlaques,
   updateOrder,
+  filterOrderByDate,
 } from "@/services/order";
 import { OrderFormData } from "@/schemas/OrderSchemaValidation";
 import { generateCode } from "@/utils/generateCode";
 import { toast } from "react-toastify";
+import { format } from "date-fns";
+
+type RangeDate = {
+  startDate: Date | null;
+  endDate: Date | null;
+};
 
 interface OrderContextProps {
   children?: ReactNode;
@@ -33,6 +40,7 @@ interface OrderProviderProps {
   addOrder: (order: OrderFormData, close?: () => void) => void;
   editOrder: (order: OrderFormData, close?: () => void) => void;
   removeOrder: (id: string) => void;
+  filterOrder: ({ startDate, endDate }: RangeDate) => void;
 }
 
 interface FillPlaqueProps {
@@ -206,6 +214,26 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
     }
   }
 
+  async function filterOrder({ startDate, endDate }: RangeDate) {
+    try {
+      if (!startDate || !endDate) return;
+
+      dispatch({ type: "LOADING" });
+
+      const orders = await filterOrderByDate(
+        format(startDate, "yyyy-MM-dd"),
+        format(endDate, "yyyy-MM-dd")
+      );
+
+      dispatch({ type: "RELOAD_ORDERS", payload: orders });
+
+      toast.success(`Foi encontrado um total de ${orders.length} pedidos.`);
+    } catch (error) {
+      dispatch({ type: "ERROR" });
+      toast.error("Erro buscar pedidos.");
+    }
+  }
+
   return (
     <OrderContext.Provider
       value={{
@@ -216,6 +244,7 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
         addOrder,
         editOrder,
         removeOrder,
+        filterOrder,
         finishingModalShouldBeOpen,
         closeFinishingModal,
       }}

@@ -15,22 +15,31 @@ import {
   Input,
   InputGroup,
   InputLeftElement,
+  Text,
 } from "@chakra-ui/react";
 import { RiDeleteBinLine, RiEditLine, RiSearchLine } from "react-icons/ri";
 import { Column, useGlobalFilter, useTable } from "react-table";
 
+import { RangeDatePicker } from "@/components/Forms/RangeDatePicker";
 import { MAX_ITEMS_PER_PAGE_DEFAULT } from "@/constants";
 import { Pagination } from "../Pagination";
+
+type RangeDate = {
+  startDate: Date | null;
+  endDate: Date | null;
+};
 
 interface DataTableProps<T extends object> {
   data: T[];
   columns: Column[];
+
   isLoading?: boolean;
   itemsPerPage?: number;
 
   customnAction?: (row: any) => JSX.Element;
   onRowEdit?: (row: any) => void;
   onRowDelete?: (row: any) => void;
+  onFilterByDate?: ({ startDate, endDate }: RangeDate) => void;
 }
 
 export function DataTable<T extends object>({
@@ -41,6 +50,7 @@ export function DataTable<T extends object>({
   customnAction,
   onRowEdit,
   onRowDelete,
+  onFilterByDate,
 }: DataTableProps<T>) {
   const shouldRenderActions = !!onRowEdit || !!onRowDelete || !!customnAction;
   const maxItemsPerPage = itemsPerPage ?? MAX_ITEMS_PER_PAGE_DEFAULT;
@@ -62,7 +72,6 @@ export function DataTable<T extends object>({
   );
 
   const [search, setSearch] = useState(state.globalFilter);
-
   const [currentPage, setCurrentPage] = useState(1);
 
   const currentTableData = useMemo(() => {
@@ -80,20 +89,25 @@ export function DataTable<T extends object>({
       borderRadius={6}
       borderColor="gray.100"
     >
-      <InputGroup maxW="26%" mb={4}>
-        <InputLeftElement>
-          <RiSearchLine />
-        </InputLeftElement>
+      <Flex justifyContent="space-between">
+        <InputGroup maxW="26%" mb={4}>
+          <InputLeftElement>
+            <RiSearchLine />
+          </InputLeftElement>
 
-        <Input
-          placeholder="Buscar"
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setGlobalFilter(e.target.value);
-          }}
-        />
-      </InputGroup>
+          <Input
+            placeholder="Buscar"
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setGlobalFilter(e.target.value);
+            }}
+          />
+        </InputGroup>
+
+        {!!onFilterByDate && <RangeDatePicker getRangeDate={onFilterByDate} />}
+      </Flex>
+
       <Table {...getTableProps()}>
         {headerGroups.map((headerGroup) => (
           <>
@@ -173,6 +187,11 @@ export function DataTable<T extends object>({
         </Center>
       )}
 
+      {currentTableData.length === 0 && (
+        <Center mt={10}>
+          <Text size="xl">Não há registros a serem exibidos</Text>
+        </Center>
+      )}
       <Box hidden={isLoading} px={4}>
         <Pagination
           registerPerPage={itemsPerPage}

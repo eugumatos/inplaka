@@ -6,6 +6,7 @@ import { theme } from "@/styles/theme";
 import { Layout } from "@/components/Layout";
 
 import "react-toastify/dist/ReactToastify.css";
+import "../styles/date-picker.css";
 
 export default function App({ Component, pageProps }: AppProps) {
   return (

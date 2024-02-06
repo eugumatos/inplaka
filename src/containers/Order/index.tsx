@@ -1,5 +1,12 @@
 import React, { useMemo, useState } from "react";
-import { Box, Button, Flex, Heading, useDisclosure } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Flex,
+  Heading,
+  Text,
+  useDisclosure,
+} from "@chakra-ui/react";
 import { useFormContext } from "react-hook-form";
 import { Column } from "react-table";
 
@@ -25,6 +32,7 @@ export function Order() {
     addOrder,
     editOrder,
     removeOrder,
+    filterOrder,
   } = useOrder();
 
   const {
@@ -115,7 +123,7 @@ export function Order() {
 
   return (
     <Box w="100%" flex={1}>
-      <Flex justifyContent="space-between" mb={8}>
+      <Flex justifyContent="space-between" mb={4}>
         <Heading as="h3" fontSize={26}>
           Pedido de venda
         </Heading>
@@ -136,43 +144,46 @@ export function Order() {
         </Button>
       </Flex>
 
-      <DataTable
-        isLoading={isLoading}
-        columns={columns}
-        data={orders}
-        onRowEdit={(row) => {
-          setSubmitOption("UPDATE");
+      <Box mt={5}>
+        <DataTable
+          isLoading={isLoading}
+          columns={columns}
+          data={orders}
+          onRowEdit={(row) => {
+            setSubmitOption("UPDATE");
 
-          Object.keys(row).forEach(async (key: any) => {
-            if (key === "cliente") {
-              const client = await seekSelectedClientOption(row.cliente);
+            Object.keys(row).forEach(async (key: any) => {
+              if (key === "cliente") {
+                const client = await seekSelectedClientOption(row.cliente);
 
-              return setValue(key, client);
-            }
-            if (key === "vendedor") {
-              const seller = await seekSelectedSellerOption(row.vendedor);
+                return setValue(key, client);
+              }
+              if (key === "vendedor") {
+                const seller = await seekSelectedSellerOption(row.vendedor);
 
-              return setValue(key, seller);
-            }
-            if (key === "formaPagamento") {
-              const paymentOption = await seekSelectedPaymentOption(
-                row.formaPagamento
-              );
+                return setValue(key, seller);
+              }
+              if (key === "formaPagamento") {
+                const paymentOption = await seekSelectedPaymentOption(
+                  row.formaPagamento
+                );
 
-              return setValue(key, paymentOption);
-            }
+                return setValue(key, paymentOption);
+              }
 
-            return setValue(key, row[key]);
-          });
+              return setValue(key, row[key]);
+            });
 
-          seekCurrentOrder(row);
-          onOpen();
-        }}
-        onRowDelete={(row) => {
-          seekCurrentOrder(row);
-          disclosureDestroyModal.onOpen();
-        }}
-      />
+            seekCurrentOrder(row);
+            onOpen();
+          }}
+          onRowDelete={(row) => {
+            seekCurrentOrder(row);
+            disclosureDestroyModal.onOpen();
+          }}
+          onFilterByDate={filterOrder}
+        />
+      </Box>
 
       <OrderDrawer
         id={currentOrder?.id}

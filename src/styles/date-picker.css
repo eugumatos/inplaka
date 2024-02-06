@@ -1,0 +1,14 @@
+.chakra-datepicker-input {
+  width: 200px; /* Adjust the width as needed */
+  padding: 0.5rem;
+  border: 1px solid #cbd5e0; /* Chakra UI's default border color */
+  border-radius: 0.25rem;
+  font-size: 1rem;
+  color: #1a202c; /* Chakra UI's default text color */
+  outline: none;
+  background: transparent;
+}
+
+.chakra-datepicker-input::placeholder {
+  color: #a0aec0; /* Chakra UI's default placeholder color */
+}
