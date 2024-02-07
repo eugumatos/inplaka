@@ -188,7 +188,7 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
             <TabList>
               <Tab>Produtos</Tab>
               <Tab>Serviços</Tab>
-              <Tab>Placas</Tab>
+              <Tab hidden={!id}>Placas</Tab>
             </TabList>
             <TabPanels mt={5}>
               <TabPanel p={0}>
@@ -242,7 +242,7 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
                   )}
                 />
               </TabPanel>
-              <TabPanel>
+              <TabPanel hidden={!id}>
                 <DataTable columns={columnsPlaque} data={registeredPlaques} />
               </TabPanel>
             </TabPanels>
