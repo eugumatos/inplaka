@@ -12,7 +12,9 @@ import {
   RiBankCard2Line,
   RiUserSharedLine,
   RiServiceLine,
+  RiBox3Line,
 } from "react-icons/ri";
+import { BsSignpost } from "react-icons/bs";
 
 import { NavSection } from "./NavSection";
 import { NavLink } from "./NavLink";
@@ -56,8 +58,13 @@ export function SidebarNav() {
         <NavLink href="/condicao-pagamento" icon={RiMindMap}>
           Condições de Pagamento
         </NavLink>
+      </NavSection>
+      <NavSection title="PEDIDOS">
         <NavLink href="/pedido" icon={RiShoppingCartLine}>
           Pedidos de Venda
+        </NavLink>
+        <NavLink href="/estoque" icon={RiBox3Line}>
+          Estoque
         </NavLink>
       </NavSection>
     </Stack>

@@ -28,7 +28,6 @@ import {
 } from "@chakra-ui/react";
 import { Input } from "@/components/Input";
 import { FullModal } from "@/components/Modals/FullModal";
-import { useOrderForm } from "@/containers/Order/hooks/useOrderForm";
 import { RiDeleteBin7Line, RiFullscreenFill } from "react-icons/ri";
 import { BsSignpostFill } from "react-icons/bs";
 import { toast } from "react-toastify";
@@ -36,7 +35,6 @@ import { upper } from "@/utils/upper";
 import { DataTable } from "@/components/Table";
 import { Column } from "react-table";
 import { IProduct } from "@/domains/product";
-import { IService } from "@/domains/service";
 
 interface PopoverPlaqueFormProps {
   product: IProduct;
