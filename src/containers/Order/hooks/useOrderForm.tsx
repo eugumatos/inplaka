@@ -7,8 +7,9 @@ import { IProduct } from "@/domains/product";
 import { IService } from "@/domains/service";
 import { getProducts } from "@/services/product";
 import { getServices } from "@/services/service";
-import { getOrder } from "@/services/order";
+import { getOrder, getPlaques } from "@/services/order";
 import { IClient } from "@/domains/client";
+import { IOrder } from "@/domains/order";
 
 interface SelectProps {
   label: string;
@@ -20,11 +21,16 @@ interface IUseOrderFormProps {
   noFetch?: boolean;
 }
 
+interface IPlaques {
+  name: string;
+}
+
 interface UseOrderFormProps {
   isLoading: boolean;
   products: IProduct[];
   services: IService[];
   clients: IClient[];
+  registeredPlaques: IPlaques[];
   clientOptions: (value: string) => Promise<SelectProps[]>;
   sellerOptions: (value: string) => Promise<SelectProps[]>;
   paymentOptions: (value: string) => Promise<SelectProps[]>;
@@ -49,6 +55,7 @@ export function useOrderForm({
   const [products, setProducts] = useState<IProduct[]>([]);
   const [services, setServices] = useState<IService[]>([]);
   const [clients, setClients] = useState<IClient[]>([]);
+  const [allPlaques, setPlaques] = useState<IPlaques[]>([]);
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -355,9 +362,36 @@ export function useOrderForm({
       }
     }
 
+    async function loadPlaqueList() {
+      try {
+        if (!id) return;
+
+        const plaques = await getPlaques(id);
+
+        const list: string[] = [];
+
+        plaques.forEach((p) => {
+          p.placa?.split(",").length > 1
+            ? list.push(...p.placa?.split(","))
+            : list.push(p.placa);
+        });
+
+        setPlaques(
+          list.map((p) => {
+            return {
+              name: p,
+            };
+          })
+        );
+      } catch (error) {
+        throw new Error("Erro ao carregar lista de placas!");
+      }
+    }
+
     if (!noFetch) {
       if (id) {
         loadServiceAnOrdersById();
+        loadPlaqueList();
       } else {
         loadServiceAndProducts();
       }
@@ -374,6 +408,7 @@ export function useOrderForm({
     clientOptions,
     sellerOptions,
     paymentOptions,
+    registeredPlaques: allPlaques,
     seekSelectedClientOption,
     seekSelectedSellerOption,
     seekSelectedPaymentOption,

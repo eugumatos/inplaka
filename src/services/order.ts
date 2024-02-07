@@ -78,6 +78,17 @@ export async function destroyOrder(id: string): Promise<void> {
   }
 }
 
+export async function getPlaques(id: string): Promise<IOrder[]> {
+  const res = await fetch(`${url}/PedidoVendaProduto/${id}`);
+
+  if (!res.ok) {
+    // This will activate the closest `error.js` Error Boundary
+    throw new Error("Failed to fetch data");
+  }
+
+  return res.json();
+}
+
 export async function filterOrderByDate(
   startDate: string,
   endDate: string

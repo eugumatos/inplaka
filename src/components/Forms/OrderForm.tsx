@@ -1,4 +1,4 @@
-import { useMemo, useRef, useEffect, useState, FormEventHandler } from "react";
+import { useMemo, useRef, useEffect, useState } from "react";
 import {
   Box,
   Divider,
@@ -14,6 +14,7 @@ import {
   TabList,
   TabPanel,
   TabPanels,
+  IconButton,
   Tab,
 } from "@chakra-ui/react";
 import {
@@ -62,6 +63,7 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
     clientOptions,
     sellerOptions,
     paymentOptions,
+    registeredPlaques,
     updateProductAmount,
     updateServiceAmount,
     updateProductPlaque,
@@ -75,6 +77,16 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
   const [discountFormValue, setDiscountFormValue] = useState<any>(0);
 
   const discount = useDebounce(String(discountFormValue), 500);
+
+  const columnsPlaque = useMemo(
+    (): Column[] => [
+      {
+        Header: "Nome",
+        accessor: "name",
+      },
+    ],
+    []
+  );
 
   const columns = useMemo(
     (): Column[] => [
@@ -176,6 +188,7 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
             <TabList>
               <Tab>Produtos</Tab>
               <Tab>Serviços</Tab>
+              <Tab>Placas</Tab>
             </TabList>
             <TabPanels mt={5}>
               <TabPanel p={0}>
@@ -228,6 +241,9 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
                     />
                   )}
                 />
+              </TabPanel>
+              <TabPanel>
+                <DataTable columns={columnsPlaque} data={registeredPlaques} />
               </TabPanel>
             </TabPanels>
           </Tabs>
