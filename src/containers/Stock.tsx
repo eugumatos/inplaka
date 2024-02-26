@@ -29,7 +29,7 @@ export function Stock() {
       },
       {
         Header: "Produto",
-        accessor: "produto",
+        accessor: "produtoNome",
         Cell: ({ value }) => filterText(value),
       },
       {

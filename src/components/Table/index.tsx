@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import {
   Box,
   Flex,
@@ -18,11 +18,13 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { RiDeleteBinLine, RiEditLine, RiSearchLine } from "react-icons/ri";
+
 import { Column, useGlobalFilter, useTable } from "react-table";
 
 import { RangeDatePicker } from "@/components/Forms/RangeDatePicker";
 import { MAX_ITEMS_PER_PAGE_DEFAULT } from "@/constants";
 import { Pagination } from "../Pagination";
+import { UploadFile } from "./UploadFile";
 
 type RangeDate = {
   startDate: Date | null;
@@ -40,6 +42,7 @@ interface DataTableProps<T extends object> {
   onRowEdit?: (row: any) => void;
   onRowDelete?: (row: any) => void;
   onFilterByDate?: ({ startDate, endDate }: RangeDate) => void;
+  onImport?: (parsedData: any) => void;
 }
 
 export function DataTable<T extends object>({
@@ -51,6 +54,7 @@ export function DataTable<T extends object>({
   onRowEdit,
   onRowDelete,
   onFilterByDate,
+  onImport,
 }: DataTableProps<T>) {
   const shouldRenderActions = !!onRowEdit || !!onRowDelete || !!customnAction;
   const maxItemsPerPage = itemsPerPage ?? MAX_ITEMS_PER_PAGE_DEFAULT;
@@ -105,7 +109,13 @@ export function DataTable<T extends object>({
           />
         </InputGroup>
 
-        {!!onFilterByDate && <RangeDatePicker getRangeDate={onFilterByDate} />}
+        <Flex gap={6}>
+          {!!onFilterByDate && (
+            <RangeDatePicker getRangeDate={onFilterByDate} />
+          )}
+
+          {!!onImport && <UploadFile onParsedData={onImport} />}
+        </Flex>
       </Flex>
 
       <Table {...getTableProps()}>

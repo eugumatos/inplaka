@@ -31,6 +31,7 @@ export function ModalDialog({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
+      closeOnEsc={false}
       scrollBehavior="inside"
       closeOnOverlayClick={false}
     >

@@ -30,6 +30,7 @@ export function Order() {
     finishingModalShouldBeOpen,
     closeFinishingModal,
     addOrder,
+    importOrder,
     editOrder,
     removeOrder,
     filterOrder,
@@ -39,7 +40,8 @@ export function Order() {
     seekSelectedClientOption,
     seekSelectedSellerOption,
     seekSelectedPaymentOption,
-  } = useOrderForm({ noFetch: true });
+    formatImportData,
+  } = useOrderForm({ noFetch: true, shouldPreLoad: true });
 
   const { handleSubmit, setValue, reset } = useFormContext<OrderFormData>();
 
@@ -121,6 +123,47 @@ export function Order() {
     );
   };
 
+  const handleImport = (parsedData: any) => {
+    const products: any = [];
+
+    const formattedData = {
+      cliente: parsedData[0].cliente,
+      vendedor: parsedData[0].vendedor,
+      formaPagamento: parsedData[0].formaPagamento,
+      desconto: parsedData[0].desconto,
+      produtos: [] as any,
+    };
+
+    parsedData.forEach((item: any) => {
+      if (products.includes(item.produto)) {
+        const findIndexProduct = formattedData.produtos.findIndex(
+          (p: any) => p.descricao === item.produto
+        );
+
+        if (findIndexProduct >= 0) {
+          formattedData.produtos[findIndexProduct].placa =
+            `${formattedData.produtos[findIndexProduct].placa},` +
+            `${item.placa}`;
+        }
+
+        return;
+      }
+
+      products.push(item.produto);
+
+      formattedData.produtos = [
+        {
+          descricao: item.produto,
+          placa: item.placa,
+        },
+      ];
+    });
+
+    const order = formatImportData(formattedData);
+
+    importOrder(order);
+  };
+
   return (
     <Box w="100%" flex={1}>
       <Flex justifyContent="space-between" mb={4}>
@@ -149,6 +192,7 @@ export function Order() {
           isLoading={isLoading}
           columns={columns}
           data={orders}
+          onImport={handleImport}
           onRowEdit={(row) => {
             setSubmitOption("UPDATE");
 

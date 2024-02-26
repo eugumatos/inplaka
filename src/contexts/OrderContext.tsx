@@ -38,6 +38,7 @@ interface OrderProviderProps {
   finishingModalShouldBeOpen: boolean;
   closeFinishingModal: () => void;
   addOrder: (order: OrderFormData, close?: () => void) => void;
+  importOrder: (order: OrderFormData, close?: () => void) => void;
   editOrder: (order: OrderFormData, close?: () => void) => void;
   removeOrder: (id: string) => void;
   filterOrder: ({ startDate, endDate }: RangeDate) => void;
@@ -165,6 +166,20 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
     }
   }
 
+  async function importOrder(order: OrderFormData) {
+    try {
+      dispatch({ type: "LOADING" });
+      await createOrder(order);
+
+      const newOrders = await getOrders();
+      dispatch({ type: "RELOAD_ORDERS", payload: newOrders });
+
+      toast.success("Importação concluída com sucesso!");
+    } catch (error) {
+      toast.error("Erro ao importar arquivo.");
+    }
+  }
+
   async function editOrder(order: OrderFormData, close?: () => void) {
     try {
       const findIdOrder = state.orders.find((o) => o.id === order.id);
@@ -242,6 +257,7 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
         orders: state.orders,
         order: order,
         addOrder,
+        importOrder,
         editOrder,
         removeOrder,
         filterOrder,

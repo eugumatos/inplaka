@@ -9,7 +9,9 @@ import { getProducts } from "@/services/product";
 import { getServices } from "@/services/service";
 import { getOrder, getPlaques } from "@/services/order";
 import { IClient } from "@/domains/client";
-import { IOrder } from "@/domains/order";
+import { upper } from "@/utils/upper";
+import { ISeller } from "@/domains/seller";
+import { IFormPayment } from "@/domains/form-payment";
 
 interface SelectProps {
   label: string;
@@ -19,6 +21,7 @@ interface SelectProps {
 interface IUseOrderFormProps {
   id?: string;
   noFetch?: boolean;
+  shouldPreLoad?: boolean;
 }
 
 interface IPlaques {
@@ -31,6 +34,7 @@ interface UseOrderFormProps {
   services: IService[];
   clients: IClient[];
   registeredPlaques: IPlaques[];
+  formatImportData: (parsedData: any) => any;
   clientOptions: (value: string) => Promise<SelectProps[]>;
   sellerOptions: (value: string) => Promise<SelectProps[]>;
   paymentOptions: (value: string) => Promise<SelectProps[]>;
@@ -50,11 +54,14 @@ interface UseOrderFormProps {
 
 export function useOrderForm({
   id,
+  shouldPreLoad = false,
   noFetch = false,
 }: IUseOrderFormProps): UseOrderFormProps {
   const [products, setProducts] = useState<IProduct[]>([]);
   const [services, setServices] = useState<IService[]>([]);
   const [clients, setClients] = useState<IClient[]>([]);
+  const [sellers, setSellers] = useState<ISeller[]>([]);
+  const [formPayments, setFormPayments] = useState<IFormPayment[]>([]);
   const [allPlaques, setPlaques] = useState<IPlaques[]>([]);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -85,6 +92,9 @@ export function useOrderForm({
   const sellerOptions = useCallback(async (value: string) => {
     try {
       const sellers = await getSellers();
+
+      setSellers(sellers);
+
       const options = sellers
         .map((seller) => ({
           value: seller.id,
@@ -105,6 +115,9 @@ export function useOrderForm({
   const paymentOptions = useCallback(async (value: string) => {
     try {
       const formPayments = await getFormPayments();
+
+      setFormPayments(formPayments);
+
       const options = formPayments
         .map((formPayment) => ({
           value: formPayment.id,
@@ -150,6 +163,54 @@ export function useOrderForm({
     if (findPaymentOption) {
       return findPaymentOption;
     }
+  };
+
+  const formatImportData = (parsedData: any) => {
+    const findClient = clients.find(
+      (c) => upper(c.apelido) === upper(parsedData.cliente)
+    );
+
+    const findSeller = sellers.find(
+      (s) => upper(s.apelido) === upper(parsedData.vendedor)
+    );
+
+    const findFormPayment = formPayments.find(
+      (p) => upper(p.descricao) === upper(parsedData.formaPagamento)
+    );
+
+    const productsMatch: any = [];
+
+    products.forEach((p) => {
+      parsedData.produtos.forEach((i: any) => {
+        if (upper(i.descricao) === upper(p.descricao)) {
+          productsMatch.push({
+            produto: p.id,
+            descricao: p.descricao,
+            placa: i.placa,
+            valorUnitario: p.valor_venda,
+            quantidade: i.placa.split(",").length ?? 1,
+          });
+        }
+      });
+    });
+
+    const orderTotal = productsMatch.reduce((acc: any, curr: any) => {
+      return acc + curr.quantidade * Number(curr.valorUnitario);
+    }, 0);
+
+    const formattedData = {
+      cliente: findClient?.id,
+      vendedor: findSeller?.id,
+      formaPagamento: findFormPayment?.id,
+      valorPedido: orderTotal,
+      valorDesconto: parsedData.desconto,
+      valorTotal: Number(orderTotal) - Number(parsedData.desconto),
+      produtos: productsMatch,
+      status: "ABERTO",
+      servicos: [],
+    };
+
+    return formattedData;
   };
 
   const updateProductAmount = useCallback(
@@ -270,6 +331,18 @@ export function useOrderForm({
   useEffect(() => {
     setIsLoading(true);
 
+    async function preLoadServices() {
+      const clientsData = await getClients();
+      const sellersData = await getSellers();
+      const formPaymentsData = await getFormPayments();
+      const productsData = await getProducts();
+
+      setClients(clientsData);
+      setSellers(sellersData);
+      setFormPayments(formPaymentsData);
+      setProducts(productsData);
+    }
+
     async function loadServiceAndProducts() {
       try {
         const products: IProduct[] = await getProducts();
@@ -388,6 +461,10 @@ export function useOrderForm({
       }
     }
 
+    if (shouldPreLoad) {
+      preLoadServices();
+    }
+
     if (!noFetch) {
       if (id) {
         loadServiceAnOrdersById();
@@ -398,7 +475,7 @@ export function useOrderForm({
     }
 
     setIsLoading(false);
-  }, [id, noFetch]);
+  }, [id, noFetch, shouldPreLoad]);
 
   return {
     isLoading,
@@ -408,6 +485,7 @@ export function useOrderForm({
     clientOptions,
     sellerOptions,
     paymentOptions,
+    formatImportData,
     registeredPlaques: allPlaques,
     seekSelectedClientOption,
     seekSelectedSellerOption,

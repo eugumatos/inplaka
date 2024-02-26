@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Flex, Button, IconButton } from "@chakra-ui/react";
+import { Box, Flex, Button, IconButton, Tooltip } from "@chakra-ui/react";
 import { RiCalendar2Line, RiSearch2Line } from "react-icons/ri";
 import DatePicker from "react-datepicker";
 
@@ -65,18 +65,20 @@ export const RangeDatePicker = ({ getRangeDate }: RangeDatePickerProps) => {
           style={calendarStyleProps}
         />
       </Box>
-      <IconButton
-        aria-label="Search database"
-        bg="teal.400"
-        icon={<RiSearch2Line color="white" />}
-        onClick={() => {
-          getRangeDate({ startDate, endDate });
-          handleReset();
-        }}
-        _hover={{
-          bg: "teal.500",
-        }}
-      />
+      <Tooltip label="Filtrar">
+        <IconButton
+          aria-label="Search database"
+          bg="teal.400"
+          icon={<RiSearch2Line color="white" />}
+          onClick={() => {
+            getRangeDate({ startDate, endDate });
+            handleReset();
+          }}
+          _hover={{
+            bg: "teal.500",
+          }}
+        />
+      </Tooltip>
     </Flex>
   );
 };
