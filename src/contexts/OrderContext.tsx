@@ -35,6 +35,7 @@ interface OrderProviderProps {
   isError: boolean;
   orders: Array<IOrder>;
   order: any;
+  currentOrderNumber: number | null;
   finishingModalShouldBeOpen: boolean;
   closeFinishingModal: () => void;
   addOrder: (order: OrderFormData, close?: () => void) => void;
@@ -74,6 +75,10 @@ const OrderContext = createContext<OrderProviderProps>(
 );
 
 function OrderProvider({ orders = [], children }: OrderContextProps) {
+  const [currentOrderNumber, setCurrentOrderNumber] = useState<number | null>(
+    null
+  );
+
   const [state, dispatch] = useReducer(orderReducer, {
     orders,
     isLoading: false,
@@ -148,7 +153,9 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
         return;
       }
 
-      await createOrder(order);
+      const orderNumber = await createOrder(order);
+
+      setCurrentOrderNumber(orderNumber);
 
       setOrder(order);
       close && close();
@@ -261,6 +268,7 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
         editOrder,
         removeOrder,
         filterOrder,
+        currentOrderNumber,
         finishingModalShouldBeOpen,
         closeFinishingModal,
       }}

@@ -336,13 +336,18 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
 
           <Flex direction="column" flex={1} gap={2}>
             {!id ? (
-              <InputCurrency
-                mt={2}
-                name="desconto"
-                placeholder="Ex: R$ 100,00"
-                control={control}
-                onChange={(e) => setDiscountFormValue(currency(e.target.value))}
-              />
+              <div>
+                <Text>Desconto:</Text>
+                <InputCurrency
+                  mt={2}
+                  name="desconto"
+                  placeholder="Ex: R$ 100,00"
+                  control={control}
+                  onChange={(e) =>
+                    setDiscountFormValue(currency(e.target.value))
+                  }
+                />
+              </div>
             ) : (
               <Select
                 label="Status"

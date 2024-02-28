@@ -178,23 +178,20 @@ export function useOrderForm({
       (p) => upper(p.descricao) === upper(parsedData.formaPagamento)
     );
 
-    const productsMatch: any = [];
+    const findProduct = products.find(
+      (p) => upper(p.descricao) === "PAR DE PLACAS MERCOSUL"
+    );
 
-    products.forEach((p) => {
-      parsedData.produtos.forEach((i: any) => {
-        if (upper(i.descricao) === upper(p.descricao)) {
-          productsMatch.push({
-            produto: p.id,
-            descricao: p.descricao,
-            placa: i.placa,
-            valorUnitario: p.valor_venda,
-            quantidade: i.placa.split(",").length ?? 1,
-          });
-        }
-      });
+    parsedData.produtos = parsedData?.produtos.map((item: any) => {
+      return {
+        ...item,
+        produto: findProduct?.id,
+        descricao: findProduct?.descricao,
+        valorUnitario: findProduct?.valor_venda,
+      };
     });
 
-    const orderTotal = productsMatch.reduce((acc: any, curr: any) => {
+    const orderTotal = parsedData?.produtos.reduce((acc: any, curr: any) => {
       return acc + curr.quantidade * Number(curr.valorUnitario);
     }, 0);
 
@@ -204,8 +201,8 @@ export function useOrderForm({
       formaPagamento: findFormPayment?.id,
       valorPedido: orderTotal,
       valorDesconto: parsedData.desconto,
-      valorTotal: Number(orderTotal) - Number(parsedData.desconto),
-      produtos: productsMatch,
+      valorTotal: Number(orderTotal),
+      produtos: parsedData?.produtos,
       status: "ABERTO",
       servicos: [],
     };

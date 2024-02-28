@@ -135,29 +135,19 @@ export function Order() {
     };
 
     parsedData.forEach((item: any) => {
-      if (products.includes(item.produto)) {
-        const findIndexProduct = formattedData.produtos.findIndex(
-          (p: any) => p.descricao === item.produto
-        );
-
-        if (findIndexProduct >= 0) {
-          formattedData.produtos[findIndexProduct].placa =
-            `${formattedData.produtos[findIndexProduct].placa},` +
-            `${item.placa}`;
-        }
-
-        return;
-      }
-
-      products.push(item.produto);
-
-      formattedData.produtos = [
-        {
-          descricao: item.produto,
-          placa: item.placa,
-        },
-      ];
+      products.push({
+        placa: item?.Placa,
+        quantidade: parsedData.length - 1 ?? null,
+        chassi: item?.Chassi,
+        marca: item?.["Marca/Modelo"].split("/")[0],
+        modelo: item?.["Marca/Modelo"].split("/")[1],
+        cor: item?.Cor,
+        localEmplacamento: item?.["Local de emplacamento"],
+        observacao: item?.["Observações"],
+      });
     });
+
+    formattedData.produtos = products;
 
     const order = formatImportData(formattedData);
 

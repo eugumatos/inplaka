@@ -29,7 +29,7 @@ export function FinishingModal({
   onClose,
   description,
 }: DestroyModalProps) {
-  const { order, closeFinishingModal } = useOrder();
+  const { order, currentOrderNumber, closeFinishingModal } = useOrder();
   const [clients, setClients] = useState<IClient[]>([]);
 
   useEffect(() => {
@@ -89,7 +89,7 @@ export function FinishingModal({
             document={
               <PDFDocument order={formattedValues()} shouldRenderValues />
             }
-            fileName={"pedido-com-valor.pdf"}
+            fileName={`${currentOrderNumber}_pedido-comvalor.pdf`}
           >
             <Button
               mr={3}
@@ -110,7 +110,7 @@ export function FinishingModal({
                 shouldRenderValues={false}
               />
             }
-            fileName={"pedido-sem-valor.pdf"}
+            fileName={`${currentOrderNumber}_pedido-semvalor.pdf`}
           >
             <Button
               bg="gray.100"
