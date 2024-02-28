@@ -171,7 +171,7 @@ export function useOrderForm({
     );
 
     const findSeller = sellers.find(
-      (s) => upper(s.apelido) === upper(parsedData.vendedor)
+      (s) => upper(s.apelido) === upper(parsedData["Responsável"])
     );
 
     const findFormPayment = formPayments.find(
