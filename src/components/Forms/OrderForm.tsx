@@ -69,6 +69,9 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
     updateProductPlaque,
     removeProductPlaque,
     calculateTotal,
+    seekSelectedClientOption,
+    seekSelectedSellerOption,
+    formatImportData,
   } = useOrderForm({ id });
 
   const { subTotalProducts, subTotalServices, total } = calculateTotal();
@@ -107,6 +110,30 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
   function onScrollToTotal() {
     containerTotalRef.current?.scrollIntoView({ behavior: "smooth" });
   }
+
+  const handleImport = async (parsedData: any) => {
+    const formattedData: any = parsedData;
+
+    const client = (await seekSelectedClientOption(
+      parsedData[0].cliente
+    )) as any;
+    const seller = (await seekSelectedSellerOption(
+      parsedData[0].vendedor
+    )) as any;
+
+    formattedData.cliente = client;
+    formattedData.vendedor = seller;
+
+    if (client) {
+      setValue("cliente", client);
+    }
+
+    if (seller) {
+      setValue("vendedor", seller);
+    }
+
+    formatImportData(formattedData);
+  };
 
   function handleSubmit() {
     const formValues = getValues();
@@ -194,6 +221,8 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
               <TabPanel p={0}>
                 <DataTable
                   isLoading={isLoading}
+                  onImport={handleImport}
+                  disableImport={!!id}
                   columns={columns}
                   data={products}
                   itemsPerPage={5}

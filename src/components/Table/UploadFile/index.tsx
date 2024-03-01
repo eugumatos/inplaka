@@ -7,9 +7,10 @@ import { ModalDialog } from "@/components/Modals";
 
 type UploadFileProps = {
   onParsedData: (parsedData: any) => void;
+  isDisabled?: boolean;
 };
 
-export function UploadFile({ onParsedData }: UploadFileProps) {
+export function UploadFile({ onParsedData, isDisabled }: UploadFileProps) {
   const fileUploadButtonRef = useRef<HTMLInputElement | null>(null);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -64,6 +65,7 @@ export function UploadFile({ onParsedData }: UploadFileProps) {
       />
       <Tooltip label="Importar arquivo">
         <IconButton
+          isDisabled={isDisabled}
           aria-label="Search database"
           bg="purple.400"
           icon={<LuUpload color="white" />}

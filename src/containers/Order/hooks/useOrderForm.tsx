@@ -166,48 +166,30 @@ export function useOrderForm({
   };
 
   const formatImportData = (parsedData: any) => {
-    const findClient = clients.find(
-      (c) => upper(c.apelido) === upper(parsedData.cliente)
-    );
+    const updatedProducts = [...products];
 
-    const findSeller = sellers.find(
-      (s) => upper(s.apelido) === upper(parsedData["Responsável"])
-    );
-
-    const findFormPayment = formPayments.find(
-      (p) => upper(p.descricao) === upper(parsedData.formaPagamento)
-    );
-
-    const findProduct = products.find(
+    const findIndexProduct = updatedProducts.findIndex(
       (p) => upper(p.descricao) === "PAR DE PLACAS MERCOSUL"
     );
 
-    parsedData.produtos = parsedData?.produtos.map((item: any) => {
+    const placas = parsedData?.map((item: any) => {
       return {
-        ...item,
-        produto: findProduct?.id,
-        descricao: findProduct?.descricao,
-        valorUnitario: findProduct?.valor_venda,
+        placa: item?.Placa,
+        chassi: item?.Chassi,
+        marca: item?.["Marca/Modelo"].split("/")[0],
+        modelo: item?.["Marca/Modelo"].split("/")[1],
+        cor: item?.Cor,
+        localEmplacamento: item?.["Local de emplacamento"],
+        observacao: item?.["Observações"],
       };
     });
 
-    const orderTotal = parsedData?.produtos.reduce((acc: any, curr: any) => {
-      return acc + curr.quantidade * Number(curr.valorUnitario);
-    }, 0);
-
-    const formattedData = {
-      cliente: findClient?.id,
-      vendedor: findSeller?.id,
-      formaPagamento: findFormPayment?.id,
-      valorPedido: orderTotal,
-      valorDesconto: parsedData.desconto,
-      valorTotal: Number(orderTotal),
-      produtos: parsedData?.produtos,
-      status: "ABERTO",
-      servicos: [],
-    };
-
-    return formattedData;
+    updatedProducts[findIndexProduct].placas = placas.map((p: any) => p.placa);
+    updatedProducts[findIndexProduct].placa = placas
+      .map((p: any) => p.placa)
+      .join(",");
+    (updatedProducts[findIndexProduct].quantidade = parsedData.length ?? null),
+      setProducts(updatedProducts);
   };
 
   const updateProductAmount = useCallback(

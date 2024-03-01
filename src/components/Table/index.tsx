@@ -43,6 +43,7 @@ interface DataTableProps<T extends object> {
   onRowDelete?: (row: any) => void;
   onFilterByDate?: ({ startDate, endDate }: RangeDate) => void;
   onImport?: (parsedData: any) => void;
+  disableImport?: boolean;
 }
 
 export function DataTable<T extends object>({
@@ -55,6 +56,7 @@ export function DataTable<T extends object>({
   onRowDelete,
   onFilterByDate,
   onImport,
+  disableImport,
 }: DataTableProps<T>) {
   const shouldRenderActions = !!onRowEdit || !!onRowDelete || !!customnAction;
   const maxItemsPerPage = itemsPerPage ?? MAX_ITEMS_PER_PAGE_DEFAULT;
@@ -114,7 +116,9 @@ export function DataTable<T extends object>({
             <RangeDatePicker getRangeDate={onFilterByDate} />
           )}
 
-          {!!onImport && <UploadFile onParsedData={onImport} />}
+          {!!onImport && (
+            <UploadFile onParsedData={onImport} isDisabled={disableImport} />
+          )}
         </Flex>
       </Flex>
 

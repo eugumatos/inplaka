@@ -123,37 +123,6 @@ export function Order() {
     );
   };
 
-  const handleImport = (parsedData: any) => {
-    const products: any = [];
-
-    const formattedData = {
-      cliente: parsedData[0].cliente,
-      vendedor: parsedData[0].vendedor,
-      formaPagamento: parsedData[0].formaPagamento,
-      desconto: parsedData[0].desconto,
-      produtos: [] as any,
-    };
-
-    parsedData.forEach((item: any) => {
-      products.push({
-        placa: item?.Placa,
-        quantidade: parsedData.length - 1 ?? null,
-        chassi: item?.Chassi,
-        marca: item?.["Marca/Modelo"].split("/")[0],
-        modelo: item?.["Marca/Modelo"].split("/")[1],
-        cor: item?.Cor,
-        localEmplacamento: item?.["Local de emplacamento"],
-        observacao: item?.["Observações"],
-      });
-    });
-
-    formattedData.produtos = products;
-
-    const order = formatImportData(formattedData);
-
-    importOrder(order);
-  };
-
   return (
     <Box w="100%" flex={1}>
       <Flex justifyContent="space-between" mb={4}>
@@ -182,7 +151,6 @@ export function Order() {
           isLoading={isLoading}
           columns={columns}
           data={orders}
-          onImport={handleImport}
           onRowEdit={(row) => {
             setSubmitOption("UPDATE");
 
