@@ -322,7 +322,7 @@ export const PopoverPlaqueForm = ({
               isDisabled={!shouldDisabledAddButton}
               onClick={() => {
                 if (plaque.descricao.length > 0) {
-                  updateProductPlaque(product.id, [plaque]);
+                  updateProductPlaque(product.id, [...allPlaques, plaque]);
                   setPlaque(initialPlaqueValue);
 
                   toast.success(
