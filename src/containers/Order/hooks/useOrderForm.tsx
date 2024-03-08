@@ -180,8 +180,8 @@ export function useOrderForm({
       return {
         placa: item?.Placa,
         chassi: item?.Chassi,
-        marca: item?.["Marca/Modelo"].split("/")[0],
-        modelo: item?.["Marca/Modelo"].split("/")[1],
+        marca: item?.["Marca/Modelo"]?.split("/")[0],
+        modelo: item?.["Marca/Modelo"]?.split("/")[1],
         cor: item?.Cor,
         localEmplacamento: item?.["Local de emplacamento"],
         observacao: item?.["Observações"],
@@ -189,7 +189,12 @@ export function useOrderForm({
       };
     });
 
-    updatedProducts[findIndexProduct].placas = placas.map((p: any) => p.placa);
+    updatedProducts[findIndexProduct].placas = placas.map((p: any) => {
+      return {
+        descricao: p.placa,
+        placaQuitada: p?.placaQuitada,
+      };
+    });
     updatedProducts[findIndexProduct].placa = placas
       .map((p: any) => p.placa)
       .join(",");
