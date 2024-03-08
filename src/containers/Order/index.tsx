@@ -30,7 +30,6 @@ export function Order() {
     finishingModalShouldBeOpen,
     closeFinishingModal,
     addOrder,
-    importOrder,
     editOrder,
     removeOrder,
     filterOrder,
@@ -40,7 +39,6 @@ export function Order() {
     seekSelectedClientOption,
     seekSelectedSellerOption,
     seekSelectedPaymentOption,
-    formatImportData,
   } = useOrderForm({ noFetch: true, shouldPreLoad: true });
 
   const { handleSubmit, setValue, reset } = useFormContext<OrderFormData>();
@@ -78,7 +76,7 @@ export function Order() {
       },
       {
         Header: "Valor do pedido",
-        accessor: "valorPedido",
+        accessor: "valorTotal",
         Cell: ({ value }) => currency(value),
       },
       {

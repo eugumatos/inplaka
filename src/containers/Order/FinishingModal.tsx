@@ -51,6 +51,7 @@ export function FinishingModal({
     const findClient = clients.find((client) => client.id === order.cliente);
 
     return {
+      orderNumber: currentOrderNumber,
       clientName: findClient?.apelido,
       clientAddress: findClient?.ender_logradouro,
       clientNeighborhood: findClient?.ender_bairro,
@@ -60,7 +61,7 @@ export function FinishingModal({
         return {
           name: p.descricao,
           amount: p.quantidade,
-          plaques: p.placas,
+          plaque: p.placa,
           value: currency(p.valorUnitario),
         };
       }),

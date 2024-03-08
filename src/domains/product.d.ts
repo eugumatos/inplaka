@@ -1,9 +1,10 @@
 export interface IProduct {
   id: string;
-  status: string;
+  status?: string;
   controlar_estoque: boolean | string;
   descricao: string;
   valor_venda: string;
+  produto?: string;
   csosn: string;
   ncmsh: string;
   unidade: string;
@@ -13,5 +14,5 @@ export interface IProduct {
   nao_usar_para_nota_fiscal: boolean | string;
   quantidade: number;
   placa: string;
-  placas: Array<string>;
+  placas: Array<string> | undefined;
 }

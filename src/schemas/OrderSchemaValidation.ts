@@ -33,6 +33,7 @@ export const orderFormSchema = yup.object().shape({
       .nullable("Campo obrigatório")
       .required("Campo obrigatório"),
   }),
+  valorDesconto: yup.string(),
   desconto: yup.string(),
   status: yup.string(),
   id: yup.string(),

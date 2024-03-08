@@ -38,6 +38,7 @@ import { currency as currencyFormat } from "@/utils/currency";
 import { useOrderForm } from "@/containers/Order/hooks/useOrderForm";
 import { toast } from "react-toastify";
 import currency from "currency.js";
+import { upper } from "@/utils/upper";
 
 interface OrderFormProps {
   id?: string;
@@ -77,7 +78,11 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
   const { subTotalProducts, subTotalServices, total } = calculateTotal();
 
   const [totalValue, setTotalValue] = useState(0);
-  const [discountFormValue, setDiscountFormValue] = useState<any>(0);
+
+  const initialDiscountValue = getValues()?.valorDesconto || 0;
+
+  const [discountFormValue, setDiscountFormValue] =
+    useState<any>(initialDiscountValue);
 
   const discount = useDebounce(String(discountFormValue), 500);
 
@@ -140,6 +145,7 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
 
     formValues.produtos = products.filter((p) => p.quantidade > 0);
     formValues.servicos = services.filter((s) => s.quantidade > 0);
+    formValues.desconto = discount;
     formValues.total = total;
 
     if (formValues.produtos.length === 0 && formValues.servicos.length === 0) {
@@ -150,8 +156,23 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
       return;
     }
 
+    const filterPlaquesNotFilled = formValues.produtos.filter(
+      (p) => p.quantidade !== p.placas?.length
+    );
+
+    if (filterPlaquesNotFilled.length > 0) {
+      toast.warning(
+        `Não foi preenchido o nome de todas as placas referente aos seguintes produtos ("${filterPlaquesNotFilled.map(
+          (p) => upper(p.descricao) + " "
+        )}"). Por favor verifique e tente novamente.`
+      );
+
+      return;
+    }
+
     setValue("produtos", formValues.produtos);
     setValue("servicos", formValues.servicos);
+    setValue("desconto", formValues.desconto);
     setValue("total", formValues.total);
 
     onSubmit(formValues);
@@ -170,7 +191,7 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
     if (total > Number(discount)) {
       setTotalValue(total - Number(discount));
     }
-  }, [total, discount]);
+  }, [total, discount, id]);
 
   return (
     <form>
@@ -364,20 +385,18 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
           </Flex>
 
           <Flex direction="column" flex={1} gap={2}>
-            {!id ? (
-              <div>
-                <Text>Desconto:</Text>
-                <InputCurrency
-                  mt={2}
-                  name="desconto"
-                  placeholder="Ex: R$ 100,00"
-                  control={control}
-                  onChange={(e) =>
-                    setDiscountFormValue(currency(e.target.value))
-                  }
-                />
-              </div>
-            ) : (
+            <div>
+              <Text>Desconto:</Text>
+              <InputCurrency
+                mt={2}
+                name="desconto"
+                placeholder="Ex: R$ 100,00"
+                control={control}
+                onChange={(e) => setDiscountFormValue(currency(e.target.value))}
+              />
+            </div>
+
+            {id && (
               <Select
                 label="Status"
                 defaultOption="ATIVO"

@@ -51,7 +51,9 @@ export function PDFDocument({
               <View>
                 <View style={styles.descriptionItem}>
                   <Text style={styles.description}>Número:</Text>
-                  <Text style={[styles.description, { marginLeft: 5 }]}></Text>
+                  <Text style={[styles.description, { marginLeft: 5 }]}>
+                    {order?.orderNumber}
+                  </Text>
                 </View>
                 <View style={styles.descriptionItem}>
                   <Text style={styles.description}>Data:</Text>
@@ -90,39 +92,37 @@ export function PDFDocument({
 
                 return (
                   <>
-                    {orderItem?.plaques.map((p: any, k: number) => (
-                      <View
-                        key={key}
-                        style={[
-                          { backgroundColor: isOdd === 0 ? "#ddd8d8" : "#fff" },
-                          { marginHorizontal: 2 },
-                          styles.columns,
-                        ]}
-                      >
-                        <View style={{ width: 400 }}>
-                          <Text style={styles.columnText}>
-                            {orderItem.name}
-                          </Text>
-                        </View>
-                        <View style={{ width: 100 }}>
-                          <Text style={styles.columnText}>
-                            {orderItem.amount}
-                          </Text>
-                        </View>
-
-                        <View key={k} style={{ width: 100 }}>
-                          <Text style={styles.columnText}>{p}</Text>
-                        </View>
-                        <View style={{ width: 300, textAlign: "right" }}>
-                          <Text style={styles.columnText}></Text>
-                        </View>
-                        <View style={{ width: 300, textAlign: "right" }}>
-                          <Text style={styles.columnText}>
-                            {shouldRenderValues && orderItem.value}
-                          </Text>
-                        </View>
+                    <View
+                      key={key}
+                      style={[
+                        { backgroundColor: isOdd === 0 ? "#ddd8d8" : "#fff" },
+                        { marginHorizontal: 2 },
+                        styles.columns,
+                      ]}
+                    >
+                      <View style={{ width: 400 }}>
+                        <Text style={styles.columnText}>{orderItem?.name}</Text>
                       </View>
-                    ))}
+                      <View style={{ width: 100 }}>
+                        <Text style={styles.columnText}>
+                          {orderItem?.amount}
+                        </Text>
+                      </View>
+
+                      <View style={{ width: 100 }}>
+                        <Text style={styles.columnText}>
+                          {orderItem?.value}
+                        </Text>
+                      </View>
+                      <View style={{ width: 300, textAlign: "right" }}>
+                        <Text style={styles.columnText}></Text>
+                      </View>
+                      <View style={{ width: 300, textAlign: "right" }}>
+                        <Text style={styles.columnText}>
+                          {shouldRenderValues && orderItem?.value}
+                        </Text>
+                      </View>
+                    </View>
                   </>
                 );
               })}

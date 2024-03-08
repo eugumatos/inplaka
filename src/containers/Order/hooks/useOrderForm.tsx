@@ -188,8 +188,11 @@ export function useOrderForm({
     updatedProducts[findIndexProduct].placa = placas
       .map((p: any) => p.placa)
       .join(",");
+
     (updatedProducts[findIndexProduct].quantidade = parsedData.length ?? null),
-      setProducts(updatedProducts);
+      Object.assign(updatedProducts[findIndexProduct], { ...placas });
+
+    setProducts(updatedProducts);
   };
 
   const updateProductAmount = useCallback(
@@ -243,6 +246,7 @@ export function useOrderForm({
       if (
         findProduct &&
         findProduct.quantidade > 0 &&
+        findProduct.placas &&
         findProduct.placas.length <= findProduct.quantidade
       ) {
         setProducts((state) =>
@@ -250,7 +254,7 @@ export function useOrderForm({
             if (findProduct.id === item.id) {
               return {
                 ...findProduct,
-                placas: [...findProduct.placas, name],
+                placas: findProduct.placas && [...findProduct.placas, name],
               };
             } else {
               return item;
@@ -272,7 +276,9 @@ export function useOrderForm({
             if (findProduct.id === item.id) {
               return {
                 ...findProduct,
-                placas: findProduct.placas.filter((p) => p !== name),
+                placas:
+                  findProduct.placas &&
+                  findProduct.placas.filter((p) => p !== name),
               };
             } else {
               return item;

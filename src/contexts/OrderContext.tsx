@@ -19,6 +19,7 @@ import { OrderFormData } from "@/schemas/OrderSchemaValidation";
 import { generateCode } from "@/utils/generateCode";
 import { toast } from "react-toastify";
 import { format } from "date-fns";
+import { IProduct } from "@/domains/product";
 
 type RangeDate = {
   startDate: Date | null;
@@ -98,37 +99,32 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
     try {
       dispatch({ type: "LOADING" });
 
+      let produtos: any = [];
+
+      order.produtos.forEach((produto) => {
+        if (produto.quantidade > 0) {
+          produto.placas &&
+            produto.placas.forEach((placa) => {
+              produtos.push({
+                produto: produto.id,
+                placa: placa,
+                quantidade: 1,
+                descricao: produto.descricao,
+                valorUnitario: produto.valor_venda,
+              });
+            });
+        }
+      });
+
       Object.assign(order, {
         cliente: order.cliente.value,
         vendedor: order.vendedor.value,
         formaPagamento: order.formaPagamento.value,
         valorPedido: order.total,
-        valorDesconto: order.desconto,
-        valorTotal: order.total,
+        valorDesconto: Number(order.desconto) || 0,
+        valorTotal: Number(order.total) - Number(order.desconto || 0),
         status: "ABERTO",
-        produtos: order.produtos.map((product) => {
-          return {
-            produto: product.id,
-            descricao: product.descricao,
-            placas: fillPlaques({
-              amount: product.quantidade,
-              plaques: product.placas,
-            }),
-            placa:
-              product.placas.length > 0
-                ? fillPlaques({
-                    amount: product.quantidade,
-                    plaques: product.placas,
-                  })
-                    .map((p) => p)
-                    .join(",")
-                : Array.from(Array(product.quantidade).keys())
-                    .map(() => `INPLK-${generateCode()}`)
-                    .join(","),
-            quantidade: product.quantidade,
-            valorUnitario: product.valor_venda,
-          };
-        }),
+        produtos: produtos,
         servicos: order.servicos.map((s) => {
           return {
             servico: s.id,
