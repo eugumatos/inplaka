@@ -1,4 +1,4 @@
-import { useRef, useState, useMemo } from "react";
+import { useRef, useState, useMemo, useEffect } from "react";
 import {
   Popover,
   PopoverTrigger,
@@ -25,6 +25,7 @@ import {
   Box,
   Container,
   Heading,
+  Checkbox,
 } from "@chakra-ui/react";
 import { Input } from "@/components/Input";
 import { FullModal } from "@/components/Modals/FullModal";
@@ -36,10 +37,15 @@ import { DataTable } from "@/components/Table";
 import { Column } from "react-table";
 import { IProduct } from "@/domains/product";
 
+interface IPlaque {
+  descricao: string;
+  placaQuitada: boolean;
+}
+
 interface PopoverPlaqueFormProps {
   product: IProduct;
-  updateProductPlaque: (id: string, name: string) => void;
-  removeProductPlaque: (id: string, name: string) => void;
+  updateProductPlaque: (id: string, plaques: IPlaque[]) => void;
+  removeProductPlaque: (id: string, plaque: IPlaque) => void;
   isDisabled?: boolean;
 }
 
@@ -49,25 +55,83 @@ export const PopoverPlaqueForm = ({
   removeProductPlaque,
   isDisabled,
 }: PopoverPlaqueFormProps) => {
+  const [allPlaques, setAllPlaques] = useState([] as any);
+
   const popoverDisclosure = useDisclosure();
   const fullModalDisclosure = useDisclosure();
 
   const firstFieldRef = useRef(null);
 
-  const [plaque, setPlaque] = useState("");
+  const initialPlaqueValue = { descricao: "", placaQuitada: false };
+  const [plaque, setPlaque] = useState(initialPlaqueValue);
+
+  const [checkRows, setCheckRows] = useState(false);
 
   const shouldDisabledAddButton =
-    product.quantidade > 0 && product.placas.length < product.quantidade;
+    product.quantidade > 0 && allPlaques.length < product.quantidade;
 
   const columns = useMemo(
     (): Column[] => [
+      {
+        Header: () => (
+          <Checkbox
+            size="md"
+            onChange={() => {
+              setAllPlaques((previousPlaques: any) => {
+                const updatedPlaques = previousPlaques.map((item: IPlaque) => {
+                  return {
+                    ...item,
+                    placaQuitada: !item.placaQuitada,
+                  };
+                });
+
+                updateProductPlaque(product.id, updatedPlaques);
+
+                return updatedPlaques;
+              });
+
+              setCheckRows(!checkRows);
+            }}
+            isChecked={checkRows}
+          >
+            Placa quitada
+          </Checkbox>
+        ),
+        accessor: "placaQuitada",
+        Cell: ({ row }: any) => (
+          <Checkbox
+            size="md"
+            onChange={() => {
+              setAllPlaques((previousPlaques: any) => {
+                const updatedPlaques = previousPlaques.map((item: IPlaque) => {
+                  return item.descricao === row.original.descricao
+                    ? {
+                        ...item,
+                        placaQuitada: !item.placaQuitada,
+                      }
+                    : { ...item };
+                });
+
+                updateProductPlaque(product.id, updatedPlaques);
+
+                return updatedPlaques;
+              });
+            }}
+            isChecked={row.original.placaQuitada}
+          />
+        ),
+      },
       {
         Header: "Placa",
         accessor: "descricao",
       },
     ],
-    []
+    [product.id, checkRows, updateProductPlaque]
   );
+
+  useEffect(() => {
+    if (product.placas) setAllPlaques(product.placas);
+  }, [product.placas]);
 
   return (
     <>
@@ -81,7 +145,7 @@ export const PopoverPlaqueForm = ({
       >
         <PopoverTrigger>
           <Box position="relative">
-            {product.placas.length > 0 && (
+            {allPlaques.length > 0 && (
               <Badge
                 bg="pink.300"
                 color="white"
@@ -91,7 +155,7 @@ export const PopoverPlaqueForm = ({
                 bottom={6}
                 zIndex={1}
               >
-                {product.placas.length}
+                {allPlaques.length}
               </Badge>
             )}
             <Tooltip label="Placas">
@@ -123,10 +187,10 @@ export const PopoverPlaqueForm = ({
                         name="placa"
                         placeholder="Ex: CFC-8949"
                         label="Placa"
-                        value={plaque}
+                        value={plaque.descricao}
                         textTransform="uppercase"
                         onChange={(e) => {
-                          setPlaque(e.target.value);
+                          setPlaque({ ...plaque, descricao: e.target.value });
                         }}
                       />
                     </Flex>
@@ -152,9 +216,12 @@ export const PopoverPlaqueForm = ({
                         }}
                         isDisabled={!shouldDisabledAddButton}
                         onClick={() => {
-                          if (plaque.length > 0) {
-                            updateProductPlaque(product.id, plaque);
-                            setPlaque("");
+                          if (plaque.descricao.length > 0) {
+                            updateProductPlaque(product.id, [
+                              ...allPlaques,
+                              plaque,
+                            ]);
+                            setPlaque(initialPlaqueValue);
 
                             toast.success(
                               `Placa adicionada! Você consegue visualiza-lá na aba "Lista" ao lado.`
@@ -169,22 +236,22 @@ export const PopoverPlaqueForm = ({
                   </PopoverFooter>
                 </TabPanel>
                 <TabPanel>
-                  {product.placas.length === 0 ? (
+                  {allPlaques.length === 0 ? (
                     <Center>
                       <Text>Nenhuma placa adicionada!</Text>
                     </Center>
                   ) : (
                     <VStack maxH={400} overflow="auto">
-                      {product.placas.map((p) => (
+                      {allPlaques.map((p: IPlaque, key: number) => (
                         <Flex
-                          key={p}
+                          key={key}
                           py={2}
                           w="100%"
                           align="center"
                           justify="space-between"
                         >
                           <Text textTransform="uppercase" fontWeight="bold">
-                            {p}
+                            {p.descricao}
                           </Text>
                           <IconButton
                             bg="red.300"
@@ -239,10 +306,10 @@ export const PopoverPlaqueForm = ({
               name="placa"
               placeholder="Ex: CFC-8949"
               label="Digite o número da placa"
-              value={plaque}
+              value={plaque.descricao}
               textTransform="uppercase"
               onChange={(e) => {
-                setPlaque(e.target.value);
+                setPlaque({ ...plaque, descricao: e.target.value });
               }}
             />
             <Button
@@ -254,9 +321,9 @@ export const PopoverPlaqueForm = ({
               }}
               isDisabled={!shouldDisabledAddButton}
               onClick={() => {
-                if (plaque.length > 0) {
-                  updateProductPlaque(product.id, plaque);
-                  setPlaque("");
+                if (plaque.descricao.length > 0) {
+                  updateProductPlaque(product.id, [plaque]);
+                  setPlaque(initialPlaqueValue);
 
                   toast.success(
                     `Placa adicionada! Você consegue visualiza-lá na aba "Lista" ao lado.`
@@ -270,15 +337,11 @@ export const PopoverPlaqueForm = ({
 
           <DataTable
             columns={columns}
-            data={
-              product.placas.map((p) => {
-                return { descricao: p };
-              }) as any
-            }
+            data={allPlaques}
             onRowDelete={(row) => {
               removeProductPlaque(product.id, row);
 
-              toast.info(`Placa ${upper(row)} removida!`);
+              toast.info(`Placa ${upper(row.descricao)} removida!`);
             }}
           />
         </Container>

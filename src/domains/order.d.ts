@@ -15,6 +15,7 @@ export interface IOrder {
     produto: string;
     quantidade: number;
     placa: string;
+    placaQuitada: boolean;
     descricao: string;
     valorUnitario: number;
   }>;

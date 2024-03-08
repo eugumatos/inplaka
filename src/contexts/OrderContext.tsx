@@ -107,8 +107,9 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
             produto.placas.forEach((placa) => {
               produtos.push({
                 produto: produto.id,
-                placa: placa,
                 quantidade: 1,
+                placa: placa.descricao,
+                placaQuitada: placa.placaQuitada,
                 descricao: produto.descricao,
                 valorUnitario: produto.valor_venda,
               });
@@ -191,10 +192,29 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
         throw new Error("ID Order not found!");
       }
 
+      let produtos: any = [];
+
+      order.produtos.forEach((produto) => {
+        if (produto.quantidade > 0) {
+          produto.placas &&
+            produto.placas.forEach((placa) => {
+              produtos.push({
+                produto: produto.id,
+                quantidade: 1,
+                placa: placa.descricao,
+                placaQuitada: placa.placaQuitada,
+                descricao: produto.descricao,
+                valorUnitario: produto.valor_venda,
+              });
+            });
+        }
+      });
+
       Object.assign(order, {
         cliente: order.cliente.value,
         vendedor: order.vendedor.value,
         formaPagamento: order.formaPagamento.value,
+        produtos: produtos,
       });
 
       await updateOrder(findIdOrder.id, order);

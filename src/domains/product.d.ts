@@ -1,3 +1,8 @@
+interface IPlaque {
+  descricao: string;
+  placaQuitada: boolean;
+}
+
 export interface IProduct {
   id: string;
   status?: string;
@@ -14,5 +19,6 @@ export interface IProduct {
   nao_usar_para_nota_fiscal: boolean | string;
   quantidade: number;
   placa: string;
-  placas: Array<string> | undefined;
+  placas: Array<IPlaque> | undefined;
+  placaQuitada: boolean;
 }

@@ -23,6 +23,10 @@ interface IUseOrderFormProps {
   noFetch?: boolean;
   shouldPreLoad?: boolean;
 }
+interface IPlaque {
+  descricao: string;
+  placaQuitada: boolean;
+}
 
 interface IPlaques {
   name: string;
@@ -33,7 +37,7 @@ interface UseOrderFormProps {
   products: IProduct[];
   services: IService[];
   clients: IClient[];
-  registeredPlaques: IPlaques[];
+  registeredPlaques: IPlaque[];
   formatImportData: (parsedData: any) => any;
   clientOptions: (value: string) => Promise<SelectProps[]>;
   sellerOptions: (value: string) => Promise<SelectProps[]>;
@@ -43,8 +47,8 @@ interface UseOrderFormProps {
   seekSelectedPaymentOption: (id: string) => void;
   updateProductAmount: (product: IProduct, amount: number) => void;
   updateServiceAmount: (product: IService, amount: number) => void;
-  updateProductPlaque: (id: string, name: string) => void;
-  removeProductPlaque: (id: string, name: string) => void;
+  updateProductPlaque: (id: string, plaques: IPlaque[]) => void;
+  removeProductPlaque: (id: string, plaque: IPlaque) => void;
   calculateTotal: () => {
     total: number;
     subTotalProducts: number;
@@ -62,7 +66,7 @@ export function useOrderForm({
   const [clients, setClients] = useState<IClient[]>([]);
   const [sellers, setSellers] = useState<ISeller[]>([]);
   const [formPayments, setFormPayments] = useState<IFormPayment[]>([]);
-  const [allPlaques, setPlaques] = useState<IPlaques[]>([]);
+  const [allPlaques, setPlaques] = useState<IPlaque[]>([]);
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -181,6 +185,7 @@ export function useOrderForm({
         cor: item?.Cor,
         localEmplacamento: item?.["Local de emplacamento"],
         observacao: item?.["Observações"],
+        placaQuitada: false,
       };
     });
 
@@ -240,7 +245,7 @@ export function useOrderForm({
   );
 
   const updateProductPlaque = useCallback(
-    (id: string, name: string) => {
+    (id: string, plaques: IPlaque[]) => {
       const findProduct = products.find((p) => p.id === id);
 
       if (
@@ -251,23 +256,25 @@ export function useOrderForm({
       ) {
         setProducts((state) =>
           state.map((item) => {
-            if (findProduct.id === item.id) {
+            if (findProduct.id === item.id && item.placas) {
               return {
                 ...findProduct,
-                placas: findProduct.placas && [...findProduct.placas, name],
+                placas: plaques,
               };
             } else {
               return item;
             }
           })
         );
+
+        setPlaques(plaques);
       }
     },
     [products]
   );
 
   const removeProductPlaque = useCallback(
-    (id: string, name: string) => {
+    (id: string, plaque: IPlaque) => {
       const findProduct = products.find((p) => p.id === id);
 
       if (findProduct) {
@@ -278,7 +285,9 @@ export function useOrderForm({
                 ...findProduct,
                 placas:
                   findProduct.placas &&
-                  findProduct.placas.filter((p) => p !== name),
+                  findProduct.placas.filter(
+                    (p) => p.descricao !== plaque.descricao
+                  ),
               };
             } else {
               return item;
@@ -368,30 +377,22 @@ export function useOrderForm({
         const response = await getOrder(id);
 
         const selectedProducts = products.map((item) => {
-          const macthingItem = response.produtos?.find(
+          const macthingItem = response.produtos?.filter(
             (product) => product.produto === item.id
           );
 
-          return macthingItem
-            ? {
-                ...item,
-                descricao: macthingItem.descricao,
-                placa: macthingItem.placa,
-                quantidade: macthingItem.quantidade,
-                placas:
-                  macthingItem.quantidade > 1
-                    ? macthingItem.placa?.split(",")
-                    : [macthingItem.placa],
-                valorUnitario: macthingItem.valorUnitario,
-              }
-            : {
-                ...item,
-                descricao: item.descricao,
-                quantidade: 0,
-                placa: "",
-                placas: [],
-                valorUnitario: item.valor_venda,
+          return {
+            ...item,
+            descricao: item.descricao,
+            quantidade: macthingItem?.length || 0,
+            placas: macthingItem?.map((item) => {
+              return {
+                descricao: item?.placa || "",
+                placaQuitada: item?.placaQuitada || false,
               };
+            }),
+            valorUnitario: item.valor_venda,
+          };
         });
 
         const selectedServices = services.map((item) => {
@@ -426,21 +427,14 @@ export function useOrderForm({
 
         const plaques = await getPlaques(id);
 
-        const list: string[] = [];
-
-        plaques.forEach((p) => {
-          p.placa?.split(",").length > 1
-            ? list.push(...p.placa?.split(","))
-            : list.push(p.placa);
+        const list: IPlaque[] = plaques.map((p) => {
+          return {
+            descricao: p.placa,
+            placaQuitada: p.placaQuitada,
+          };
         });
 
-        setPlaques(
-          list.map((p) => {
-            return {
-              name: p,
-            };
-          })
-        );
+        setPlaques(list);
       } catch (error) {
         throw new Error("Erro ao carregar lista de placas!");
       }

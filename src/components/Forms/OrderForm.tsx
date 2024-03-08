@@ -16,6 +16,7 @@ import {
   TabPanels,
   IconButton,
   Tab,
+  Checkbox,
 } from "@chakra-ui/react";
 import {
   RiArrowDownSLine,
@@ -39,6 +40,11 @@ import { useOrderForm } from "@/containers/Order/hooks/useOrderForm";
 import { toast } from "react-toastify";
 import currency from "currency.js";
 import { upper } from "@/utils/upper";
+
+interface IPlaque {
+  descricao: string;
+  placaQuitada: boolean;
+}
 
 interface OrderFormProps {
   id?: string;
@@ -86,14 +92,73 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
 
   const discount = useDebounce(String(discountFormValue), 500);
 
+  const [allPlaques, setAllPlaques] = useState([] as any);
+  const [checkRows, setCheckRows] = useState(false);
+
   const columnsPlaque = useMemo(
     (): Column[] => [
       {
+        Header: () => (
+          <Checkbox
+            size="md"
+            onChange={() => {
+              setAllPlaques((previousPlaques: any) => {
+                const updatedPlaques = previousPlaques.map((item: IPlaque) => {
+                  return {
+                    ...item,
+                    placaQuitada: !item.placaQuitada,
+                  };
+                });
+
+                updateProductPlaque(
+                  "47e6b7ec-dff4-45a5-ad20-d4907a593cbf",
+                  updatedPlaques
+                );
+
+                return updatedPlaques;
+              });
+
+              setCheckRows(!checkRows);
+            }}
+            isChecked={checkRows}
+          >
+            Placa quitada
+          </Checkbox>
+        ),
+        accessor: "placaQuitada",
+        Cell: ({ row }: any) => (
+          <Checkbox
+            size="md"
+            onChange={() => {
+              setAllPlaques((previousPlaques: any) => {
+                const updatedPlaques = previousPlaques.map((item: IPlaque) => {
+                  return item.descricao === row.original.descricao
+                    ? {
+                        ...item,
+                        placaQuitada: !item.placaQuitada,
+                      }
+                    : { ...item };
+                });
+
+                updateProductPlaque(
+                  "47e6b7ec-dff4-45a5-ad20-d4907a593cbf",
+                  updatedPlaques
+                );
+
+                return updatedPlaques;
+              });
+            }}
+            isChecked={row.original.placaQuitada}
+          />
+        ),
+      },
+      {
         Header: "Nome",
-        accessor: "name",
+        accessor: "descricao",
+        Cell: ({ value }) => filterText(upper(value), 55),
       },
     ],
-    []
+    [checkRows, updateProductPlaque]
   );
 
   const columns = useMemo(
@@ -101,7 +166,7 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
       {
         Header: "Descrição",
         accessor: "descricao",
-        Cell: ({ value }) => filterText(value, 20),
+        Cell: ({ value }) => filterText(upper(value), 20),
       },
       {
         Header: "Valor venda",
@@ -170,6 +235,24 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
       return;
     }
 
+    let findPlaquesNotChecked = false;
+
+    formValues.produtos.forEach((p) => {
+      const checkPlaques = p.placas?.some(
+        (placa) => placa.placaQuitada === false
+      );
+
+      if (checkPlaques) findPlaquesNotChecked = checkPlaques;
+    });
+
+    if (formValues.status === "FINALIZADO" && findPlaquesNotChecked) {
+      toast.warning(
+        "É necessário que todas as placas estejam quitadas antes de finalizar um pedido!."
+      );
+
+      return;
+    }
+
     setValue("produtos", formValues.produtos);
     setValue("servicos", formValues.servicos);
     setValue("desconto", formValues.desconto);
@@ -186,6 +269,10 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
 
   const shouldDisabledOption =
     (!!id && statusOption === "ABERTO") || statusOption === "CANCELADO";
+
+  useEffect(() => {
+    if (registeredPlaques) setAllPlaques(registeredPlaques);
+  }, [registeredPlaques]);
 
   useEffect(() => {
     if (total > Number(discount)) {
@@ -293,7 +380,7 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
                 />
               </TabPanel>
               <TabPanel hidden={!id}>
-                <DataTable columns={columnsPlaque} data={registeredPlaques} />
+                <DataTable columns={columnsPlaque} data={allPlaques} />
               </TabPanel>
             </TabPanels>
           </Tabs>
