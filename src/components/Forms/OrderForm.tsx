@@ -486,17 +486,20 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
                 />
               </div>
             ) : (
-              <Select
-                label="Status"
-                defaultOption="ATIVO"
-                {...register("status")}
-              >
-                <option value="ABERTO" disabled={shouldDisabledOption}>
-                  ABERTO
-                </option>
-                <option value="FINALIZADO">FINALIZADO</option>
-                <option value="CANCELADO">CANCELADO</option>
-              </Select>
+              <>
+                <Text>Desconto: {currencyFormat(+discount)}</Text>
+                <Select
+                  label="Status"
+                  defaultOption="ATIVO"
+                  {...register("status")}
+                >
+                  <option value="ABERTO" disabled={shouldDisabledOption}>
+                    ABERTO
+                  </option>
+                  <option value="FINALIZADO">FINALIZADO</option>
+                  <option value="CANCELADO">CANCELADO</option>
+                </Select>
+              </>
             )}
           </Flex>
 

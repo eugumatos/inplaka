@@ -192,7 +192,11 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
         throw new Error("ID Order not found!");
       }
 
+      await removeOrder(findIdOrder.id, "notShowMessage");
+
       let produtos: any = [];
+
+      const newOrder = {};
 
       order.produtos.forEach((produto) => {
         if (produto.quantidade > 0) {
@@ -210,16 +214,34 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
         }
       });
 
-      Object.assign(order, {
+      const totalValue = Number(order.total) - Number(order.desconto || 0);
+
+      Object.assign(newOrder, {
         cliente: order.cliente.value,
         vendedor: order.vendedor.value,
         formaPagamento: order.formaPagamento.value,
         produtos: produtos,
+        numero: order?.numero,
+        valorPedido: order.total,
+        status: order.status,
+        valorDesconto: Number(order.desconto) || 0,
+        valorTotal: totalValue,
+        total: totalValue,
+        servicos: order.servicos.map((s) => {
+          return {
+            servico: s.id,
+            descricao: s.descricao,
+            quantidade: s.quantidade,
+            valorUnitario: s.valor_venda,
+          };
+        }),
       });
 
-      await updateOrder(findIdOrder.id, order);
+      await createOrder(newOrder as any);
 
-      setOrder(order);
+      setCurrentOrderNumber(order.numero);
+
+      setOrder(newOrder as any);
       close && close();
 
       const updatedOrders = await getOrders();
@@ -235,7 +257,7 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
     }
   }
 
-  async function removeOrder(id: string) {
+  async function removeOrder(id: string, action?: string) {
     try {
       dispatch({ type: "LOADING" });
 
@@ -244,6 +266,8 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
       const orders = await getOrders();
 
       dispatch({ type: "RELOAD_ORDERS", payload: orders });
+
+      if (action && action === "notShowMessage") return;
 
       toast.success("Pedido removido com sucesso!");
     } catch (error) {

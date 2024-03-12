@@ -16,8 +16,14 @@ import {
   InputGroup,
   InputLeftElement,
   Text,
+  IconButton,
 } from "@chakra-ui/react";
-import { RiDeleteBinLine, RiEditLine, RiSearchLine } from "react-icons/ri";
+import {
+  RiDeleteBinLine,
+  RiEditLine,
+  RiSearchLine,
+  RiQrCodeFill,
+} from "react-icons/ri";
 
 import { Column, useGlobalFilter, useTable } from "react-table";
 
@@ -111,9 +117,24 @@ export function DataTable<T extends object>({
           />
         </InputGroup>
 
-        <Flex gap={6}>
+        <Flex gap={5}>
           {!!onFilterByDate && (
             <RangeDatePicker getRangeDate={onFilterByDate} />
+          )}
+
+          {!!onImport && (
+            <Tooltip label="Gerar etiquetas">
+              <IconButton
+                isDisabled
+                aria-label="Search database"
+                bg="orange.300"
+                icon={<RiQrCodeFill color="#fff" />}
+                // onClick={() => fileUploadButtonRef.current?.click()}
+                _hover={{
+                  bg: "orange.400",
+                }}
+              />
+            </Tooltip>
           )}
 
           {!!onImport && (
