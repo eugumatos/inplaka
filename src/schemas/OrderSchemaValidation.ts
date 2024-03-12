@@ -45,4 +45,5 @@ export interface OrderFormData extends IOrderFormData {
   produtos: IProduct[];
   servicos: IService[];
   total: number;
+  numero: number;
 }
