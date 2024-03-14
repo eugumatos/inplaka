@@ -419,6 +419,7 @@ export function useOrderForm({
               };
         });
 
+        console.log(selectedServices);
         setProducts(selectedProducts);
         setServices(selectedServices);
       } catch (error) {

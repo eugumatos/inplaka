@@ -375,6 +375,7 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
                       name="servico"
                       forceDisabled={!!id}
                       maxQ={row.unidade}
+                      value={row.quantidade}
                       maxW="50%"
                       onChangeQuantity={(value) => {
                         updateServiceAmount(row, value);

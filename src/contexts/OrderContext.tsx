@@ -18,6 +18,7 @@ import { OrderFormData } from "@/schemas/OrderSchemaValidation";
 import { generateCode } from "@/utils/generateCode";
 import { formatDate } from "@/utils/formatDate";
 import { toast } from "react-toastify";
+import { format, parseISO } from "date-fns";
 
 type RangeDate = {
   startDate: Date | null;
@@ -152,7 +153,9 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
 
       const orderNumber = await createOrder(order);
 
-      Object.assign(order, { dateCreated: formatDate(String(new Date())) });
+      Object.assign(order, {
+        dateCreated: format(new Date(), "dd/MM/yyyy"),
+      });
 
       setCurrentOrderNumber(orderNumber);
 
