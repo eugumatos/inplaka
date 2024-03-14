@@ -12,14 +12,12 @@ import {
   getOrders,
   destroyOrder,
   validateExistingPlaques,
-  updateOrder,
   filterOrderByDate,
 } from "@/services/order";
 import { OrderFormData } from "@/schemas/OrderSchemaValidation";
 import { generateCode } from "@/utils/generateCode";
+import { formatDate } from "@/utils/formatDate";
 import { toast } from "react-toastify";
-import { format } from "date-fns";
-import { IProduct } from "@/domains/product";
 
 type RangeDate = {
   startDate: Date | null;
@@ -136,6 +134,7 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
         }),
       });
 
+      /*
       const plaqueList = order.produtos
         .map((product) => product.placa)
         .join(",");
@@ -149,8 +148,11 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
 
         return;
       }
+      */
 
       const orderNumber = await createOrder(order);
+
+      Object.assign(order, { dateCreated: formatDate(String(new Date())) });
 
       setCurrentOrderNumber(orderNumber);
 
@@ -238,6 +240,10 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
       });
 
       await createOrder(newOrder as any);
+
+      Object.assign(newOrder, {
+        dateCreated: formatDate(order?.dateCreated ?? ""),
+      });
 
       setCurrentOrderNumber(order.numero);
 

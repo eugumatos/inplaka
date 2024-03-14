@@ -57,7 +57,9 @@ export function PDFDocument({
                 </View>
                 <View style={styles.descriptionItem}>
                   <Text style={styles.description}>Data:</Text>
-                  <Text style={[styles.description, { marginLeft: 5 }]}></Text>
+                  <Text style={[styles.description, { marginLeft: 5 }]}>
+                    {order?.orderDate}
+                  </Text>
                 </View>
                 <View style={styles.descriptionItem}>
                   <Text style={styles.description}>Email:</Text>

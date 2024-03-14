@@ -65,68 +65,17 @@ export const PopoverPlaqueForm = ({
   const initialPlaqueValue = { descricao: "", placaQuitada: false };
   const [plaque, setPlaque] = useState(initialPlaqueValue);
 
-  const [checkRows, setCheckRows] = useState(false);
-
   const shouldDisabledAddButton =
     product.quantidade > 0 && allPlaques.length < product.quantidade;
 
   const columns = useMemo(
     (): Column[] => [
       {
-        Header: () => (
-          <Checkbox
-            size="md"
-            onChange={() => {
-              setAllPlaques((previousPlaques: any) => {
-                const updatedPlaques = previousPlaques.map((item: IPlaque) => {
-                  return {
-                    ...item,
-                    placaQuitada: !item.placaQuitada,
-                  };
-                });
-
-                updateProductPlaque(product.id, updatedPlaques);
-
-                return updatedPlaques;
-              });
-
-              setCheckRows(!checkRows);
-            }}
-            isChecked={checkRows}
-          >
-            Placa quitada
-          </Checkbox>
-        ),
-        accessor: "placaQuitada",
-        Cell: ({ row }: any) => (
-          <Checkbox
-            size="md"
-            onChange={() => {
-              setAllPlaques((previousPlaques: any) => {
-                const updatedPlaques = previousPlaques.map((item: IPlaque) => {
-                  return item.descricao === row.original.descricao
-                    ? {
-                        ...item,
-                        placaQuitada: !item.placaQuitada,
-                      }
-                    : { ...item };
-                });
-
-                updateProductPlaque(product.id, updatedPlaques);
-
-                return updatedPlaques;
-              });
-            }}
-            isChecked={row.original.placaQuitada}
-          />
-        ),
-      },
-      {
         Header: "Placa",
         accessor: "descricao",
       },
     ],
-    [product.id, checkRows, updateProductPlaque]
+    []
   );
 
   useEffect(() => {

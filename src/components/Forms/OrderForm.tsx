@@ -95,70 +95,74 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
   const [allPlaques, setAllPlaques] = useState([] as any);
   const [checkRows, setCheckRows] = useState(false);
 
+  const placaQuitada = useMemo(() => {
+    return {
+      Header: () => (
+        <Checkbox
+          size="md"
+          onChange={() => {
+            setAllPlaques((previousPlaques: any) => {
+              const updatedPlaques = previousPlaques.map((item: IPlaque) => {
+                return {
+                  ...item,
+                  placaQuitada: !item.placaQuitada,
+                };
+              });
+
+              updateProductPlaque(
+                "47e6b7ec-dff4-45a5-ad20-d4907a593cbf",
+                updatedPlaques
+              );
+
+              return updatedPlaques;
+            });
+
+            setCheckRows(!checkRows);
+          }}
+          isChecked={checkRows}
+        >
+          Placa quitada
+        </Checkbox>
+      ),
+      accessor: "placaQuitada",
+      Cell: ({ row }: any) => (
+        <Checkbox
+          size="md"
+          onChange={() => {
+            setAllPlaques((previousPlaques: any) => {
+              const updatedPlaques = previousPlaques.map((item: IPlaque) => {
+                return item.descricao === row.original.descricao
+                  ? {
+                      ...item,
+                      placaQuitada: !item.placaQuitada,
+                    }
+                  : { ...item };
+              });
+
+              updateProductPlaque(
+                "47e6b7ec-dff4-45a5-ad20-d4907a593cbf",
+                updatedPlaques
+              );
+
+              return updatedPlaques;
+            });
+          }}
+          isChecked={row.original.placaQuitada}
+        />
+      ),
+    };
+  }, [checkRows, updateProductPlaque]);
+
   const columnsPlaque = useMemo(
     (): Column[] => [
-      {
-        Header: () => (
-          <Checkbox
-            size="md"
-            onChange={() => {
-              setAllPlaques((previousPlaques: any) => {
-                const updatedPlaques = previousPlaques.map((item: IPlaque) => {
-                  return {
-                    ...item,
-                    placaQuitada: !item.placaQuitada,
-                  };
-                });
-
-                updateProductPlaque(
-                  "47e6b7ec-dff4-45a5-ad20-d4907a593cbf",
-                  updatedPlaques
-                );
-
-                return updatedPlaques;
-              });
-
-              setCheckRows(!checkRows);
-            }}
-            isChecked={checkRows}
-          >
-            Placa quitada
-          </Checkbox>
-        ),
-        accessor: "placaQuitada",
-        Cell: ({ row }: any) => (
-          <Checkbox
-            size="md"
-            onChange={() => {
-              setAllPlaques((previousPlaques: any) => {
-                const updatedPlaques = previousPlaques.map((item: IPlaque) => {
-                  return item.descricao === row.original.descricao
-                    ? {
-                        ...item,
-                        placaQuitada: !item.placaQuitada,
-                      }
-                    : { ...item };
-                });
-
-                updateProductPlaque(
-                  "47e6b7ec-dff4-45a5-ad20-d4907a593cbf",
-                  updatedPlaques
-                );
-
-                return updatedPlaques;
-              });
-            }}
-            isChecked={row.original.placaQuitada}
-          />
-        ),
-      },
+      placaQuitada as Column,
       {
         Header: "Nome",
         accessor: "descricao",
         Cell: ({ value }) => filterText(upper(value), 55),
       },
     ],
-    [checkRows, updateProductPlaque]
+    [placaQuitada]
   );
 
   const columns = useMemo(
@@ -486,20 +490,17 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
                 />
               </div>
             ) : (
-              <>
-                <Text>Desconto: {currencyFormat(+discount)}</Text>
-                <Select
-                  label="Status"
-                  defaultOption="ATIVO"
-                  {...register("status")}
-                >
-                  <option value="ABERTO" disabled={shouldDisabledOption}>
-                    ABERTO
-                  </option>
-                  <option value="FINALIZADO">FINALIZADO</option>
-                  <option value="CANCELADO">CANCELADO</option>
-                </Select>
-              </>
+              <Select
+                label="Status"
+                defaultOption="ATIVO"
+                {...register("status")}
+              >
+                <option value="ABERTO" disabled={shouldDisabledOption}>
+                  ABERTO
+                </option>
+                <option value="FINALIZADO">FINALIZADO</option>
+                <option value="CANCELADO">CANCELADO</option>
+              </Select>
             )}
           </Flex>
 

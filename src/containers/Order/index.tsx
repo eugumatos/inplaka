@@ -133,6 +133,7 @@ export function Order() {
           size="md"
           onClick={() => {
             setSubmitOption("CREATE");
+            setCurrentOrder(null);
             reset({});
             onOpen();
           }}
