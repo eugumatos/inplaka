@@ -24,14 +24,14 @@ export function PDFDocument({ placas }: DocumentProps) {
         </View>
         <View style={styles.container}>
           {placas?.map((item, key) => (
-            <View key={key} style={[styles.main, { marginBottom: 15 }]}>
+            <View key={key} style={[styles.main, { marginBottom: 30 }]}>
               <Text style={styles.titles}>CÓDIGO DE BARRAS</Text>
               <View style={styles.containerBarcode}>
                 <View style={styles.content}>
-                  <Text>{item.descricao}</Text>
-                  <Text>{item.chassi}</Text>
-                  <Text>{item.marca_modelo}</Text>
-                  <Text>{item.endereco}</Text>
+                  <Text>{item?.descricao}</Text>
+                  <Text>{item?.chassi}</Text>
+                  <Text>{item?.marca_modelo}</Text>
+                  <Text>{item?.endereco}</Text>
                 </View>
                 <Text style={styles.titles}>QR CODE</Text>
               </View>

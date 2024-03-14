@@ -337,6 +337,7 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
               <TabPanel p={0}>
                 <DataTable
                   isLoading={isLoading}
+                  showGeneratedData={!!id}
                   generatedData={products[0]?.placas}
                   onImport={handleImport}
                   disableImport={!!id}

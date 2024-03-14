@@ -191,13 +191,11 @@ export function useOrderForm({
 
     updatedProducts[findIndexProduct].placas = placas.map((p: any) => {
       return {
+        ...p,
         descricao: p.placa,
         placaQuitada: p?.placaQuitada,
       };
     });
-    updatedProducts[findIndexProduct].placa = placas
-      .map((p: any) => p.placa)
-      .join(",");
 
     (updatedProducts[findIndexProduct].quantidade = parsedData.length ?? null),
       Object.assign(updatedProducts[findIndexProduct], { ...placas });

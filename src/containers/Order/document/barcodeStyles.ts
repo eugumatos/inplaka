@@ -8,9 +8,8 @@ export const styles = StyleSheet.create({
   container: {
     padding: 20,
     width: "100%",
-    display: "flex",
+    alignItems: "center",
     justifyContent: "center",
-    flexDirection: "row",
   },
   containerTitle: {
     borderTop: "1px solid #000",
@@ -19,7 +18,7 @@ export const styles = StyleSheet.create({
     textAlign: "center",
     fontWeight: "bold",
     marginTop: 8,
-    marginBottom: 20,
+    marginBottom: 5,
     fontSize: 12,
     color: "#000",
   },

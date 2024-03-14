@@ -39,8 +39,6 @@ export const getServerSideProps: GetServerSideProps = async ({
 
   const response = await getOrder(String(id));
 
-  console.log(response);
-
   if (!response) {
     return {
       redirect: {

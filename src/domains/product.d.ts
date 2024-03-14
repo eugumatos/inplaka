@@ -1,4 +1,9 @@
 interface IPlaque {
+  localEmplacamento?: string;
+  cor?: string;
+  modelo?: string;
+  marca?: string;
+  chassi?: string;
   descricao: string;
   placaQuitada: boolean;
 }

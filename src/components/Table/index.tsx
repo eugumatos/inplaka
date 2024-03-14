@@ -45,6 +45,7 @@ interface DataTableProps<T extends object> {
 
   isLoading?: boolean;
   itemsPerPage?: number;
+  showGeneratedData?: boolean;
 
   customnAction?: (row: any) => JSX.Element;
   onRowEdit?: (row: any) => void;
@@ -67,11 +68,10 @@ export function DataTable<T extends object>({
   onImport,
   disableImport,
   generatedData,
+  showGeneratedData,
 }: DataTableProps<T>) {
   const shouldRenderActions = !!onRowEdit || !!onRowDelete || !!customnAction;
   const maxItemsPerPage = itemsPerPage ?? MAX_ITEMS_PER_PAGE_DEFAULT;
-
-  console.log(generatedData);
 
   const {
     getTableProps,
@@ -128,7 +128,7 @@ export function DataTable<T extends object>({
             <RangeDatePicker getRangeDate={onFilterByDate} />
           )}
 
-          {!!generatedData && (
+          {showGeneratedData && (
             <Tooltip label="Gerar etiquetas">
               <PDFDownloadLink
                 fileName="etiquetas"

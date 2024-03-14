@@ -108,6 +108,11 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
                 produto: produto.id,
                 quantidade: 1,
                 placa: placa.descricao,
+                chassi: placa?.chassi,
+                marca: placa?.marca,
+                modelo: placa?.modelo,
+                cor: placa?.cor,
+                localEmplacamento: placa?.localEmplacamento,
                 placaQuitada: placa.placaQuitada,
                 descricao: produto.descricao,
                 valorUnitario: produto.valor_venda,
@@ -140,6 +145,7 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
         .map((product) => product.placa)
         .join(",");
 
+
       const plaques = await validateExistingPlaques(plaqueList);
 
       if (plaques.length > 0) {
@@ -167,6 +173,7 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
       dispatch({ type: "RELOAD_ORDERS", payload: newOrders });
 
       toast.success("Pedido criado com sucesso!");
+
       setFinishingModalShouldBeOpen(true);
     } catch (error) {
       dispatch({ type: "ERROR" });
@@ -211,6 +218,11 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
                 produto: produto.id,
                 quantidade: 1,
                 placa: placa.descricao,
+                chassi: placa?.chassi,
+                marca: placa?.marca,
+                modelo: placa?.modelo,
+                cor: placa?.cor,
+                localEmplacamento: placa?.localEmplacamento,
                 placaQuitada: placa.placaQuitada,
                 descricao: produto.descricao,
                 valorUnitario: produto.valor_venda,
