@@ -31,6 +31,8 @@ import { RangeDatePicker } from "@/components/Forms/RangeDatePicker";
 import { MAX_ITEMS_PER_PAGE_DEFAULT } from "@/constants";
 import { Pagination } from "../Pagination";
 import { UploadFile } from "./UploadFile";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import { PDFDocument } from "@/containers/Order/document/barcode";
 
 type RangeDate = {
   startDate: Date | null;
@@ -49,6 +51,7 @@ interface DataTableProps<T extends object> {
   onRowDelete?: (row: any) => void;
   onFilterByDate?: ({ startDate, endDate }: RangeDate) => void;
   onImport?: (parsedData: any) => void;
+  generatedData?: Array<any>;
   disableImport?: boolean;
 }
 
@@ -63,9 +66,12 @@ export function DataTable<T extends object>({
   onFilterByDate,
   onImport,
   disableImport,
+  generatedData,
 }: DataTableProps<T>) {
   const shouldRenderActions = !!onRowEdit || !!onRowDelete || !!customnAction;
   const maxItemsPerPage = itemsPerPage ?? MAX_ITEMS_PER_PAGE_DEFAULT;
+
+  console.log(generatedData);
 
   const {
     getTableProps,
@@ -122,18 +128,22 @@ export function DataTable<T extends object>({
             <RangeDatePicker getRangeDate={onFilterByDate} />
           )}
 
-          {!!onImport && (
+          {!!generatedData && (
             <Tooltip label="Gerar etiquetas">
-              <IconButton
-                isDisabled
-                aria-label="Search database"
-                bg="orange.300"
-                icon={<RiQrCodeFill color="#fff" />}
-                // onClick={() => fileUploadButtonRef.current?.click()}
-                _hover={{
-                  bg: "orange.400",
-                }}
-              />
+              <PDFDownloadLink
+                fileName="etiquetas"
+                document={<PDFDocument placas={generatedData ?? []} />}
+              >
+                <IconButton
+                  aria-label="Search database"
+                  bg="orange.300"
+                  icon={<RiQrCodeFill color="#fff" />}
+                  // onClick={() => fileUploadButtonRef.current?.click()}
+                  _hover={{
+                    bg: "orange.400",
+                  }}
+                />
+              </PDFDownloadLink>
             </Tooltip>
           )}
 

@@ -394,6 +394,9 @@ export function useOrderForm({
               return {
                 descricao: item?.placa || "",
                 placaQuitada: item?.placaQuitada || false,
+                marca_modelo: `${item?.marca}/${item?.modelo}`,
+                chassi: item?.chassi,
+                localEmplacamento: item?.localEmplacamento,
               };
             }),
             valorUnitario: item.valor_venda,
@@ -419,7 +422,6 @@ export function useOrderForm({
               };
         });
 
-        console.log(selectedServices);
         setProducts(selectedProducts);
         setServices(selectedServices);
       } catch (error) {

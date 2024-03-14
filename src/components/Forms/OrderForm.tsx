@@ -40,10 +40,14 @@ import { useOrderForm } from "@/containers/Order/hooks/useOrderForm";
 import { toast } from "react-toastify";
 import currency from "currency.js";
 import { upper } from "@/utils/upper";
+import { useOrder } from "@/contexts/OrderContext";
 
 interface IPlaque {
   descricao: string;
   placaQuitada: boolean;
+  marca_modelo: string;
+  chassi: string;
+  localEmplacamento: string;
 }
 
 interface OrderFormProps {
@@ -333,6 +337,7 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
               <TabPanel p={0}>
                 <DataTable
                   isLoading={isLoading}
+                  generatedData={products[0]?.placas}
                   onImport={handleImport}
                   disableImport={!!id}
                   columns={columns}

@@ -21,4 +21,8 @@ export interface IProduct {
   placa: string;
   placas: Array<IPlaque> | undefined;
   placaQuitada: boolean;
+  chassi?: string;
+  marca?: string;
+  modelo?: string;
+  localEmplacamento?: string;
 }

@@ -11,6 +11,10 @@ export interface IOrder {
   status?: string;
   observacao?: string;
   produtos?: Array<{
+    localEmplacamento: any;
+    modelo: any;
+    marca: any;
+    chassi: any;
     id: string;
     produto: string;
     quantidade: number;

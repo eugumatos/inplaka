@@ -91,6 +91,8 @@ export function Order() {
   const seekCurrentOrder = (order: IOrder) => {
     const findOrder = orders.find((o) => order.id === o.id);
 
+    console.log(findOrder);
+
     if (findOrder) {
       setCurrentOrder(findOrder);
     }
