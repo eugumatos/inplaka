@@ -384,6 +384,7 @@ export function useOrderForm({
             (product) => product.produto === item.id
           );
 
+          console.log(macthingItem);
           return {
             ...item,
             descricao: item.descricao,
@@ -400,6 +401,8 @@ export function useOrderForm({
             valorUnitario: item.valor_venda,
           };
         });
+
+        console.log(selectedProducts);
 
         const selectedServices = services.map((item) => {
           const macthingItem = response.servicos?.find(

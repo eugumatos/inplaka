@@ -113,7 +113,7 @@ export function PDFDocument({
 
                       <View style={{ width: 100 }}>
                         <Text style={styles.columnText}>
-                          {orderItem?.value}
+                          {orderItem?.plaque}
                         </Text>
                       </View>
                       <View style={{ width: 300, textAlign: "right" }}>
