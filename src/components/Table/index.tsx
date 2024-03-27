@@ -129,11 +129,11 @@ export function DataTable<T extends object>({
           )}
 
           {showGeneratedData && (
-            <Tooltip label="Gerar etiquetas">
-              <PDFDownloadLink
-                fileName="etiquetas"
-                document={<PDFDocument placas={generatedData ?? []} />}
-              >
+            <PDFDownloadLink
+              fileName="etiquetas"
+              document={<PDFDocument placas={generatedData ?? []} />}
+            >
+              <Tooltip label="Gerar etiquetas">
                 <IconButton
                   aria-label="Search database"
                   bg="orange.300"
@@ -143,8 +143,8 @@ export function DataTable<T extends object>({
                     bg: "orange.400",
                   }}
                 />
-              </PDFDownloadLink>
-            </Tooltip>
+              </Tooltip>
+            </PDFDownloadLink>
           )}
 
           {!!onImport && (

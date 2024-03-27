@@ -140,23 +140,6 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
         }),
       });
 
-      /*
-      const plaqueList = order.produtos
-        .map((product) => product.placa)
-        .join(",");
-
-
-      const plaques = await validateExistingPlaques(plaqueList);
-
-      if (plaques.length > 0) {
-        toast.warning(
-          "Há algumas placas que já foram cadastradas no sistemas anteriormente, por favor verifique e tente novamente."
-        );
-
-        return;
-      }
-      */
-
       const orderNumber = await createOrder(order);
 
       Object.assign(order, {

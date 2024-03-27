@@ -63,6 +63,9 @@ export function SidebarNav() {
         <NavLink href="/pedido" icon={RiShoppingCartLine}>
           Pedidos de Venda
         </NavLink>
+        <NavLink href="/baixa-placa" icon={BsSignpost}>
+          Baixa de placas
+        </NavLink>
         <NavLink href="/estoque" icon={RiBox3Line}>
           Estoque
         </NavLink>

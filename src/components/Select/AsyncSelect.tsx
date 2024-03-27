@@ -67,6 +67,7 @@ export const AsyncSelect = ({
           <FormLabel>{label}</FormLabel>
           <AsyncSelectChakra
             ref={field.ref}
+            className="async-select-props"
             components={asyncComponents}
             loadOptions={loadOptions}
             value={value}

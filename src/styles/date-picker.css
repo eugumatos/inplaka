@@ -12,3 +12,7 @@
 .chakra-datepicker-input::placeholder {
   color: #a0aec0; /* Chakra UI's default placeholder color */
 }
+
+.async-select-props {
+  border-color: #bcbcbd;
+}

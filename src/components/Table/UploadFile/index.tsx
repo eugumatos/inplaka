@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { Tooltip, IconButton, Heading, Text, Progress } from "@chakra-ui/react";
+import { useRef } from "react";
+import { Tooltip, IconButton } from "@chakra-ui/react";
 import { LuUpload } from "react-icons/lu";
 import * as XLSX from "xlsx";
 
