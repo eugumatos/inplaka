@@ -13,6 +13,8 @@ import {
   RiUserSharedLine,
   RiServiceLine,
   RiBox3Line,
+  RiFundsBoxLine,
+  RiGovernmentLine,
 } from "react-icons/ri";
 import { BsSignpost } from "react-icons/bs";
 
@@ -21,7 +23,7 @@ import { NavLink } from "./NavLink";
 
 export function SidebarNav() {
   return (
-    <Stack spacing="12" align="flex-start">
+    <Stack spacing="12" align="flex-start" mb={5}>
       <NavSection title="ADMIN">
         <NavLink href="/" icon={RiDashboardLine} color="gray.500">
           Dashboard
@@ -68,6 +70,14 @@ export function SidebarNav() {
         </NavLink>
         <NavLink href="/estoque" icon={RiBox3Line}>
           Estoque
+        </NavLink>
+      </NavSection>
+      <NavSection title="Relatórios">
+        <NavLink href="/vendas" icon={RiFundsBoxLine}>
+          Vendas
+        </NavLink>
+        <NavLink href="/caixa" icon={RiGovernmentLine}>
+          Caixa
         </NavLink>
       </NavSection>
     </Stack>

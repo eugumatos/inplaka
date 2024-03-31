@@ -32,8 +32,6 @@ export function FinishingModal({
   const { order, currentOrderNumber, closeFinishingModal } = useOrder();
   const [clients, setClients] = useState<IClient[]>([]);
 
-  console.log(order);
-
   useEffect(() => {
     async function loadClients() {
       try {
