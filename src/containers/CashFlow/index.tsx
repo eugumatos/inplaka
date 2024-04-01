@@ -6,9 +6,11 @@ import { format } from "date-fns";
 import { toast } from "react-toastify";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { PDFDocument } from "./document";
+import { currency } from "@/utils/currency";
 
 export function CashFlow() {
   const [filteredOrders, setFilteredOrders] = useState<any[]>([]);
+  const [total, setTotal] = useState(0);
 
   async function filterOrder() {
     try {
@@ -17,7 +19,13 @@ export function CashFlow() {
         format(new Date(), "yyyy-MM-dd")
       );
 
+      const totalValue = orders.reduce(
+        (curr, acc) => Number(acc.valorTotal) + curr,
+        0
+      );
+
       setFilteredOrders(orders);
+      setTotal(totalValue);
 
       toast.success(`Foi encontrado um total de ${orders.length} pedidos.`);
     } catch (error) {
@@ -67,9 +75,10 @@ export function CashFlow() {
               <PDFDocument
                 orders={filteredOrders}
                 startDate={format(new Date(), "dd/MM/yyyy")}
+                total={currency(total)}
               />
             }
-            fileName={`vendas`}
+            fileName={`fluxo-de-caixa`}
           >
             <Button
               mt={3}
