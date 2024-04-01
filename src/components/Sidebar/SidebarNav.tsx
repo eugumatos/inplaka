@@ -72,7 +72,7 @@ export function SidebarNav() {
           Estoque
         </NavLink>
       </NavSection>
-      <NavSection title="Relatórios">
+      <NavSection title="RELATÓRIOS">
         <NavLink href="/vendas" icon={RiFundsBoxLine}>
           Vendas
         </NavLink>
