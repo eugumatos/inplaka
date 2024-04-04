@@ -78,7 +78,7 @@ export function CashFlow() {
                 total={currency(total)}
               />
             }
-            fileName={`fluxo-de-caixa`}
+            fileName={`relatorio-xpto-${format(new Date(), "dd-MM-yyyy")}`}
           >
             <Button
               mt={3}

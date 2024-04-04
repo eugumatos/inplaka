@@ -6,6 +6,7 @@ import {
   Heading,
   FormLabel,
   HStack,
+  Checkbox,
   useDisclosure,
 } from "@chakra-ui/react";
 import { AsyncSelect } from "@/components/Select/AsyncSelect";
@@ -106,13 +107,24 @@ export function Plaque({ clients, orders }: PlaqueProps) {
               {
                 Header: "Placa quitada",
                 accessor: "placa_quitada",
+                Cell: () => <Checkbox size="md" />,
               },
               {
                 Header: "Nome",
                 accessor: "nome",
               },
             ]}
-            data={[]}
+            data={[
+              {
+                nome: "TESTE 1",
+              },
+              {
+                nome: "TESTE 2",
+              },
+              {
+                nome: "TESTE 3",
+              },
+            ]}
           />
         </Box>
       </ModalDialog>

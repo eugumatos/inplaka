@@ -30,8 +30,6 @@ export function Sales() {
         end: format(endDate, "dd/MM/yyyy"),
       });
 
-      console.log(orders);
-
       setFilteredOrders(orders);
 
       toast.success(`Foi encontrado um total de ${orders.length} pedidos.`);
@@ -76,7 +74,7 @@ export function Sales() {
                 endDate={filteredDate.end}
               />
             }
-            fileName={`vendas`}
+            fileName={`relatorio-xpto${format(new Date(), "dd-MM-yyyy")}`}
           >
             <Button
               mt={3}
