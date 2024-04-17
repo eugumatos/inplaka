@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useRef, useEffect } from "react";
 import {
   Box,
   Button,
@@ -6,59 +6,68 @@ import {
   Heading,
   FormLabel,
   HStack,
+  Card,
   Checkbox,
-  useDisclosure,
 } from "@chakra-ui/react";
 import { AsyncSelect } from "@/components/Select/AsyncSelect";
 import { IClient } from "@/domains/client";
 import { IOrder } from "@/domains/order";
+import { getOrderByClient, updatePlaques } from "@/services/order";
 
 import { toast } from "react-toastify";
 import { useForm } from "react-hook-form";
 import { DataTable } from "@/components/Table";
-import { currency } from "@/utils/currency";
-import { formatDate } from "@/utils/formatDate";
+
 import { Column } from "react-table";
-import { upper } from "@/utils/upper";
-import { ModalDialog } from "@/components/Modals";
 
 interface PlaqueProps {
   clients: IClient[];
   orders: IOrder[];
 }
 
-export function Plaque({ clients, orders }: PlaqueProps) {
-  const [tableData, setTableData] = useState<IOrder[] | []>([]);
-  const [isLoadingData, setIsLoadingData] = useState(false);
-
+export function Plaque({ clients }: PlaqueProps) {
   const [client, setClient] = useState({ value: "", label: "" });
 
-  const { control, register, watch } = useForm();
+  const [ordersByClient, setOrdersByClient] = useState<IOrder[] | []>([]);
+  const [isLoadingOrders, setIsLoadingOrders] = useState(false);
 
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { control, register, watch } = useForm();
 
   const currentClient = watch("cliente") as any;
 
   const columns = useMemo(
     (): Column[] => [
       {
-        Header: "Número",
-        accessor: "numero",
+        Header: "Quitada",
+        accessor: "placa_quitada",
+        Cell: ({ row }: any) => (
+          <Checkbox
+            size="md"
+            isChecked={row.original?.placaQuitada}
+            onChange={() => {
+              setOrdersByClient((previousPlaques: any) => {
+                const updatedPlaques = previousPlaques.map((item: any) => {
+                  return item.placa === row.original.placa
+                    ? {
+                        ...item,
+                        placaQuitada: !item.placaQuitada,
+                      }
+                    : { ...item };
+                });
+
+                return updatedPlaques;
+              });
+            }}
+          />
+        ),
       },
       {
-        Header: "Data Emissão",
-        accessor: "dateCreated",
-        Cell: ({ value }) => formatDate(value),
+        Header: "Placa",
+        accessor: "placa",
       },
       {
-        Header: "Valor do pedido",
-        accessor: "valorTotal",
-        Cell: ({ value }) => currency(value),
-      },
-      {
-        Header: "Status",
-        accessor: "status",
-        Cell: ({ value }) => upper(value),
+        Header: "Descrição",
+        accessor: "descricao",
       },
     ],
     []
@@ -84,52 +93,42 @@ export function Plaque({ clients, orders }: PlaqueProps) {
     }
   }
 
-  function seekOrdersbyClient() {
-    setIsLoadingData(true);
-    const filteredOrders = orders.filter((o) => o.cliente === client.value);
+  async function loadOrdersByClient() {
+    if (client.value === "") {
+      toast.warning("Você deve selecionar um cliente antes de continuar.");
 
-    setIsLoadingData(false);
-    setTableData(filteredOrders);
+      return;
+    }
+
+    try {
+      setIsLoadingOrders(true);
+      const response = await getOrderByClient(client.value);
+
+      setOrdersByClient(response);
+      setIsLoadingOrders(false);
+    } catch (error) {
+      setIsLoadingOrders(false);
+      toast.error("Erro ao carrregar placas deste pedido.");
+    }
   }
 
-  const renderFormEditModal = () => {
-    return (
-      <ModalDialog
-        maxWidth="70%"
-        textAction="Editar"
-        isOpen={isOpen}
-        onClose={onClose}
-        onAction={() => {}}
-      >
-        <Box mt={10}>
-          <DataTable
-            columns={[
-              {
-                Header: "Placa quitada",
-                accessor: "placa_quitada",
-                Cell: () => <Checkbox size="md" />,
-              },
-              {
-                Header: "Nome",
-                accessor: "nome",
-              },
-            ]}
-            data={[
-              {
-                nome: "TESTE 1",
-              },
-              {
-                nome: "TESTE 2",
-              },
-              {
-                nome: "TESTE 3",
-              },
-            ]}
-          />
-        </Box>
-      </ModalDialog>
+  function updateProducts() {
+    const updatedPlaques = ordersByClient.filter(
+      (item) => item.placaQuitada === true
     );
-  };
+
+    updatedPlaques.forEach(async (item: any) => {
+      try {
+        await updatePlaques(item);
+      } catch (error) {
+        toast.error("Erro ao atualizar placas.");
+
+        return;
+      }
+    });
+
+    toast.success("Placas selecionadas quitadas com sucesso!");
+  }
 
   return (
     <Box w="100%" flex={1}>
@@ -139,39 +138,55 @@ export function Plaque({ clients, orders }: PlaqueProps) {
         </Heading>
       </Flex>
 
-      <HStack w="45%" mb={10}>
-        <Box flex={1}>
-          <FormLabel fontWeight="bold">Cliente:</FormLabel>
-          <AsyncSelect
-            control={control}
-            loadOptions={clientOptions}
-            value={currentClient}
-            onChangeOption={setClient}
-            {...register("cliente")}
-          />
-        </Box>
+      <Card bg="whiteAlpha.600" p={5}>
+        <HStack w="45%" mb={10}>
+          <Box flex={1}>
+            <FormLabel color="gray.500" fontWeight="bold">
+              Cliente:
+            </FormLabel>
+            <AsyncSelect
+              control={control}
+              loadOptions={clientOptions}
+              value={currentClient}
+              onChangeOption={setClient}
+              {...register("cliente")}
+            />
+          </Box>
+          <Button
+            marginTop="auto"
+            fontSize={15}
+            bg="pink.300"
+            color="gray.50"
+            _hover={{
+              bg: "pink.400",
+            }}
+            onClick={() => loadOrdersByClient()}
+          >
+            BUSCAR
+          </Button>
+        </HStack>
+
+        <DataTable
+          isLoading={isLoadingOrders}
+          columns={columns}
+          data={ordersByClient}
+        />
+
         <Button
-          marginTop="auto"
+          w={120}
+          ml="auto"
+          marginTop="10"
           fontSize={15}
-          bg="pink.300"
+          bg="green.400"
           color="gray.50"
           _hover={{
-            bg: "pink.400",
+            bg: "green.500",
           }}
-          onClick={() => seekOrdersbyClient()}
+          onClick={() => updateProducts()}
         >
-          BUSCAR
+          EDITAR
         </Button>
-      </HStack>
-
-      <DataTable
-        isLoading={isLoadingData}
-        columns={columns}
-        data={tableData}
-        onRowEdit={onOpen}
-      />
-
-      {renderFormEditModal()}
+      </Card>
     </Box>
   );
 }

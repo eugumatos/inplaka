@@ -1,4 +1,4 @@
-import { Stack, Box, Text } from "@chakra-ui/react";
+import { Stack, Flex, Text } from "@chakra-ui/react";
 import { PaginationItem } from "./PaginationItem";
 
 interface PaginationProps {
@@ -47,10 +47,19 @@ export function Pagination({
       justify="space-between"
       align="center"
     >
-      <Box>
-        <strong>{currentPage}</strong> - <strong>{registerPerPage}</strong> de{" "}
-        <strong>{totalCountOfRegisters}</strong>
-      </Box>
+      <Flex gap={1}>
+        <Text color="gray.500" fontWeight="bold">
+          {currentPage}
+        </Text>{" "}
+        -{" "}
+        <Text color="gray.500" fontWeight="bold">
+          {registerPerPage}
+        </Text>{" "}
+        de{" "}
+        <Text color="gray.500" fontWeight="bold">
+          {totalCountOfRegisters}
+        </Text>
+      </Flex>
       <Stack direction="row" spacing="2">
         {currentPage > 1 + siblingsCount && (
           <>

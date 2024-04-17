@@ -154,9 +154,9 @@ export function DataTable<T extends object>({
       </Flex>
 
       <Table {...getTableProps()}>
-        {headerGroups.map((headerGroup) => (
+        {headerGroups.map((headerGroup, key) => (
           <>
-            <Thead {...headerGroup.getHeaderGroupProps()}>
+            <Thead {...headerGroup.getHeaderGroupProps()} key={key}>
               <Tr>
                 {headerGroup.headers.map((column) => (
                   <>

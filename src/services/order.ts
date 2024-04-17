@@ -24,6 +24,17 @@ export async function getOrder(id: string): Promise<IOrder> {
   return res.json();
 }
 
+export async function getOrderByClient(id: string): Promise<IOrder[]> {
+  const res = await fetch(`${url}/PedidoVenda/FindByClient/${id}`);
+
+  if (!res.ok) {
+    // This will activate the closest `error.js` Error Boundary
+    throw new Error("Failed to fetch data");
+  }
+
+  return res.json();
+}
+
 export async function validateExistingPlaques(placa: string): Promise<[]> {
   const res = await fetch(
     `${url}/PedidoVendaProduto/GetValidaPlacaJaExiste/${placa}`
@@ -66,6 +77,20 @@ export async function updateOrder(id: string, order: OrderFormData) {
   if (!res.ok) {
     // This will activate the closest `error.js` Error Boundary
     throw new Error("Failed to delete data");
+  }
+}
+export async function updatePlaques(order: OrderFormData) {
+  const res = await fetch(`${url}/PedidoVendaProduto`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(order),
+  });
+
+  if (!res.ok) {
+    // This will activate the closest `error.js` Error Boundary
+    throw new Error("Failed to update data");
   }
 }
 
