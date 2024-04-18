@@ -4,6 +4,7 @@ export const stockFormSchema = yup.object().shape({
   codigoMovimento: yup.string(),
   descricao: yup.string(),
   produto: yup.string(),
+  produtoNome: yup.string(),
   quantidade: yup.number(),
 });
 

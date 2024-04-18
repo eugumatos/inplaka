@@ -138,8 +138,12 @@ export const PopoverPlaqueForm = ({
                         label="Placa"
                         value={plaque.descricao}
                         textTransform="uppercase"
+                        maxLength={7}
                         onChange={(e) => {
-                          setPlaque({ ...plaque, descricao: e.target.value });
+                          setPlaque({
+                            ...plaque,
+                            descricao: e.target.value.trim(),
+                          });
                         }}
                       />
                     </Flex>
@@ -257,8 +261,9 @@ export const PopoverPlaqueForm = ({
               label="Digite o número da placa"
               value={plaque.descricao}
               textTransform="uppercase"
+              maxLength={7}
               onChange={(e) => {
-                setPlaque({ ...plaque, descricao: e.target.value });
+                setPlaque({ ...plaque, descricao: e.target.value.trim() });
               }}
             />
             <Button

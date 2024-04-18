@@ -23,11 +23,6 @@ export function Stock() {
   const columns = useMemo(
     (): Column[] => [
       {
-        Header: "Descrição",
-        accessor: "descricao",
-        Cell: ({ value }) => filterText(value),
-      },
-      {
         Header: "Produto",
         accessor: "produtoNome",
         Cell: ({ value }) => filterText(value),
