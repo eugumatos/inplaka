@@ -4,21 +4,22 @@ import {
   DrawerContent,
   DrawerCloseButton,
   DrawerBody,
+  Center,
+  Spinner,
 } from "@chakra-ui/react";
 import { OrderForm } from "@/components/Forms/OrderForm";
 
 interface OrderDraweProps {
-  id?: string;
-  isOpen: boolean;
   onClose: () => void;
-  onSubmit: any;
+
+  isOpen: boolean;
+  isLoadingContent?: boolean;
 }
 
 export function OrderDrawer({
-  id,
   isOpen,
   onClose,
-  onSubmit,
+  isLoadingContent,
 }: OrderDraweProps) {
   return (
     <Drawer
@@ -32,7 +33,13 @@ export function OrderDrawer({
       <DrawerContent>
         <DrawerCloseButton />
         <DrawerBody>
-          <OrderForm id={id} onSubmit={onSubmit} />
+          {isLoadingContent ? (
+            <Center w="100%" h="90vh">
+              <Spinner size="lg" />
+            </Center>
+          ) : (
+            <OrderForm id={""} onSubmit={() => {}} />
+          )}
         </DrawerBody>
       </DrawerContent>
     </Drawer>

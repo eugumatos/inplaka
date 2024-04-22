@@ -35,28 +35,11 @@ export function Order() {
     filterOrder,
   } = useOrder();
 
-  const {
-    seekSelectedClientOption,
-    seekSelectedSellerOption,
-    seekSelectedPaymentOption,
-  } = useOrderForm({ noFetch: true, shouldPreLoad: true });
-
   const { handleSubmit, setValue, reset } = useFormContext<OrderFormData>();
-
-  const { isOpen, onOpen, onClose } = useDisclosure();
-
-  const disclosureDestroyModal = useDisclosure();
-
-  const [submitOption, setSubmitOption] = useState<"CREATE" | "UPDATE">(
-    "CREATE"
-  );
-
   const [currentOrder, setCurrentOrder] = useState<IOrder | null>(null);
 
-  const subOption = {
-    CREATE: handleSubmit((values) => addOrder(values, onClose)),
-    UPDATE: handleSubmit((values) => editOrder(values, onClose)),
-  };
+  const disclosureDrawerModal = useDisclosure();
+  const disclosureDestroyModal = useDisclosure();
 
   const columns = useMemo(
     (): Column[] => [
@@ -88,12 +71,16 @@ export function Order() {
     []
   );
 
-  const seekCurrentOrder = (order: IOrder) => {
-    const findOrder = orders.find((o) => order.id === o.id);
+  const handleCreateOrder = () => {
+    disclosureDrawerModal.onOpen();
+  };
 
-    if (findOrder) {
-      setCurrentOrder(findOrder);
-    }
+  const handleEditOrder = () => {
+    disclosureDrawerModal.onOpen();
+  };
+
+  const handleCloseDrawer = () => {
+    disclosureDrawerModal.onClose();
   };
 
   const renderDestroyModal = () => {
@@ -102,10 +89,6 @@ export function Order() {
         isOpen={disclosureDestroyModal.isOpen}
         onClose={disclosureDestroyModal.onClose}
         onAction={() => {
-          if (currentOrder?.id) {
-            removeOrder(currentOrder.id);
-          }
-
           disclosureDestroyModal.onClose();
         }}
       />
@@ -131,12 +114,7 @@ export function Order() {
           bg="pink.300"
           color="gray.50"
           size="md"
-          onClick={() => {
-            setSubmitOption("CREATE");
-            setCurrentOrder(null);
-            reset({});
-            onOpen();
-          }}
+          onClick={handleCreateOrder}
           _hover={{
             bg: "pink.400",
           }}
@@ -150,36 +128,8 @@ export function Order() {
           isLoading={isLoading}
           columns={columns}
           data={orders}
-          onRowEdit={(row) => {
-            setSubmitOption("UPDATE");
-
-            Object.keys(row).forEach(async (key: any) => {
-              if (key === "cliente") {
-                const client = await seekSelectedClientOption(row.cliente);
-
-                return setValue(key, client);
-              }
-              if (key === "vendedor") {
-                const seller = await seekSelectedSellerOption(row.vendedor);
-
-                return setValue(key, seller);
-              }
-              if (key === "formaPagamento") {
-                const paymentOption = await seekSelectedPaymentOption(
-                  row.formaPagamento
-                );
-
-                return setValue(key, paymentOption);
-              }
-
-              return setValue(key, row[key]);
-            });
-
-            seekCurrentOrder(row);
-            onOpen();
-          }}
+          onRowEdit={handleEditOrder}
           onRowDelete={(row) => {
-            seekCurrentOrder(row);
             disclosureDestroyModal.onOpen();
           }}
           onFilterByDate={filterOrder}
@@ -187,14 +137,9 @@ export function Order() {
       </Box>
 
       <OrderDrawer
-        id={currentOrder?.id}
-        isOpen={isOpen}
-        onSubmit={subOption[submitOption]}
-        onClose={() => {
-          onClose();
-          setCurrentOrder(null);
-          reset({});
-        }}
+        isLoadingContent
+        isOpen={disclosureDrawerModal.isOpen}
+        onClose={handleCloseDrawer}
       />
 
       {renderDestroyModal()}
