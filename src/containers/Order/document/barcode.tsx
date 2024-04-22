@@ -1,5 +1,5 @@
 import React from "react";
-import { Document, Page, View, Text } from "@react-pdf/renderer";
+import { Document, Page, View, Text, Image } from "@react-pdf/renderer";
 import { styles } from "./barcodeStyles";
 
 type DocumentProps = {
@@ -33,7 +33,10 @@ export function PDFDocument({ placas }: DocumentProps) {
                   <Text>{item?.marca_modelo}</Text>
                   <Text>{item?.endereco}</Text>
                 </View>
-                <Text style={styles.titles}>QR CODE</Text>
+                <View>
+                  {/*  eslint-disable-next-line jsx-a11y/alt-text */}
+                  <Image src="code.png" style={{ width: 100, height: 100 }} />
+                </View>
               </View>
             </View>
           ))}
