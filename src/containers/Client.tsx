@@ -188,7 +188,7 @@ export function Client() {
         columns={columns}
         data={clients}
         customnAction={(row) => (
-            <Tooltip label="Customize valor para cliente">
+            <Tooltip label="Customizar valor produto para este cliente">
               <span>
                 <RiUserAddLine
                   size={20}
