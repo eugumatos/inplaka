@@ -20,8 +20,7 @@ export function Product() {
     products, 
     isLoading, 
     addProduct, 
-    editProduct, 
-    editProductByClient, 
+    editProduct,  
     removeProduct 
   } = useProducts();
 
@@ -32,8 +31,6 @@ export function Product() {
 
   const hasErrors = formState.isValid;
   
-  const formProductByClient = useForm<ProductFormByClientData>();
-
   const disclosureFormCreateModal = useDisclosure();
   const disclosureFormEditModal = useDisclosure();
   const disclosureDestroyModal = useDisclosure();
