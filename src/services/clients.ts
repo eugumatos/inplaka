@@ -48,6 +48,25 @@ export async function createClient(client: ClientFormData) {
   }
 }
 
+export async function createClientProduct(client: {
+  idCliente: string,
+  idProduto: string,
+  preco: number 
+}) {
+  const res = await fetch(`${url}/ClienteProduto`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(client),
+  });
+
+  if (!res.ok) {
+    // This will activate the closest `error.js` Error Boundary
+    throw new Error("Failed to delete data");
+  }
+}
+
 export async function updateClient(company: ClientFormData) {
   const res = await fetch(`${url}/Cliente`, {
     method: "PUT",

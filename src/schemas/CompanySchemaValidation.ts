@@ -6,6 +6,7 @@ export const companyFormSchema = yup.object().shape({
   razao_social: yup.string().required("Campo obrigatório"),
   email: yup.string().email("Email inválido"),
   ender_numero: yup.string().max(5, "Máximo 5 char"),
+  id: yup.string(),
   ender_uf: yup.string(),
   telefone1: yup.string(),
   telefone2: yup.string(),

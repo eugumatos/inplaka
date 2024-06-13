@@ -46,6 +46,7 @@ export async function createCompany(company: CompanyFormData) {
     // This will activate the closest `error.js` Error Boundary
     throw new Error("Failed to delete data");
   }
+
 }
 
 export async function updateCompany(company: CompanyFormData) {

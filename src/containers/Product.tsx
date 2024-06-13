@@ -1,8 +1,8 @@
 import { useProducts } from "@/contexts/ProductContext";
-import { ProductFormData } from "@/schemas/ProductSchemaValidation";
+import { ProductFormData, ProductFormByClientData } from "@/schemas/ProductSchemaValidation";
 import { Box, Button, Flex, Heading, useDisclosure } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
-import { useFormContext } from "react-hook-form";
+import { useForm, useFormContext, FormProvider } from "react-hook-form";
 import { Column } from "react-table";
 
 import { ProductForm } from "@/components/Forms/ProductForm";
@@ -13,10 +13,17 @@ import { DataTable } from "@/components/Table";
 import { IProduct } from "@/domains/product";
 import { filterText } from "@/utils/filterText";
 import { upper } from "@/utils/upper";
+import { ProductByClientForm } from "@/components/Forms/ProductByClientForm";
 
 export function Product() {
-  const { products, isLoading, addProduct, editProduct, removeProduct } =
-    useProducts();
+  const { 
+    products, 
+    isLoading, 
+    addProduct, 
+    editProduct, 
+    editProductByClient, 
+    removeProduct 
+  } = useProducts();
 
   const [currentProduct, setCurrentProduct] = useState<IProduct | null>(null);
 
@@ -24,10 +31,13 @@ export function Product() {
     useFormContext<ProductFormData>();
 
   const hasErrors = formState.isValid;
+  
+  const formProductByClient = useForm<ProductFormByClientData>();
 
   const disclosureFormCreateModal = useDisclosure();
   const disclosureFormEditModal = useDisclosure();
   const disclosureDestroyModal = useDisclosure();
+  const disclosureCustomModal = useDisclosure();
 
   const columns = useMemo(
     (): Column[] => [
@@ -93,7 +103,7 @@ export function Product() {
           }
         }}
       >
-        <ProductForm />
+        <ProductForm isUpdate />
       </ModalDialog>
     );
   };

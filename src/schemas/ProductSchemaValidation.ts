@@ -14,4 +14,23 @@ export const productFormSchema = yup.object().shape({
   nao_usar_para_nota_fiscal: yup.string(),
 });
 
+export const productByClientSchema = yup.object().shape({
+  valor_venda_cliente: yup.string().required("Campo obrigatório"),
+  produto: yup.object().shape({
+    value: yup
+      .string()
+      .nullable("Campo obrigatório")
+      .required("Campo obrigatório"),
+    label: yup
+      .string()
+      .nullable("Campo obrigatório")
+      .required("Campo obrigatório"),
+  }),
+    idCliente: yup.string(),
+    descricao: yup.string(),
+    valor_venda: yup.string(),
+});
+
 export type ProductFormData = yup.InferType<typeof productFormSchema>;
+
+export type ProductFormByClientData = yup.InferType<typeof productByClientSchema>;

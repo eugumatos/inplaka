@@ -202,6 +202,8 @@ export function DataTable<T extends object>({
                           </Tooltip>
                         )}
 
+                        {!!customnAction && customnAction(row.original)}
+
                         {!!onRowDelete && (
                           <Tooltip label="Excluir">
                             <span>
@@ -214,8 +216,6 @@ export function DataTable<T extends object>({
                             </span>
                           </Tooltip>
                         )}
-
-                        {!!customnAction && customnAction(row.original)}
                       </Flex>
                     </Td>
                   )}

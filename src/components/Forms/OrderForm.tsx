@@ -14,7 +14,6 @@ import {
   TabList,
   TabPanel,
   TabPanels,
-  IconButton,
   Tab,
   Checkbox,
 } from "@chakra-ui/react";
@@ -67,6 +66,8 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
 
   const containerTotalRef = useRef<null | HTMLDivElement>(null);
 
+  const currentClient = watch("cliente") as any;
+
   const {
     isLoading,
     products,
@@ -83,7 +84,7 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
     seekSelectedClientOption,
     seekSelectedSellerOption,
     formatImportData,
-  } = useOrderForm({ id });
+  } = useOrderForm({ id, clientId: currentClient?.value });
 
   const { subTotalProducts, subTotalServices, total } = calculateTotal();
 
@@ -269,7 +270,6 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
     onSubmit(formValues);
   }
 
-  const currentClient = watch("cliente") as any;
   const currentSeller = watch("vendedor") as any;
   const currentPaymentOption = watch("formaPagamento") as any;
 

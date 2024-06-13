@@ -5,7 +5,7 @@ import { getSellers } from "@/services/seller";
 import { getFormPayments } from "@/services/form-payment";
 import { IProduct } from "@/domains/product";
 import { IService } from "@/domains/service";
-import { getProducts } from "@/services/product";
+import { getProducts, getProductByClient } from "@/services/product";
 import { getServices } from "@/services/service";
 import { getOrder, getPlaques } from "@/services/order";
 import { IClient } from "@/domains/client";
@@ -20,6 +20,7 @@ interface SelectProps {
 
 interface IUseOrderFormProps {
   id?: string;
+  clientId?: string;
   noFetch?: boolean;
   shouldPreLoad?: boolean;
 }
@@ -58,6 +59,7 @@ interface UseOrderFormProps {
 
 export function useOrderForm({
   id,
+  clientId, 
   shouldPreLoad = false,
   noFetch = false,
 }: IUseOrderFormProps): UseOrderFormProps {
@@ -340,36 +342,6 @@ export function useOrderForm({
       setProducts(productsData);
     }
 
-    async function loadServiceAndProducts() {
-      try {
-        const products: IProduct[] = await getProducts();
-        const services: IService[] = await getServices();
-
-        const formattedProducts = products.map((product) => {
-          return {
-            ...product,
-            quantidade: 0,
-            placa: "",
-            placas: [],
-            valorUnitario: product.valor_venda,
-          };
-        });
-
-        const formattedServices = services.map((service) => {
-          return {
-            ...service,
-            valorUnitario: service.valor_venda,
-            quantidade: 0,
-          };
-        });
-
-        setProducts(formattedProducts);
-        setServices(formattedServices);
-      } catch (error) {
-        throw new Error("Erro ao listar produtos e serviços");
-      }
-    }
-
     async function loadServiceAnOrdersById() {
       if (!id) return;
 
@@ -384,7 +356,6 @@ export function useOrderForm({
             (product) => product.produto === item.id
           );
 
-          console.log(macthingItem);
           return {
             ...item,
             descricao: item.descricao,
@@ -401,8 +372,6 @@ export function useOrderForm({
             valorUnitario: item.valor_venda,
           };
         });
-
-        console.log(selectedProducts);
 
         const selectedServices = services.map((item) => {
           const macthingItem = response.servicos?.find(
@@ -457,13 +426,50 @@ export function useOrderForm({
       if (id) {
         loadServiceAnOrdersById();
         loadPlaqueList();
-      } else {
-        loadServiceAndProducts();
-      }
+      } 
     }
 
     setIsLoading(false);
   }, [id, noFetch, shouldPreLoad]);
+
+  useEffect(() => {
+    async function loadServiceAndProducts() {
+      try {
+        if (clientId) {
+          const products: IProduct[] = await getProductByClient(clientId);
+          
+          const formattedProducts = products.map((product) => {
+            return {
+              ...product,
+              quantidade: 0,
+              placa: "",
+              placas: [],
+              valorUnitario: product.valor_venda,
+            };
+          });
+
+          setProducts(formattedProducts);
+        }
+
+        const services: IService[] = await getServices();
+        const formattedServices = services.map((service) => {
+          return {
+            ...service,
+            valorUnitario: service.valor_venda,
+            quantidade: 0,
+          };
+        });
+
+        setServices(formattedServices);
+      } catch (error) {
+        throw new Error("Erro ao listar produtos e serviços");
+      }
+    }
+
+    if (!noFetch && !id) {
+      loadServiceAndProducts();
+    }
+  }, [noFetch, id, clientId])
 
   return {
     isLoading,

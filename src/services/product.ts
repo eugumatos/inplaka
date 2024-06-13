@@ -24,6 +24,17 @@ export async function getProduct(id: string): Promise<IProduct> {
   return res.json();
 }
 
+export async function getProductByClient(id: string): Promise<IProduct[]> {
+  const res = await fetch(`${url}/Produto/GetByIdCliente/${id}`);
+
+  if (!res.ok) {
+    // This will activate the closest `error.js` Error Boundary
+    throw new Error("Failed to fetch data");
+  }
+
+  return res.json();
+}
+
 export async function destroyProduct(id: string): Promise<void> {
   const res = await fetch(`${url}/Produto/${id}`, { method: "delete" });
 

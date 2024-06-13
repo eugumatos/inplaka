@@ -16,8 +16,13 @@ import { formatCnpjCpf } from "@/utils/formatCnpjCpf";
 import { upper } from "@/utils/upper";
 
 export function Company() {
-  const { companies, isLoading, addCompany, editCompany, removeCompany } =
-    useCompanies();
+  const { 
+    companies, 
+    isLoading, 
+    addCompany, 
+    editCompany, 
+    removeCompany 
+  } = useCompanies();
 
   const [currentCompany, setCurrentCompany] = useState<ICompany | null>(null);
 

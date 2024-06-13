@@ -1,9 +1,10 @@
 import { useClients } from "@/contexts/ClientContext";
 import { ClientFormData } from "@/schemas/ClientSchemaValidation";
-import { Box, Button, Flex, Heading, useDisclosure } from "@chakra-ui/react";
+import { Box, Button, Flex, Heading, Tooltip, useDisclosure } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
-import { useFormContext } from "react-hook-form";
+import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import { Column } from "react-table";
+import { RiUserAddLine } from "react-icons/ri";
 
 import { ClientForm } from "@/components/Forms/ClientForm";
 import { ModalDialog } from "@/components/Modals";
@@ -13,6 +14,8 @@ import { DataTable } from "@/components/Table";
 import { IClient } from "@/domains/client";
 import { filterText } from "@/utils/filterText";
 import { upper } from "@/utils/upper";
+import { ProductByClientForm } from "@/components/Forms/ProductByClientForm";
+import { ProductFormByClientData } from "@/schemas/ProductSchemaValidation";
 
 export function Client() {
   const {
@@ -22,6 +25,7 @@ export function Client() {
     addClient,
     editClient,
     removeClient,
+    editProductByClient
   } = useClients();
 
   const [currentClient, setCurrentClient] = useState<IClient | null>(null);
@@ -29,11 +33,14 @@ export function Client() {
   const { handleSubmit, reset, setValue, formState } =
     useFormContext<ClientFormData>();
 
+  const formProductByClient = useForm<ProductFormByClientData>();
+  
   const hasErrors = formState.isValid;
 
   const disclosureFormCreateModal = useDisclosure();
   const disclosureFormEditModal = useDisclosure();
   const disclosureDestroyModal = useDisclosure();
+  const disclosureCustomModal = useDisclosure();
 
   const columns = useMemo(
     (): Column[] => [
@@ -73,6 +80,30 @@ export function Client() {
       return findSeller;
     }
   };
+
+  const renderCustomValueProductByClientModal = () => {
+    return (
+      <ModalDialog
+        maxWidth="70%"
+        textAction="Editar"
+        isOpen={disclosureCustomModal.isOpen}
+        onClose={disclosureCustomModal.onClose}
+        onAction={() => {
+          formProductByClient.handleSubmit(editProductByClient)();
+          
+          if (formProductByClient.formState.isValid) {
+            disclosureCustomModal.onClose();
+          }
+
+          disclosureCustomModal.onClose();
+        }}
+      >
+        <FormProvider {...formProductByClient}>
+          <ProductByClientForm />
+        </FormProvider>
+      </ModalDialog>
+    )
+  }
 
   const renderFormCreateModal = () => {
     return (
@@ -156,6 +187,21 @@ export function Client() {
         isLoading={isLoading}
         columns={columns}
         data={clients}
+        customnAction={(row) => (
+            <Tooltip label="Customize valor para cliente">
+              <span>
+                <RiUserAddLine
+                  size={20}
+                  onClick={() => {
+                    formProductByClient.reset();
+                    formProductByClient.setValue('idCliente', row?.id);
+                    disclosureCustomModal.onOpen();
+                  }}
+                  style={{ cursor: "pointer" }}
+                />
+              </span>
+            </Tooltip>
+        )}
         onRowEdit={(row) => {
           Object.keys(row).forEach(async (key: any) => {
             if (key === "vendedorPadrao") {
@@ -165,6 +211,7 @@ export function Client() {
             }
 
             return setValue(key, row[key]);
+            
           });
 
           disclosureFormEditModal.onOpen();
@@ -177,6 +224,7 @@ export function Client() {
 
       {renderFormCreateModal()}
       {renderFormEditModal()}
+      {renderCustomValueProductByClientModal()}
 
       {renderDestroyModal()}
     </Box>

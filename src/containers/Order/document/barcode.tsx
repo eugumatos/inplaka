@@ -25,7 +25,10 @@ export function PDFDocument({ placas }: DocumentProps) {
         <View style={styles.container}>
           {placas?.map((item, key) => (
             <View key={key} style={[styles.main, { marginBottom: 30 }]}>
-              <Text style={styles.titles}>CÓDIGO DE BARRAS</Text>
+              <View>
+                {/*  eslint-disable-next-line jsx-a11y/alt-text */}
+                <Image src="barcode.png" style={{ height: 80 }} />
+              </View>
               <View style={styles.containerBarcode}>
                 <View style={styles.content}>
                   <Text>{item?.descricao}</Text>

@@ -5,7 +5,11 @@ import { Input } from "@/components/Input";
 import { InputCurrency } from "@/components/Input/InputCurrency";
 import { Select } from "@/components/Select";
 
-export function ProductForm() {
+type ProductFormProps = {
+  isUpdate?: boolean
+}
+
+export function ProductForm({ isUpdate }: ProductFormProps) {
   const {
     register,
     control,
@@ -19,7 +23,7 @@ export function ProductForm() {
         <Flex gap={4} alignItems="center" wrap="wrap">
           <Input
             mt={4}
-            maxW="75%"
+            maxW={isUpdate ? "50%" : "75%"}
             label="Descrição"
             placeholder="Ex: Inplaka"
             {...register("descricao")}
@@ -29,6 +33,20 @@ export function ProductForm() {
           <Flex direction="column" flex={1} gap={2}>
             <Flex gap={2}>
               <Text>Valor venda </Text>
+              <Text color="red.500">*</Text>
+            </Flex>
+            <InputCurrency
+              mt={2}
+              name="valor_venda_cliente"
+              placeholder="R$ 5.000"
+              control={control}
+              error={errors.valor_venda}
+              isDisabled={isUpdate}
+            />
+          </Flex>
+          <Flex direction="column" flex={1} gap={2} hidden={!isUpdate}>
+            <Flex gap={2}>
+              <Text>Valor venda cliente</Text>
               <Text color="red.500">*</Text>
             </Flex>
             <InputCurrency

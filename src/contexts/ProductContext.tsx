@@ -1,5 +1,5 @@
 import { ReactNode, createContext, useReducer, useContext } from "react";
-import { ProductFormData } from "@/schemas/ProductSchemaValidation";
+import { ProductFormByClientData, ProductFormData } from "@/schemas/ProductSchemaValidation";
 import { IProduct } from "@/domains/product";
 import { productReducer } from "@/reducers/productReducer";
 import {
@@ -8,6 +8,7 @@ import {
   getProducts,
   updateProduct,
 } from "@/services/product";
+import { createClientProduct } from "@/services/clients"
 import { toast } from "react-toastify";
 import currency from "currency.js";
 

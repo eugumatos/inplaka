@@ -1,11 +1,11 @@
-import { ReactNode, createContext, useReducer, useContext } from "react";
+import { ReactNode, createContext, useReducer, useContext, useCallback } from "react";
 import { CompanyFormData } from "@/schemas/CompanySchemaValidation";
 import { ICompany } from "@/domains/company";
-import { companyReducer } from "@/reducers/companyReducer";
+import { companyReducer } from "@/reducers/company/reducer";
+import { loadingCompanyAction, errorCompanyAction, addNewCompanyAction, editCompanyAction, deleteCompanyAction } from "@/reducers/company/action"
 import {
   createCompany,
   destroyCompany,
-  getCompanies,
   updateCompany,
 } from "@/services/company";
 import { toast } from "react-toastify";
@@ -29,61 +29,50 @@ const CompanyContext = createContext<CompanyProviderProps>(
 );
 
 function CompanyProvider({ companies = [], children }: CompanyContextProps) {
-  const [state, dispatch] = useReducer(companyReducer, {
-    companies,
-    isLoading: false,
-    isError: false,
-  });
+  const [companyState, dispatch] =  useReducer(companyReducer, {
+      companies,
+      isLoading: false,
+      isSuccess: false,
+      isError: false,
+    });
 
   async function addCompany(company: CompanyFormData) {
     try {
-      dispatch({ type: "LOADING" });
+      dispatch(loadingCompanyAction());
+      
       await createCompany(company);
 
-      const newCompanies = await getCompanies();
-
-      dispatch({ type: "RELOAD_COMPANY", payload: newCompanies });
+      dispatch(addNewCompanyAction(company));
 
       toast.success("Empresa criada com sucesso!");
     } catch (error) {
-      dispatch({ type: "ERROR" });
+      dispatch(errorCompanyAction());
       toast.error("Erro ao criar empresa");
     }
   }
 
   async function editCompany(company: CompanyFormData) {
     try {
-      dispatch({ type: "LOADING" });
+      dispatch(loadingCompanyAction());
 
       await updateCompany(company);
-      const newCompanies = await getCompanies();
-
-      dispatch({ type: "RELOAD_COMPANY", payload: newCompanies });
+    
+      dispatch(editCompanyAction(company));
 
       toast.success("Empresa editada com sucesso!");
     } catch (error) {
-      dispatch({ type: "ERROR" });
+      dispatch(errorCompanyAction());
       toast.error("Erro ao editar empresa");
     }
   }
 
   async function removeCompany(company: ICompany) {
     try {
-      dispatch({ type: "LOADING" });
+      dispatch(loadingCompanyAction());
+    
+      await destroyCompany(company.id);
 
-      const findIdCompany = state.companies.find(
-        (c) => c.cnpj === company.cnpj
-      );
-
-      if (!findIdCompany) {
-        throw new Error("ID Company not found!");
-      }
-
-      await destroyCompany(findIdCompany.id);
-
-      const companies = await getCompanies();
-
-      dispatch({ type: "RELOAD_COMPANY", payload: companies });
+      dispatch(deleteCompanyAction(company.id));
 
       toast.success("Empresa removida com sucesso!");
     } catch (error) {
@@ -95,9 +84,9 @@ function CompanyProvider({ companies = [], children }: CompanyContextProps) {
   return (
     <CompanyContext.Provider
       value={{
-        isError: state.isError,
-        isLoading: state.isLoading,
-        companies: state.companies,
+        isError: companyState.isError,
+        isLoading: companyState.isLoading,
+        companies: companyState.companies,
         addCompany,
         removeCompany,
         editCompany,
