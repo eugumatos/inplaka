@@ -16,19 +16,6 @@ export const productFormSchema = yup.object().shape({
 
 export const productByClientSchema = yup.object().shape({
   valor_venda_cliente: yup.string().required("Campo obrigatório"),
-  produto: yup.object().shape({
-    value: yup
-      .string()
-      .nullable("Campo obrigatório")
-      .required("Campo obrigatório"),
-    label: yup
-      .string()
-      .nullable("Campo obrigatório")
-      .required("Campo obrigatório"),
-  }),
-    idCliente: yup.string(),
-    descricao: yup.string(),
-    valor_venda: yup.string(),
 });
 
 export type ProductFormData = yup.InferType<typeof productFormSchema>;

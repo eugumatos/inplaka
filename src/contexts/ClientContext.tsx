@@ -10,7 +10,6 @@ import { IClient } from "@/domains/client";
 import { clientReducer } from "@/reducers/clientReducer";
 import {
   createClient,
-  createClientProduct,
   destroyClient,
   getClients,
   updateClient,
@@ -38,7 +37,6 @@ interface ClientProviderProps {
   editClient: (client: ClientFormData) => void;
   removeClient: (client: IClient) => void;
   sellerOptions: (value: string) => Promise<SelectProps[]>;
-  editProductByClient: (client: ProductFormByClientData) => void;
 }
 
 const ClientContext = createContext<ClientProviderProps>(
@@ -115,28 +113,6 @@ function ClientProvider({ clients = [], children }: ClientContextProps) {
     }
   }
 
-  async function editProductByClient(client: ProductFormByClientData) {
-    try {
-      dispatch({ type: "LOADING" });
-        
-      await createClientProduct({
-        idCliente: client?.idCliente || '',
-        idProduto: client.produto.value,
-        preco: Number(unmaskText(client.valor_venda_cliente))
-      });
-      
-      const newClients = await getClients();
-
-      dispatch({ type: "RELOAD_CLIENT", payload: newClients });
-      
-      toast.success("Valor cliente produto editado com sucesso!");
-    } catch (error) {
-      dispatch({ type: "ERROR" });
-      toast.error("Erro ao editar valor cliente produto.");
-    }
-  }
-
-
   async function removeClient(client: IClient) {
     try {
       dispatch({ type: "LOADING" });
@@ -170,7 +146,6 @@ function ClientProvider({ clients = [], children }: ClientContextProps) {
         removeClient,
         editClient,
         sellerOptions,
-        editProductByClient,
       }}
     >
       {children}

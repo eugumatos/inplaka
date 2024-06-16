@@ -25,7 +25,6 @@ export function Client() {
     addClient,
     editClient,
     removeClient,
-    editProductByClient
   } = useClients();
 
   const [currentClient, setCurrentClient] = useState<IClient | null>(null);
@@ -40,7 +39,6 @@ export function Client() {
   const disclosureFormCreateModal = useDisclosure();
   const disclosureFormEditModal = useDisclosure();
   const disclosureDestroyModal = useDisclosure();
-  const disclosureCustomModal = useDisclosure();
 
   const columns = useMemo(
     (): Column[] => [
@@ -81,30 +79,6 @@ export function Client() {
     }
   };
 
-  const renderCustomValueProductByClientModal = () => {
-    return (
-      <ModalDialog
-        maxWidth="70%"
-        textAction="Editar"
-        isOpen={disclosureCustomModal.isOpen}
-        onClose={disclosureCustomModal.onClose}
-        onAction={() => {
-          formProductByClient.handleSubmit(editProductByClient)();
-          
-          if (formProductByClient.formState.isValid) {
-            disclosureCustomModal.onClose();
-          }
-
-          disclosureCustomModal.onClose();
-        }}
-      >
-        <FormProvider {...formProductByClient}>
-          <ProductByClientForm />
-        </FormProvider>
-      </ModalDialog>
-    )
-  }
-
   const renderFormCreateModal = () => {
     return (
       <ModalDialog
@@ -140,7 +114,7 @@ export function Client() {
           }
         }}
       >
-        <ClientForm />
+        <ClientForm id={currentClient?.id} />
       </ModalDialog>
     );
   };
@@ -187,21 +161,6 @@ export function Client() {
         isLoading={isLoading}
         columns={columns}
         data={clients}
-        customnAction={(row) => (
-            <Tooltip label="Customizar valor produto para este cliente">
-              <span>
-                <RiUserAddLine
-                  size={20}
-                  onClick={() => {
-                    formProductByClient.reset();
-                    formProductByClient.setValue('idCliente', row?.id);
-                    disclosureCustomModal.onOpen();
-                  }}
-                  style={{ cursor: "pointer" }}
-                />
-              </span>
-            </Tooltip>
-        )}
         onRowEdit={(row) => {
           Object.keys(row).forEach(async (key: any) => {
             if (key === "vendedorPadrao") {
@@ -209,9 +168,9 @@ export function Client() {
 
               return setValue(key, seller);
             }
-
-            return setValue(key, row[key]);
             
+            setCurrentClient(row);
+            return setValue(key, row[key]);
           });
 
           disclosureFormEditModal.onOpen();
@@ -224,7 +183,6 @@ export function Client() {
 
       {renderFormCreateModal()}
       {renderFormEditModal()}
-      {renderCustomValueProductByClientModal()}
 
       {renderDestroyModal()}
     </Box>
