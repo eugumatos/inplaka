@@ -13,7 +13,6 @@ import { DataTable } from "@/components/Table";
 import { IProduct } from "@/domains/product";
 import { filterText } from "@/utils/filterText";
 import { upper } from "@/utils/upper";
-import { ProductByClientForm } from "@/components/Forms/ProductByClientForm";
 
 export function Product() {
   const { 

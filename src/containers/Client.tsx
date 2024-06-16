@@ -14,7 +14,6 @@ import { DataTable } from "@/components/Table";
 import { IClient } from "@/domains/client";
 import { filterText } from "@/utils/filterText";
 import { upper } from "@/utils/upper";
-import { ProductByClientForm } from "@/components/Forms/ProductByClientForm";
 import { ProductFormByClientData } from "@/schemas/ProductSchemaValidation";
 
 export function Client() {
