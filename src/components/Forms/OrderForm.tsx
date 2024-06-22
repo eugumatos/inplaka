@@ -16,12 +16,16 @@ import {
   TabPanels,
   Tab,
   Checkbox,
+  IconButton,
+  useDisclosure,
+  Tooltip
 } from "@chakra-ui/react";
 import {
   RiArrowDownSLine,
   RiUser3Line,
   RiStoreLine,
   RiBankCard2Line,
+  RiPrinterLine
 } from "react-icons/ri";
 import { Column } from "react-table";
 import { useFormContext } from "react-hook-form";
@@ -39,6 +43,7 @@ import { useOrderForm } from "@/containers/Order/hooks/useOrderForm";
 import { toast } from "react-toastify";
 import currency from "currency.js";
 import { upper } from "@/utils/upper";
+import { FinishingModal } from "@/containers/Order/FinishingModal";
 import { useOrder } from "@/contexts/OrderContext";
 
 interface IPlaque {
@@ -85,6 +90,8 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
     seekSelectedSellerOption,
     formatImportData,
   } = useOrderForm({ id, clientId: currentClient?.value });
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const { subTotalProducts, subTotalServices, total } = calculateTotal();
 
@@ -190,6 +197,15 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
     containerTotalRef.current?.scrollIntoView({ behavior: "smooth" });
   }
 
+  const renderFinishingOrderModal = () => {
+    return (
+      <FinishingModal
+        isOpen={isOpen}
+        onClose={onClose}
+      />
+    );
+  };
+
   const handleImport = async (parsedData: any) => {
     const formattedData: any = parsedData;
 
@@ -290,242 +306,263 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
 
   return (
     <form>
-      <Box h="100vh">
-        <Heading size="md">Dados do pedido</Heading>
+      <Flex h="200vh" flexDirection="column" gap={4}>
+        <Box flex={1}>
+          <Heading size="md">Dados do pedido</Heading>
 
-        <Flex direction="column" gap={4} justify="space-between">
-          <HStack mt={5} gap={4} alignItems="center">
-            <Box flex={1}>
-              <FormLabel>Cliente:</FormLabel>
-              <AsyncSelect
-                control={control}
-                loadOptions={clientOptions}
-                value={currentClient}
-                error={errors.cliente?.label}
-                {...register("cliente")}
-              />
-            </Box>
-            <Box flex={1}>
-              <FormLabel>Vendedor:</FormLabel>
-              <AsyncSelect
-                control={control}
-                value={currentSeller}
-                loadOptions={sellerOptions}
-                error={errors.vendedor?.label}
-                {...register("vendedor")}
-              />
-            </Box>
-            <Box flex={1}>
-              <FormLabel>Forma pagamento:</FormLabel>
-              <AsyncSelect
-                control={control}
-                value={currentPaymentOption}
-                loadOptions={paymentOptions}
-                error={errors.formaPagamento?.label}
-                {...register("formaPagamento")}
-              />
-            </Box>
-          </HStack>
+          <Flex direction="column" gap={4} justify="space-between">
+            <HStack mt={5} gap={4} alignItems="center">
+              <Box flex={1}>
+                <FormLabel>Cliente:</FormLabel>
+                <AsyncSelect
+                  control={control}
+                  loadOptions={clientOptions}
+                  value={currentClient}
+                  error={errors.cliente?.label}
+                  {...register("cliente")}
+                />
+              </Box>
+              <Box flex={1}>
+                <FormLabel>Vendedor:</FormLabel>
+                <AsyncSelect
+                  control={control}
+                  value={currentSeller}
+                  loadOptions={sellerOptions}
+                  error={errors.vendedor?.label}
+                  {...register("vendedor")}
+                />
+              </Box>
+              <Box flex={1}>
+                <FormLabel>Forma pagamento:</FormLabel>
+                <AsyncSelect
+                  control={control}
+                  value={currentPaymentOption}
+                  loadOptions={paymentOptions}
+                  error={errors.formaPagamento?.label}
+                  {...register("formaPagamento")}
+                />
+              </Box>
+            </HStack>
 
-          <Tabs isManual variant="enclosed">
-            <TabList>
-              <Tab>Produtos</Tab>
-              <Tab>Serviços</Tab>
-              <Tab hidden={!id}>Placas</Tab>
-            </TabList>
-            <TabPanels mt={5}>
-              <TabPanel p={0}>
-                <DataTable
-                  isLoading={isLoading}
-                  showGeneratedData={!!id}
-                  generatedData={products[0]?.placas}
-                  onImport={handleImport}
-                  disableImport={!!id}
-                  columns={columns}
-                  data={products}
-                  itemsPerPage={5}
-                  customnAction={(row) => (
-                    <Flex gap={4} justify="flex-end">
+            <Tabs isManual variant="enclosed">
+              <TabList>
+                <Tab>Produtos</Tab>
+                <Tab>Serviços</Tab>
+                <Tab hidden={!id}>Placas</Tab>
+              </TabList>
+              <TabPanels mt={5}>
+                <TabPanel p={0}>
+                  <DataTable
+                    isLoading={isLoading}
+                    customnButtonTable={() => id ? (
+                      <Tooltip label="Imprimir">
+                        <IconButton 
+                          aria-label="Print"
+                          bg="cyan.500"
+                          onClick={onOpen}
+                          icon={<RiPrinterLine color="#fff" />}
+                          _hover={{
+                            bg: "cyan.400",
+                          }}
+                          isDisabled
+                        />
+                      </Tooltip>
+                    ) : <></>}
+                    showGeneratedData={!!id}
+                    generatedData={products[0]?.placas}
+                    onImport={handleImport}
+                    disableImport={!!id}
+                    columns={columns}
+                    data={products}
+                    itemsPerPage={5}
+                    customnAction={(row) => (
+                      <Flex gap={4} justify="flex-end">
+                        <InputQuantity
+                          key={row.id}
+                          name="produto"
+                          maxQ={row.unidade}
+                          maxW="50%"
+                          forceDisabled={!!id}
+                          value={row.quantidade}
+                          onChangeQuantity={(value) => {
+                            updateProductAmount(row, value);
+                          }}
+                        />
+                        <Box>
+                          <PopoverPlaqueForm
+                            product={row}
+                            updateProductPlaque={updateProductPlaque}
+                            removeProductPlaque={removeProductPlaque}
+                            isDisabled={+row.unidade <= 0 || !!id}
+                          />
+                        </Box>
+                      </Flex>
+                    )}
+                  />
+                </TabPanel>
+                <TabPanel p={0}>
+                  <DataTable
+                    isLoading={isLoading}
+                    columns={columns}
+                    data={services}
+                    itemsPerPage={5}
+                    customnAction={(row) => (
                       <InputQuantity
                         key={row.id}
-                        name="produto"
-                        maxQ={row.unidade}
-                        maxW="50%"
+                        name="servico"
                         forceDisabled={!!id}
+                        maxQ={row.unidade}
                         value={row.quantidade}
+                        maxW="50%"
                         onChangeQuantity={(value) => {
-                          updateProductAmount(row, value);
+                          updateServiceAmount(row, value);
                         }}
                       />
-                      <Box>
-                        <PopoverPlaqueForm
-                          product={row}
-                          updateProductPlaque={updateProductPlaque}
-                          removeProductPlaque={removeProductPlaque}
-                          isDisabled={+row.unidade <= 0 || !!id}
-                        />
-                      </Box>
-                    </Flex>
-                  )}
-                />
-              </TabPanel>
-              <TabPanel p={0}>
-                <DataTable
-                  isLoading={isLoading}
-                  columns={columns}
-                  data={services}
-                  itemsPerPage={5}
-                  customnAction={(row) => (
-                    <InputQuantity
-                      key={row.id}
-                      name="servico"
-                      forceDisabled={!!id}
-                      maxQ={row.unidade}
-                      value={row.quantidade}
-                      maxW="50%"
-                      onChangeQuantity={(value) => {
-                        updateServiceAmount(row, value);
-                      }}
-                    />
-                  )}
-                />
-              </TabPanel>
-              <TabPanel hidden={!id}>
-                <DataTable columns={columnsPlaque} data={allPlaques} />
-              </TabPanel>
-            </TabPanels>
-          </Tabs>
+                    )}
+                  />
+                </TabPanel>
+                <TabPanel hidden={!id}>
+                  <DataTable columns={columnsPlaque} data={allPlaques} />
+                </TabPanel>
+              </TabPanels>
+            </Tabs>
 
-          <Button
-            mt="auto"
-            ml="auto"
-            type="button"
-            w="40%"
-            bg="transaprent"
-            border="1px"
-            onClick={onScrollToTotal}
-            rightIcon={<RiArrowDownSLine size={20} />}
-          >
-            Ir para fechamento do pedido
-          </Button>
-        </Flex>
-      </Box>
-
-      <Divider my={3} orientation="horizontal" />
-
-      <Box ref={containerTotalRef} h="100vh">
-        <Flex h="78%" direction="column" align="space-between">
-          <Box>
-            <Heading size="lg">Total</Heading>
-            <VStack mt={10} spacing={3} align="stretch" justify="center">
-              <Flex gap={2}>
-                <Icon as={RiUser3Line} boxSize={5} />
-                <Text size="md" fontWeight="bold">
-                  Cliente:
-                </Text>
-                <Text size="md">{currentClient?.label}</Text>
-              </Flex>
-              <Flex gap={2}>
-                <Icon as={RiStoreLine} boxSize={5} />
-                <Text size="md" fontWeight="bold">
-                  Vendedor:
-                </Text>
-                <Text size="md">{currentSeller?.label}</Text>
-              </Flex>
-              <Flex gap={2}>
-                <Icon as={RiBankCard2Line} boxSize={5} />
-                <Text size="md" fontWeight="bold">
-                  Forma de pagamento:
-                </Text>
-                <Text size="md">{currentPaymentOption?.label}</Text>
-              </Flex>
-            </VStack>
-          </Box>
-        </Flex>
-
-        {products
-          .filter((product) => product.quantidade > 0)
-          .map((product) => (
-            <Flex key={product.id} justify="flex-start" my={1}>
-              <Flex gap={1}>
-                <Text fontSize="sm" fontWeight="bold">
-                  {product.quantidade}x
-                </Text>
-                <Text fontSize="sm">{product.descricao}</Text>
-              </Flex>
-            </Flex>
-          ))}
-
-        {services
-          .filter((service) => service.quantidade > 0)
-          .map((service) => (
-            <Flex key={service.id} justify="flex-start" my={1}>
-              <Flex gap={1}>
-                <Text fontSize="sm" fontWeight="bold">
-                  {service.quantidade}x
-                </Text>
-                <Text fontSize="sm">{service.descricao}</Text>
-              </Flex>
-            </Flex>
-          ))}
-
-        <Box w="100%" mt={4}>
-          <Text size="md">Subtotal: {currencyFormat(subTotalProducts)}</Text>
-          <Text size="md">Serviços: {currencyFormat(subTotalServices)}</Text>
-          <Flex my={2}>
-            <Text fontSize={20} fontWeight="bold">
-              {" "}
-              Total da venda:
-            </Text>
-            <Text ml={2} fontSize={20}>
-              {currencyFormat(totalValue)}
-            </Text>
+            <Button
+              mt="auto"
+              ml="auto"
+              type="button"
+              w="40%"
+              bg="transaprent"
+              border="1px"
+              onClick={onScrollToTotal}
+              rightIcon={<RiArrowDownSLine size={20} />}
+            >
+              Ir para fechamento do pedido
+            </Button>
           </Flex>
-
-          <Flex direction="column" flex={1} gap={2}>
-            {!id ? (
-              <div>
-                <Text>Desconto:</Text>
-                <InputCurrency
-                  mt={2}
-                  name="desconto"
-                  placeholder="Ex: R$ 100,00"
-                  control={control}
-                  onChange={(e) =>
-                    setDiscountFormValue(currency(e.target.value))
-                  }
-                />
-              </div>
-            ) : (
-              <Select
-                label="Status"
-                defaultOption="ATIVO"
-                {...register("status")}
-              >
-                <option value="ABERTO" disabled={shouldDisabledOption}>
-                  ABERTO
-                </option>
-                <option value="FINALIZADO">FINALIZADO</option>
-                <option value="CANCELADO">CANCELADO</option>
-              </Select>
-            )}
-          </Flex>
-
-          <Button
-            my={4}
-            w="100%"
-            type="button"
-            color="gray.50"
-            bg="green.400"
-            _hover={{
-              bg: "green.500",
-            }}
-            onClick={handleSubmit}
-          >
-            CONCLUIR
-          </Button>
         </Box>
-      </Box>
+
+        <Divider my={3} orientation="horizontal" />
+
+        <Box flex={1} ref={containerTotalRef}>
+          <Flex h="100%" direction="column" gap={5} align="space-between">
+            <Flex w="100%" direction="column" align="space-between">
+              <Box>
+                <Heading size="lg">Total</Heading>
+                <VStack mt={10} spacing={3} align="stretch" justify="center">
+                  <Flex gap={2}>
+                    <Icon as={RiUser3Line} boxSize={5} />
+                    <Text size="md" fontWeight="bold">
+                      Cliente:
+                    </Text>
+                    <Text size="md">{currentClient?.label}</Text>
+                  </Flex>
+                  <Flex gap={2}>
+                    <Icon as={RiStoreLine} boxSize={5} />
+                    <Text size="md" fontWeight="bold">
+                      Vendedor:
+                    </Text>
+                    <Text size="md">{currentSeller?.label}</Text>
+                  </Flex>
+                  <Flex gap={2}>
+                    <Icon as={RiBankCard2Line} boxSize={5} />
+                    <Text size="md" fontWeight="bold">
+                      Forma de pagamento:
+                    </Text>
+                    <Text size="md">{currentPaymentOption?.label}</Text>
+                  </Flex>
+                </VStack>
+              </Box>
+            </Flex>
+
+            {products
+              .filter((product) => product.quantidade > 0)
+              .map((product) => (
+                <Flex key={product.id} justify="flex-start" my={1}>
+                  <Flex gap={1}>
+                    <Text fontSize="sm" fontWeight="bold">
+                      {product.quantidade}x
+                    </Text>
+                    <Text fontSize="sm">{product.descricao}</Text>
+                  </Flex>
+                </Flex>
+              ))}
+
+            {services
+              .filter((service) => service.quantidade > 0)
+              .map((service) => (
+                <Flex key={service.id} justify="flex-start" my={1}>
+                  <Flex gap={1}>
+                    <Text fontSize="sm" fontWeight="bold">
+                      {service.quantidade}x
+                    </Text>
+                    <Text fontSize="sm">{service.descricao}</Text>
+                  </Flex>
+                </Flex>
+              ))}
+
+
+            <Box  w="100%" mt="auto">
+              <Text size="md">Subtotal: {currencyFormat(subTotalProducts)}</Text>
+              <Text size="md">Serviços: {currencyFormat(subTotalServices)}</Text>
+              <Flex my={2}>
+                <Text fontSize={20} fontWeight="bold">
+                  {" "}
+                  Total da venda:
+                </Text>
+                <Text ml={2} fontSize={20}>
+                  {currencyFormat(totalValue)}
+                </Text>
+              </Flex>
+
+              <Flex direction="column" flex={1} gap={2}>
+                {!id ? (
+                  <div>
+                    <Text>Desconto:</Text>
+                    <InputCurrency
+                      mt={2}
+                      name="desconto"
+                      placeholder="Ex: R$ 100,00"
+                      control={control}
+                      onChange={(e) =>
+                        setDiscountFormValue(currency(e.target.value))
+                      }
+                    />
+                  </div>
+                ) : (
+                  <Select
+                    label="Status"
+                    defaultOption="ATIVO"
+                    {...register("status")}
+                  >
+                    <option value="ABERTO" disabled={shouldDisabledOption}>
+                      ABERTO
+                    </option>
+                    <option value="FINALIZADO">FINALIZADO</option>
+                    <option value="CANCELADO">CANCELADO</option>
+                  </Select>
+                )}
+              </Flex>
+
+              <Button
+                my={4}
+                w="100%"
+                type="button"
+                color="gray.50"
+                bg="green.400"
+                _hover={{
+                  bg: "green.500",
+                }}
+                onClick={handleSubmit}
+              >
+                CONCLUIR
+              </Button>
+            </Box>
+          </Flex>
+        </Box>
+      </Flex>
+
+      {renderFinishingOrderModal()}
     </form>
   );
 }

@@ -22,7 +22,7 @@ import {
   RiDeleteBinLine,
   RiEditLine,
   RiSearchLine,
-  RiQrCodeFill,
+  RiQrCodeFill
 } from "react-icons/ri";
 
 import { Column, useGlobalFilter, useTable } from "react-table";
@@ -48,6 +48,7 @@ interface DataTableProps<T extends object> {
   showGeneratedData?: boolean;
 
   customnAction?: (row: any) => JSX.Element;
+  customnButtonTable?: () => JSX.Element;
   onRowEdit?: (row: any) => void;
   onRowDelete?: (row: any) => void;
   onFilterByDate?: ({ startDate, endDate }: RangeDate) => void;
@@ -62,6 +63,7 @@ export function DataTable<T extends object>({
   isLoading,
   itemsPerPage,
   customnAction,
+  customnButtonTable,
   onRowEdit,
   onRowDelete,
   onFilterByDate,
@@ -128,6 +130,8 @@ export function DataTable<T extends object>({
             <RangeDatePicker getRangeDate={onFilterByDate} />
           )}
 
+          {!!customnButtonTable && customnButtonTable()}
+        
           {showGeneratedData && (
             <PDFDownloadLink
               fileName="etiquetas"
@@ -135,7 +139,7 @@ export function DataTable<T extends object>({
             >
               <Tooltip label="Gerar etiquetas">
                 <IconButton
-                  aria-label="Search database"
+                  aria-label="Gerar etiquetas"
                   bg="orange.300"
                   icon={<RiQrCodeFill color="#fff" />}
                   // onClick={() => fileUploadButtonRef.current?.click()}
