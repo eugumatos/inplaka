@@ -45,6 +45,7 @@ import currency from "currency.js";
 import { upper } from "@/utils/upper";
 import { FinishingModal } from "@/containers/Order/FinishingModal";
 import { useOrder } from "@/contexts/OrderContext";
+import { formatDate } from "@/utils/formatDate";
 
 interface IPlaque {
   descricao: string;
@@ -68,6 +69,8 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
     getValues,
     setValue,
   } = useFormContext<OrderFormData>();
+
+  const { setterOrder } = useOrder();
 
   const containerTotalRef = useRef<null | HTMLDivElement>(null);
 
@@ -286,6 +289,41 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
     onSubmit(formValues);
   }
 
+  const handlePrint = () => {
+    const formValues = getValues();
+    
+    const formattedProducts = [] as any;
+
+    products.forEach((product) => {
+      if (product.quantidade > 0) {
+        product.placas &&
+        product.placas.forEach((placa) => {
+            formattedProducts.push({
+              produto: product.id,
+              quantidade: 1,
+              placa: placa.descricao,
+              chassi: placa?.chassi,
+              marca: placa?.marca,
+              modelo: placa?.modelo,
+              cor: placa?.cor,
+              localEmplacamento: placa?.localEmplacamento,
+              placaQuitada: placa.placaQuitada,
+              descricao: product.descricao,
+              valorUnitario: product.valor_venda,
+            });
+          });
+      }
+    });
+
+    setterOrder({
+      cliente: formValues.cliente.value,
+      dateCreated: formatDate(formValues.dateCreated || ''),
+      produtos: formattedProducts,
+      numero: formValues.numero,
+      total: total - Number(formValues.valorDesconto),
+    });
+  }
+
   const currentSeller = watch("vendedor") as any;
   const currentPaymentOption = watch("formaPagamento") as any;
 
@@ -359,12 +397,14 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
                         <IconButton 
                           aria-label="Print"
                           bg="cyan.500"
-                          onClick={onOpen}
+                          onClick={() => {
+                            handlePrint();
+                            onOpen();
+                          }}
                           icon={<RiPrinterLine color="#fff" />}
                           _hover={{
                             bg: "cyan.400",
                           }}
-                          isDisabled
                         />
                       </Tooltip>
                     ) : <></>}
@@ -500,7 +540,6 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
                   </Flex>
                 </Flex>
               ))}
-
 
             <Box  w="100%" mt="auto">
               <Text size="md">Subtotal: {currencyFormat(subTotalProducts)}</Text>

@@ -11,19 +11,27 @@ import {
   createOrder,
   getOrders,
   destroyOrder,
-  validateExistingPlaques,
   filterOrderByDate,
 } from "@/services/order";
 import { OrderFormData } from "@/schemas/OrderSchemaValidation";
 import { generateCode } from "@/utils/generateCode";
 import { formatDate } from "@/utils/formatDate";
 import { toast } from "react-toastify";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
+import { IProduct } from "@/domains/product";
 
 type RangeDate = {
   startDate: Date | null;
   endDate: Date | null;
 };
+
+interface SetterOrderProps {
+  cliente: string,
+  dateCreated: string,
+  produtos: IProduct[],
+  numero: number,
+  total: number,
+}
 
 interface OrderContextProps {
   children?: ReactNode;
@@ -38,6 +46,7 @@ interface OrderProviderProps {
   currentOrderNumber: number | null;
   finishingModalShouldBeOpen: boolean;
   closeFinishingModal: () => void;
+  setterOrder: (order: SetterOrderProps) => void;
   addOrder: (order: OrderFormData, close?: () => void) => void;
   importOrder: (order: OrderFormData, close?: () => void) => void;
   editOrder: (order: OrderFormData, close?: () => void) => void;
@@ -300,6 +309,16 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
     }
   }
 
+  async function setterOrder({ cliente, produtos, numero, total, dateCreated }: SetterOrderProps) {
+    setCurrentOrderNumber(numero);
+    setOrder({
+      cliente,
+      dateCreated,
+      produtos,
+      total
+    });
+  }
+
   return (
     <OrderContext.Provider
       value={{
@@ -312,6 +331,7 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
         editOrder,
         removeOrder,
         filterOrder,
+        setterOrder,
         currentOrderNumber,
         finishingModalShouldBeOpen,
         closeFinishingModal,

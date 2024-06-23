@@ -43,6 +43,7 @@ export const orderFormSchema = yup.object().shape({
 export type IOrderFormData = yup.InferType<typeof orderFormSchema>;
 
 export interface OrderFormData extends IOrderFormData {
+  valorTotal: number;
   produtos: IProduct[];
   servicos: IService[];
   total: number;

@@ -97,7 +97,10 @@ export function FinishingModal({
               mr={3}
               bg="orange.300"
               color="gray.50"
-              onClick={closeFinishingModal}
+              onClick={() => {
+                closeFinishingModal();
+                onClose();
+              }}
               _hover={{
                 bg: "orange.200",
               }}
@@ -117,7 +120,10 @@ export function FinishingModal({
             <Button
               bg="gray.100"
               color="gray.600"
-              onClick={closeFinishingModal}
+              onClick={() => {
+                closeFinishingModal();
+                onClose();
+              }}
               _hover={{
                 bg: "gray.50",
               }}

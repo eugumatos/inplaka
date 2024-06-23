@@ -14,7 +14,6 @@ import { DataTable } from "@/components/Table";
 import { IClient } from "@/domains/client";
 import { filterText } from "@/utils/filterText";
 import { upper } from "@/utils/upper";
-import { ProductFormByClientData } from "@/schemas/ProductSchemaValidation";
 
 export function Client() {
   const {
@@ -30,8 +29,6 @@ export function Client() {
 
   const { handleSubmit, reset, setValue, formState } =
     useFormContext<ClientFormData>();
-
-  const formProductByClient = useForm<ProductFormByClientData>();
   
   const hasErrors = formState.isValid;
 
