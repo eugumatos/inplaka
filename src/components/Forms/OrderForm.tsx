@@ -189,7 +189,7 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
       },
       {
         Header: "Valor venda",
-        accessor: "valorUnitario",
+        accessor: "valor_venda_cliente",
         Cell: ({ value }) => currencyFormat(value),
       },
     ],
