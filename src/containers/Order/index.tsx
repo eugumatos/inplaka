@@ -41,7 +41,7 @@ export function Order() {
     seekSelectedPaymentOption,
   } = useOrderForm({ noFetch: true, shouldPreLoad: true });
 
-  const { handleSubmit, setValue, reset } = useFormContext<OrderFormData>();
+  const { setValue, reset } = useFormContext<OrderFormData>();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 

@@ -111,6 +111,14 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
 
       if (findIdOrder) {
         await removeOrder(findIdOrder.id, "notShowMessage");
+
+        delete order?.id;
+        delete order?.dateCreated;
+        delete order?.formaPagamentoNome;
+        delete order?.clienteNome;
+        delete order?.observacao;
+        delete order?.valorDesconto;
+        delete order?.percentualDesconto;
       }
 
       let produtos: any = [];
@@ -139,8 +147,9 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
       Object.assign(order, {
         cliente: order.cliente.value,
         vendedor: order.vendedor.value,
+        formaPagamento: "bf15170f-f99b-4bb1-be8d-863693a52223",
         valorPedido: order.total,
-        valorTotal: Number(order.total) - Number(order.desconto || 0),
+        valorTotal: Number(order.total),
         status: order.status,
         produtos: produtos,
         servicos: order.servicos,
@@ -165,13 +174,17 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
         case "ABERTO":
           toast.success("Pedido criado com sucesso!");
           setFinishingModalShouldBeOpen(true);
+          return;
         case "QUITADO":
           toast.success("Pedido QUITADO com sucesso!");
           setFinishingModalShouldBeOpen(true);
+          return;
         case "CANCELADO":
           toast.success("Pedido CANCELADO com sucesso!");
+          return;
         case "RASCUNHO":
           toast.success("Rascunho salvo com sucesso!");
+          return;
       }
     } catch (error) {
       dispatch({ type: "ERROR" });

@@ -171,7 +171,7 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
 
   const columnsPlaque = useMemo(
     (): Column[] => [
-      placaQuitada as Column,
+    //   placaQuitada as Column,
       {
         Header: "Nome",
         accessor: "descricao",
@@ -233,13 +233,14 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
     const formValues = getValues();
 
     formValues.produtos = products.filter((p) => p.quantidade > 0);
-    formValues.total = total;
+    formValues.total = total + Number(unmaskText(servicoValue)) || 0;
 
     if (formValues.produtos.length === 0) {
       toast.warning(
         "É necessário adicionar pelo menos um produto antes de realizar um pedido."
       );
 
+      setValue("status", undefined);
       return;
     }
 
@@ -253,6 +254,8 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
           (p) => upper(p.descricao) + " "
         )}"). Por favor verifique e tente novamente.`
       );
+
+      setValue("status", undefined);
 
       return;
     }
@@ -271,13 +274,22 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
       formValues.status = "QUITADO";
     }
 
-    (formValues.servicos = {
-      descricao: formValues.servicoDescription,
-      valorTotal: Number(unmaskText(formValues.servicoValue || "")),
-    }),
-      delete formValues.servicoDescription,
-      delete formValues.servicoValue,
-      setValue("produtos", formValues.produtos);
+    if (formValues.servicoDescription.length > 0 && +unmaskText(formValues.servicoValue) > 0) {
+      formValues.servicos = [{
+        "servico": "5861b755-4fcd-4fd3-a4fe-2d8ceb619880",
+        quantidade: 1,
+        descricao: formValues.servicoDescription,
+        valorUnitario: Number(unmaskText(formValues.servicoValue || "")),
+        valorTotal: Number(unmaskText(formValues.servicoValue || "")),
+        observacao: "",
+      }];
+    } else {
+      formValues.servicos = [];
+    }
+
+    delete formValues.servicoDescription,
+    delete formValues.servicoValue,
+    setValue("produtos", formValues.produtos);
     setValue("total", formValues.total);
 
     onSubmit(formValues);
@@ -426,7 +438,7 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
                           name="produto"
                           maxQ={row.unidade}
                           maxW="50%"
-                          forceDisabled={!!id}
+                          forceDisabled={!isEditable}
                           value={row.quantidade}
                           onChangeQuantity={(value) => {
                             updateProductAmount(row, value);
@@ -437,7 +449,7 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
                             product={row}
                             updateProductPlaque={updateProductPlaque}
                             removeProductPlaque={removeProductPlaque}
-                            isDisabled={+row.unidade <= 0 || !!id}
+                            isDisabled={+row.unidade <= 0 || !isEditable}
                           />
                         </Box>
                       </Flex>
@@ -545,7 +557,7 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
                 Subtotal: {currencyFormat(subTotalProducts)}
               </Text>
               <Text size="md">
-                Serviços: {currencyFormat(subTotalServices)}
+                Serviços: {currencyFormat(Number(unmaskText(servicoValue)) || 0)}
               </Text>
               <Flex my={2}>
                 <Text fontSize={20} fontWeight="bold">
@@ -553,7 +565,7 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
                   Total da venda:
                 </Text>
                 <Text ml={2} fontSize={20}>
-                  {currencyFormat(totalValue)}
+                  {currencyFormat(total + Number(unmaskText(servicoValue)) || 0)}
                 </Text>
               </Flex>
 
@@ -586,17 +598,19 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
                     />
                   </Tooltip>
 
-                  <Tooltip label="Cancelar pedido">
-                    <IconButton
-                      bg="red.200"
-                      aria-label="Cancel"
-                      icon={<RiCloseFill size={20} color="#e4e2e2" />}
-                      onClick={() => {
-                        setValue("status", "CANCELADO");
-                        handleSubmit();
-                      }}
-                    />
-                  </Tooltip>
+                  {status === "RASCUNHO" &&
+                    <Tooltip label="Cancelar pedido">
+                      <IconButton
+                        bg="red.200"
+                        aria-label="Cancel"
+                        icon={<RiCloseFill size={20} color="#e4e2e2" />}
+                        onClick={() => {
+                          setValue("status", "CANCELADO");
+                          handleSubmit();
+                        }}
+                      />
+                    </Tooltip>
+                  }
                 </Flex>
               )}
             </Box>

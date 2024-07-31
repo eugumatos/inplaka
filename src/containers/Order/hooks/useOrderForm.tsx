@@ -395,7 +395,7 @@ export function useOrderForm({
         const filteredSelectedProducts = selectedProducts.filter(p => p.quantidade > 0);
         const filteredSelectedServices = selectedServices.filter(s => s.quantidade > 0);
 
-        setProducts(filteredSelectedProducts);
+        setProducts(selectedProducts);
         setServices(filteredSelectedServices);
       } catch (error) {
         throw new Error("Erro ao carregar pedido!");
