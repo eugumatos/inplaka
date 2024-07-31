@@ -21,6 +21,7 @@ interface AsycnSelectProps {
   label?: string;
   error?: FieldError;
   value?: SelectProps;
+  isDisabled?: boolean;
   onChangeOption?: (option: SelectProps) => void;
 }
 
@@ -49,6 +50,7 @@ export const AsyncSelect = ({
   placeHolder,
   loadOptions,
   onChangeOption,
+  isDisabled = false,
 }: AsycnSelectProps) => {
   const calculateMarginB = mt && mt + 2;
 
@@ -66,6 +68,7 @@ export const AsyncSelect = ({
         >
           <FormLabel>{label}</FormLabel>
           <AsyncSelectChakra
+            isDisabled={isDisabled}
             ref={field.ref}
             className="async-select-props"
             components={asyncComponents}

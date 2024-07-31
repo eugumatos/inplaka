@@ -18,16 +18,19 @@ import {
   Checkbox,
   IconButton,
   useDisclosure,
-  Tooltip
+  Tooltip,
 } from "@chakra-ui/react";
 import {
   RiArrowDownSLine,
   RiUser3Line,
   RiStoreLine,
-  RiBankCard2Line,
-  RiPrinterLine
+  RiBox3Line,
+  RiCloseFill,
+  RiPrinterLine,
+  RiDraftLine,
 } from "react-icons/ri";
 import { Column } from "react-table";
+import { Input } from "@/components/Input";
 import { useFormContext } from "react-hook-form";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Select } from "@/components/Select";
@@ -46,6 +49,7 @@ import { upper } from "@/utils/upper";
 import { FinishingModal } from "@/containers/Order/FinishingModal";
 import { useOrder } from "@/contexts/OrderContext";
 import { formatDate } from "@/utils/formatDate";
+import { unmaskText } from "@/utils/unmaskText";
 
 interface IPlaque {
   descricao: string;
@@ -79,13 +83,10 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
   const {
     isLoading,
     products,
-    services,
     clientOptions,
     sellerOptions,
-    paymentOptions,
     registeredPlaques,
     updateProductAmount,
-    updateServiceAmount,
     updateProductPlaque,
     removeProductPlaque,
     calculateTotal,
@@ -201,12 +202,7 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
   }
 
   const renderFinishingOrderModal = () => {
-    return (
-      <FinishingModal
-        isOpen={isOpen}
-        onClose={onClose}
-      />
-    );
+    return <FinishingModal isOpen={isOpen} onClose={onClose} />;
   };
 
   const handleImport = async (parsedData: any) => {
@@ -237,13 +233,11 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
     const formValues = getValues();
 
     formValues.produtos = products.filter((p) => p.quantidade > 0);
-    formValues.servicos = services.filter((s) => s.quantidade > 0);
-    formValues.desconto = discount;
     formValues.total = total;
 
-    if (formValues.produtos.length === 0 && formValues.servicos.length === 0) {
+    if (formValues.produtos.length === 0) {
       toast.warning(
-        "É necessário adicionar pelo menos um produto ou serviço antes de realizar um pedido."
+        "É necessário adicionar pelo menos um produto antes de realizar um pedido."
       );
 
       return;
@@ -273,17 +267,17 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
       if (checkPlaques) findPlaquesNotChecked = checkPlaques;
     });
 
-    if (formValues.status === "FINALIZADO" && findPlaquesNotChecked) {
-      toast.warning(
-        "É necessário que todas as placas estejam quitadas antes de finalizar um pedido!."
-      );
-
-      return;
+    if (formValues.status === "ABERTO" && !findPlaquesNotChecked) {
+      formValues.status = "QUITADO";
     }
 
-    setValue("produtos", formValues.produtos);
-    setValue("servicos", formValues.servicos);
-    setValue("desconto", formValues.desconto);
+    (formValues.servicos = {
+      descricao: formValues.servicoDescription,
+      valorTotal: Number(unmaskText(formValues.servicoValue || "")),
+    }),
+      delete formValues.servicoDescription,
+      delete formValues.servicoValue,
+      setValue("produtos", formValues.produtos);
     setValue("total", formValues.total);
 
     onSubmit(formValues);
@@ -291,13 +285,13 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
 
   const handlePrint = () => {
     const formValues = getValues();
-    
+
     const formattedProducts = [] as any;
 
     products.forEach((product) => {
       if (product.quantidade > 0) {
         product.placas &&
-        product.placas.forEach((placa) => {
+          product.placas.forEach((placa) => {
             formattedProducts.push({
               produto: product.id,
               quantidade: 1,
@@ -317,30 +311,32 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
 
     setterOrder({
       cliente: formValues.cliente.value,
-      dateCreated: formatDate(formValues.dateCreated || ''),
+      dateCreated: formatDate(formValues.dateCreated || ""),
       produtos: formattedProducts,
       numero: formValues.numero,
       total: total - Number(formValues.valorDesconto),
     });
-  }
+  };
+
+  const servicoDescription = watch("servicoDescription") as any;
+  const servicoValue = watch("servicoValue") as any;
 
   const currentSeller = watch("vendedor") as any;
-  const currentPaymentOption = watch("formaPagamento") as any;
 
-  const statusOption = watch("status");
+  const { status } = getValues();
 
-  const shouldDisabledOption =
-    (!!id && statusOption === "ABERTO") || statusOption === "CANCELADO";
+  const isEditable = status === "RASCUNHO" || status === undefined;
 
   useEffect(() => {
     if (registeredPlaques) setAllPlaques(registeredPlaques);
   }, [registeredPlaques]);
 
   useEffect(() => {
-    if (total > Number(discount)) {
-      setTotalValue(total - Number(discount));
+    const servicoFormattedValue = unmaskText(servicoValue);
+    if (Number(servicoFormattedValue) > 0) {
+      setTotalValue(total + Number(servicoFormattedValue));
     }
-  }, [total, discount, id]);
+  }, [total, servicoValue, id]);
 
   return (
     <form>
@@ -353,6 +349,7 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
               <Box flex={1}>
                 <FormLabel>Cliente:</FormLabel>
                 <AsyncSelect
+                  isDisabled={!isEditable}
                   control={control}
                   loadOptions={clientOptions}
                   value={currentClient}
@@ -363,6 +360,7 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
               <Box flex={1}>
                 <FormLabel>Vendedor:</FormLabel>
                 <AsyncSelect
+                  isDisabled={!isEditable}
                   control={control}
                   value={currentSeller}
                   loadOptions={sellerOptions}
@@ -370,44 +368,50 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
                   {...register("vendedor")}
                 />
               </Box>
-              <Box flex={1}>
-                <FormLabel>Forma pagamento:</FormLabel>
-                <AsyncSelect
-                  control={control}
-                  value={currentPaymentOption}
-                  loadOptions={paymentOptions}
-                  error={errors.formaPagamento?.label}
-                  {...register("formaPagamento")}
-                />
-              </Box>
+              {/*
+                <Box flex={1}>
+                  <FormLabel>Forma pagamento:</FormLabel>
+                  <AsyncSelect
+                    control={control}
+                    value={currentPaymentOption}
+                    loadOptions={paymentOptions}
+                    error={errors.formaPagamento?.label}
+                    {...register("formaPagamento")}
+                  />
+                </Box>
+              */}
             </HStack>
 
             <Tabs isManual variant="enclosed">
               <TabList>
                 <Tab>Produtos</Tab>
-                <Tab>Serviços</Tab>
+                <Tab>Outros</Tab>
                 <Tab hidden={!id}>Placas</Tab>
               </TabList>
               <TabPanels mt={5}>
                 <TabPanel p={0}>
                   <DataTable
                     isLoading={isLoading}
-                    customnButtonTable={() => id ? (
-                      <Tooltip label="Imprimir">
-                        <IconButton 
-                          aria-label="Print"
-                          bg="cyan.500"
-                          onClick={() => {
-                            handlePrint();
-                            onOpen();
-                          }}
-                          icon={<RiPrinterLine color="#fff" />}
-                          _hover={{
-                            bg: "cyan.400",
-                          }}
-                        />
-                      </Tooltip>
-                    ) : <></>}
+                    customnButtonTable={() =>
+                      id ? (
+                        <Tooltip label="Imprimir">
+                          <IconButton
+                            aria-label="Print"
+                            bg="cyan.500"
+                            onClick={() => {
+                              handlePrint();
+                              onOpen();
+                            }}
+                            icon={<RiPrinterLine color="#fff" />}
+                            _hover={{
+                              bg: "cyan.400",
+                            }}
+                          />
+                        </Tooltip>
+                      ) : (
+                        <></>
+                      )
+                    }
                     showGeneratedData={!!id}
                     generatedData={products[0]?.placas}
                     onImport={handleImport}
@@ -441,25 +445,22 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
                   />
                 </TabPanel>
                 <TabPanel p={0}>
-                  <DataTable
-                    isLoading={isLoading}
-                    columns={columns}
-                    data={services}
-                    itemsPerPage={5}
-                    customnAction={(row) => (
-                      <InputQuantity
-                        key={row.id}
-                        name="servico"
-                        forceDisabled={!!id}
-                        maxQ={row.unidade}
-                        value={row.quantidade}
-                        maxW="50%"
-                        onChangeQuantity={(value) => {
-                          updateServiceAmount(row, value);
-                        }}
-                      />
-                    )}
-                  />
+                  <Flex gap={4} alignItems="center">
+                    <Input
+                      mt={4}
+                      label="Descrição"
+                      placeholder="Ex: Frete"
+                      {...register("servicoDescription")}
+                    />
+
+                    <InputCurrency
+                      mt={2}
+                      label="Valor venda"
+                      name="servicoValue"
+                      placeholder="R$ 500,00"
+                      control={control}
+                    />
+                  </Flex>
                 </TabPanel>
                 <TabPanel hidden={!id}>
                   <DataTable columns={columnsPlaque} data={allPlaques} />
@@ -485,7 +486,7 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
         <Divider my={3} orientation="horizontal" />
 
         <Box flex={1} ref={containerTotalRef}>
-          <Flex h="100%" direction="column" gap={5} align="space-between">
+          <Flex h="100%" direction="column" gap={2} align="space-between">
             <Flex w="100%" direction="column" align="space-between">
               <Box>
                 <Heading size="lg">Total</Heading>
@@ -505,45 +506,47 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
                     <Text size="md">{currentSeller?.label}</Text>
                   </Flex>
                   <Flex gap={2}>
+                    <Icon as={RiBox3Line} boxSize={5} />
+                    <Text size="md" fontWeight="bold">
+                      Outros:
+                    </Text>
+                    <Text size="md">{servicoDescription}</Text>
+                  </Flex>
+                  {/*
+                  <Flex gap={2}>
                     <Icon as={RiBankCard2Line} boxSize={5} />
                     <Text size="md" fontWeight="bold">
                       Forma de pagamento:
                     </Text>
                     <Text size="md">{currentPaymentOption?.label}</Text>
                   </Flex>
+                  */}
                 </VStack>
               </Box>
             </Flex>
 
-            {products
-              .filter((product) => product.quantidade > 0)
-              .map((product) => (
-                <Flex key={product.id} justify="flex-start" my={1}>
-                  <Flex gap={1}>
-                    <Text fontSize="sm" fontWeight="bold">
-                      {product.quantidade}x
-                    </Text>
-                    <Text fontSize="sm">{product.descricao}</Text>
+            <Box mt={5}>
+              {products
+                .filter((product) => product.quantidade > 0)
+                .map((product) => (
+                  <Flex key={product.id} justify="flex-start" gap={2}>
+                    <Flex gap={1}>
+                      <Text fontSize="sm" fontWeight="bold">
+                        {product.quantidade}x
+                      </Text>
+                      <Text fontSize="sm">{product.descricao}</Text>
+                    </Flex>
                   </Flex>
-                </Flex>
-              ))}
+                ))}
+            </Box>
 
-            {services
-              .filter((service) => service.quantidade > 0)
-              .map((service) => (
-                <Flex key={service.id} justify="flex-start" my={1}>
-                  <Flex gap={1}>
-                    <Text fontSize="sm" fontWeight="bold">
-                      {service.quantidade}x
-                    </Text>
-                    <Text fontSize="sm">{service.descricao}</Text>
-                  </Flex>
-                </Flex>
-              ))}
-
-            <Box  w="100%" mt="auto">
-              <Text size="md">Subtotal: {currencyFormat(subTotalProducts)}</Text>
-              <Text size="md">Serviços: {currencyFormat(subTotalServices)}</Text>
+            <Box w="100%" mt="auto">
+              <Text size="md">
+                Subtotal: {currencyFormat(subTotalProducts)}
+              </Text>
+              <Text size="md">
+                Serviços: {currencyFormat(subTotalServices)}
+              </Text>
               <Flex my={2}>
                 <Text fontSize={20} fontWeight="bold">
                   {" "}
@@ -554,48 +557,48 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
                 </Text>
               </Flex>
 
-              <Flex direction="column" flex={1} gap={2}>
-                {!id ? (
-                  <div>
-                    <Text>Desconto:</Text>
-                    <InputCurrency
-                      mt={2}
-                      name="desconto"
-                      placeholder="Ex: R$ 100,00"
-                      control={control}
-                      onChange={(e) =>
-                        setDiscountFormValue(currency(e.target.value))
-                      }
-                    />
-                  </div>
-                ) : (
-                  <Select
-                    label="Status"
-                    defaultOption="ATIVO"
-                    {...register("status")}
+              {isEditable && (
+                <Flex gap={4} alignItems="center">
+                  <Button
+                    my={4}
+                    w="100%"
+                    type="button"
+                    color="gray.50"
+                    bg="green.400"
+                    _hover={{
+                      bg: "green.500",
+                    }}
+                    onClick={() => {
+                      setValue("status", "ABERTO");
+                      handleSubmit();
+                    }}
                   >
-                    <option value="ABERTO" disabled={shouldDisabledOption}>
-                      ABERTO
-                    </option>
-                    <option value="FINALIZADO">FINALIZADO</option>
-                    <option value="CANCELADO">CANCELADO</option>
-                  </Select>
-                )}
-              </Flex>
+                    ABRIR PEDIDO
+                  </Button>
+                  <Tooltip label="Salvar rascunho">
+                    <IconButton
+                      aria-label="Draft"
+                      icon={<RiDraftLine color="#767171" size={20} />}
+                      onClick={() => {
+                        setValue("status", "RASCUNHO");
+                        handleSubmit();
+                      }}
+                    />
+                  </Tooltip>
 
-              <Button
-                my={4}
-                w="100%"
-                type="button"
-                color="gray.50"
-                bg="green.400"
-                _hover={{
-                  bg: "green.500",
-                }}
-                onClick={handleSubmit}
-              >
-                CONCLUIR
-              </Button>
+                  <Tooltip label="Cancelar pedido">
+                    <IconButton
+                      bg="red.200"
+                      aria-label="Cancel"
+                      icon={<RiCloseFill size={20} color="#e4e2e2" />}
+                      onClick={() => {
+                        setValue("status", "CANCELADO");
+                        handleSubmit();
+                      }}
+                    />
+                  </Tooltip>
+                </Flex>
+              )}
             </Box>
           </Flex>
         </Box>

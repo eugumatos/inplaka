@@ -33,6 +33,8 @@ export const orderFormSchema = yup.object().shape({
       .nullable("Campo obrigatório")
       .required("Campo obrigatório"),
   }),
+  servicoValue: yup.string(),
+  servicoDescription: yup.string(),
   dateCreated: yup.string(),
   valorDesconto: yup.string(),
   desconto: yup.string(),
@@ -45,7 +47,10 @@ export type IOrderFormData = yup.InferType<typeof orderFormSchema>;
 export interface OrderFormData extends IOrderFormData {
   valorTotal: number;
   produtos: IProduct[];
-  servicos: IService[];
+  servicos: {
+    descricao?: string;
+    valorTotal: number;
+  };
   total: number;
   numero: number;
 }

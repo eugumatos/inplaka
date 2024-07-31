@@ -12,6 +12,7 @@ type RangeDate = {
 
 interface RangeDatePickerProps {
   getRangeDate: ({ startDate, endDate }: RangeDate) => void;
+  noSearch?: boolean;
 }
 
 const calendarStyleProps = {
@@ -21,7 +22,10 @@ const calendarStyleProps = {
   transform: "translateY(-50%)",
 };
 
-export const RangeDatePicker = ({ getRangeDate }: RangeDatePickerProps) => {
+export const RangeDatePicker = ({
+  getRangeDate,
+  noSearch = false,
+}: RangeDatePickerProps) => {
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
 
@@ -65,20 +69,23 @@ export const RangeDatePicker = ({ getRangeDate }: RangeDatePickerProps) => {
           style={calendarStyleProps}
         />
       </Box>
-      <Tooltip label="Filtrar">
-        <IconButton
-          aria-label="Search database"
-          bg="teal.400"
-          icon={<RiSearch2Line color="white" />}
-          onClick={() => {
-            getRangeDate({ startDate, endDate });
-            handleReset();
-          }}
-          _hover={{
-            bg: "teal.500",
-          }}
-        />
-      </Tooltip>
+
+      {!noSearch && (
+        <Tooltip label="Filtrar">
+          <IconButton
+            aria-label="Search database"
+            bg="teal.400"
+            icon={<RiSearch2Line color="white" />}
+            onClick={() => {
+              getRangeDate({ startDate, endDate });
+              handleReset();
+            }}
+            _hover={{
+              bg: "teal.500",
+            }}
+          />
+        </Tooltip>
+      )}
     </Flex>
   );
 };

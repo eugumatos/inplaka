@@ -29,7 +29,7 @@ export function Order() {
     isLoading,
     finishingModalShouldBeOpen,
     closeFinishingModal,
-    addOrder,
+    actionOrder,
     editOrder,
     removeOrder,
     filterOrder,
@@ -54,8 +54,8 @@ export function Order() {
   const [currentOrder, setCurrentOrder] = useState<IOrder | null>(null);
 
   const subOption = {
-    CREATE: handleSubmit((values) => addOrder(values, onClose)),
-    UPDATE: handleSubmit((values) => editOrder(values, onClose)),
+    CREATE: (values: OrderFormData) => actionOrder(values, onClose),
+    UPDATE: (values: OrderFormData) => editOrder(values, onClose),
   };
 
   const columns = useMemo(
@@ -189,7 +189,7 @@ export function Order() {
       <OrderDrawer
         id={currentOrder?.id}
         isOpen={isOpen}
-        onSubmit={subOption[submitOption]}
+        onSubmit={(data: OrderFormData) => actionOrder(data, onClose)}
         onClose={() => {
           onClose();
           setCurrentOrder(null);

@@ -26,11 +26,11 @@ type RangeDate = {
 };
 
 interface SetterOrderProps {
-  cliente: string,
-  dateCreated: string,
-  produtos: IProduct[],
-  numero: number,
-  total: number,
+  cliente: string;
+  dateCreated: string;
+  produtos: IProduct[];
+  numero: number;
+  total: number;
 }
 
 interface OrderContextProps {
@@ -47,7 +47,7 @@ interface OrderProviderProps {
   finishingModalShouldBeOpen: boolean;
   closeFinishingModal: () => void;
   setterOrder: (order: SetterOrderProps) => void;
-  addOrder: (order: OrderFormData, close?: () => void) => void;
+  actionOrder: (order: OrderFormData, close?: () => void) => void;
   importOrder: (order: OrderFormData, close?: () => void) => void;
   editOrder: (order: OrderFormData, close?: () => void) => void;
   removeOrder: (id: string) => void;
@@ -103,9 +103,15 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
     setFinishingModalShouldBeOpen(false);
   }
 
-  async function addOrder(order: OrderFormData, close?: () => void) {
+  async function actionOrder(order: OrderFormData, close?: () => void) {
     try {
       dispatch({ type: "LOADING" });
+
+      const findIdOrder = state.orders.find((o) => o.id === order.id);
+
+      if (findIdOrder) {
+        await removeOrder(findIdOrder.id, "notShowMessage");
+      }
 
       let produtos: any = [];
 
@@ -133,20 +139,11 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
       Object.assign(order, {
         cliente: order.cliente.value,
         vendedor: order.vendedor.value,
-        formaPagamento: order.formaPagamento.value,
         valorPedido: order.total,
-        valorDesconto: Number(order.desconto) || 0,
         valorTotal: Number(order.total) - Number(order.desconto || 0),
-        status: "ABERTO",
+        status: order.status,
         produtos: produtos,
-        servicos: order.servicos.map((s) => {
-          return {
-            servico: s.id,
-            descricao: s.descricao,
-            quantidade: s.quantidade,
-            valorUnitario: s.valor_venda,
-          };
-        }),
+        servicos: order.servicos,
       });
 
       const orderNumber = await createOrder(order);
@@ -164,12 +161,21 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
 
       dispatch({ type: "RELOAD_ORDERS", payload: newOrders });
 
-      toast.success("Pedido criado com sucesso!");
-
-      setFinishingModalShouldBeOpen(true);
+      switch (order.status) {
+        case "ABERTO":
+          toast.success("Pedido criado com sucesso!");
+          setFinishingModalShouldBeOpen(true);
+        case "QUITADO":
+          toast.success("Pedido QUITADO com sucesso!");
+          setFinishingModalShouldBeOpen(true);
+        case "CANCELADO":
+          toast.success("Pedido CANCELADO com sucesso!");
+        case "RASCUNHO":
+          toast.success("Rascunho salvo com sucesso!");
+      }
     } catch (error) {
       dispatch({ type: "ERROR" });
-      toast.error("Erro ao criar pedido.");
+      toast.error("Erro com o pedido.");
       close && close();
     }
   }
@@ -228,22 +234,13 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
       Object.assign(newOrder, {
         cliente: order.cliente.value,
         vendedor: order.vendedor.value,
-        formaPagamento: order.formaPagamento.value,
         produtos: produtos,
         numero: order?.numero,
         valorPedido: order.total,
         status: order.status,
-        valorDesconto: Number(order.desconto) || 0,
         valorTotal: totalValue,
         total: totalValue,
-        servicos: order.servicos.map((s) => {
-          return {
-            servico: s.id,
-            descricao: s.descricao,
-            quantidade: s.quantidade,
-            valorUnitario: s.valor_venda,
-          };
-        }),
+        servicos: order.servicos,
       });
 
       await createOrder(newOrder as any);
@@ -309,13 +306,19 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
     }
   }
 
-  async function setterOrder({ cliente, produtos, numero, total, dateCreated }: SetterOrderProps) {
+  async function setterOrder({
+    cliente,
+    produtos,
+    numero,
+    total,
+    dateCreated,
+  }: SetterOrderProps) {
     setCurrentOrderNumber(numero);
     setOrder({
       cliente,
       dateCreated,
       produtos,
-      total
+      total,
     });
   }
 
@@ -326,7 +329,7 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
         isLoading: state.isLoading,
         orders: state.orders,
         order: order,
-        addOrder,
+        actionOrder,
         importOrder,
         editOrder,
         removeOrder,
