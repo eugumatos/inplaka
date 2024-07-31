@@ -274,19 +274,21 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
       formValues.status = "QUITADO";
     }
 
-    if (formValues.servicoDescription.length > 0 && +unmaskText(formValues.servicoValue) > 0) {
-      formValues.servicos = [{
-        "servico": "5861b755-4fcd-4fd3-a4fe-2d8ceb619880",
-        quantidade: 1,
-        descricao: formValues.servicoDescription,
-        valorUnitario: Number(unmaskText(formValues.servicoValue || "")),
-        valorTotal: Number(unmaskText(formValues.servicoValue || "")),
-        observacao: "",
-      }];
-    } else {
-      formValues.servicos = [];
+    if (formValues.servicoDescription && formValues.servicoValue) {
+      if (formValues.servicoDescription.length > 0 && +unmaskText(formValues.servicoValue) > 0) {
+        formValues.servicos = [{
+          "servico": "5861b755-4fcd-4fd3-a4fe-2d8ceb619880",
+          quantidade: 1,
+          descricao: formValues.servicoDescription,
+          valorUnitario: Number(unmaskText(formValues.servicoValue || "")),
+          valorTotal: Number(unmaskText(formValues.servicoValue || "")),
+          observacao: "",
+        }];
+      } else {
+        formValues.servicos = [];
+      }
     }
-
+   
     delete formValues.servicoDescription,
     delete formValues.servicoValue,
     setValue("produtos", formValues.produtos);

@@ -47,6 +47,10 @@ export type IOrderFormData = yup.InferType<typeof orderFormSchema>;
 export interface OrderFormData extends IOrderFormData {
   valorTotal: number;
   produtos: IProduct[];
+  formaPagamentoNome?: string;
+  clienteNome?: string;
+  observacao?: string;
+  percentualDesconto?: string;
   servicos: Array<{
     servico: string,
     quantidade: number,
