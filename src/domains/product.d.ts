@@ -14,6 +14,7 @@ export interface IProduct {
   controlar_estoque: boolean | string;
   descricao: string;
   valor_venda: string;
+  valor_venda_cliente: string;
   produto?: string;
   csosn: string;
   ncmsh: string;

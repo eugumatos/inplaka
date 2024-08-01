@@ -118,8 +118,6 @@ export function Plaque({ clients }: PlaqueProps) {
       setIsLoadingOrders(true);
       const response = await getOrderByClient(client.value);
 
-      console.log(response);
-
       setOrdersByClient(response);
       setIsLoadingOrders(false);
     } catch (error) {

@@ -59,7 +59,7 @@ interface UseOrderFormProps {
 
 export function useOrderForm({
   id,
-  clientId, 
+  clientId,
   shouldPreLoad = false,
   noFetch = false,
 }: IUseOrderFormProps): UseOrderFormProps {
@@ -313,7 +313,7 @@ export function useOrderForm({
     );
 
     const totalProducts = selectedProducts.reduce((acc, cartItem) => {
-      return acc + cartItem.quantidade * Number(cartItem.valor_venda);
+      return acc + cartItem.quantidade * Number(cartItem.valor_venda_cliente);
     }, 0);
 
     const totalServices = selectedServices.reduce((acc, cartItem) => {
@@ -343,10 +343,10 @@ export function useOrderForm({
     }
 
     async function loadServiceAnOrdersById() {
-      if (!id) return;
+      if (!id || !clientId) return;
 
       try {
-        const products: IProduct[] = await getProducts();
+        const products: IProduct[] = await getProductByClient(clientId);
         const services: IService[] = await getServices();
 
         const response = await getOrder(id);
@@ -369,7 +369,7 @@ export function useOrderForm({
                 localEmplacamento: item?.localEmplacamento,
               };
             }),
-            valorUnitario: item.valor_venda,
+            valorUnitario: item.valor_venda_cliente,
           };
         });
 
@@ -392,8 +392,12 @@ export function useOrderForm({
               };
         });
 
-        const filteredSelectedProducts = selectedProducts.filter(p => p.quantidade > 0);
-        const filteredSelectedServices = selectedServices.filter(s => s.quantidade > 0);
+        const filteredSelectedProducts = selectedProducts.filter(
+          (p) => p.quantidade > 0
+        );
+        const filteredSelectedServices = selectedServices.filter(
+          (s) => s.quantidade > 0
+        );
 
         setProducts(selectedProducts);
         setServices(filteredSelectedServices);
@@ -429,25 +433,25 @@ export function useOrderForm({
       if (id) {
         loadServiceAnOrdersById();
         loadPlaqueList();
-      } 
+      }
     }
 
     setIsLoading(false);
-  }, [id, noFetch, shouldPreLoad]);
+  }, [id, noFetch, clientId, shouldPreLoad]);
 
   useEffect(() => {
     async function loadServiceAndProducts() {
       try {
         if (clientId) {
           const products: IProduct[] = await getProductByClient(clientId);
-          
+
           const formattedProducts = products.map((product) => {
             return {
               ...product,
               quantidade: 0,
               placa: "",
               placas: [],
-              valorUnitario: product.valor_venda,
+              valorUnitario: product.valor_venda_cliente,
             };
           });
 
@@ -472,7 +476,7 @@ export function useOrderForm({
     if (!noFetch && !id) {
       loadServiceAndProducts();
     }
-  }, [noFetch, id, clientId])
+  }, [noFetch, id, clientId]);
 
   return {
     isLoading,

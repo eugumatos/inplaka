@@ -171,7 +171,7 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
 
   const columnsPlaque = useMemo(
     (): Column[] => [
-    //   placaQuitada as Column,
+      //   placaQuitada as Column,
       {
         Header: "Nome",
         accessor: "descricao",
@@ -275,23 +275,28 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
     }
 
     if (formValues.servicoDescription && formValues.servicoValue) {
-      if (formValues.servicoDescription.length > 0 && +unmaskText(formValues.servicoValue) > 0) {
-        formValues.servicos = [{
-          "servico": "5861b755-4fcd-4fd3-a4fe-2d8ceb619880",
-          quantidade: 1,
-          descricao: formValues.servicoDescription,
-          valorUnitario: Number(unmaskText(formValues.servicoValue || "")),
-          valorTotal: Number(unmaskText(formValues.servicoValue || "")),
-          observacao: "",
-        }];
+      if (
+        formValues.servicoDescription.length > 0 &&
+        +unmaskText(formValues.servicoValue) > 0
+      ) {
+        formValues.servicos = [
+          {
+            servico: "5861b755-4fcd-4fd3-a4fe-2d8ceb619880",
+            quantidade: 1,
+            descricao: formValues.servicoDescription,
+            valorUnitario: Number(unmaskText(formValues.servicoValue || "")),
+            valorTotal: Number(unmaskText(formValues.servicoValue || "")),
+            observacao: "",
+          },
+        ];
       } else {
         formValues.servicos = [];
       }
     }
-   
+
     delete formValues.servicoDescription,
-    delete formValues.servicoValue,
-    setValue("produtos", formValues.produtos);
+      delete formValues.servicoValue,
+      setValue("produtos", formValues.produtos);
     setValue("total", formValues.total);
 
     onSubmit(formValues);
@@ -463,6 +468,7 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
                     <Input
                       mt={4}
                       label="Descrição"
+                      isDisabled={!isEditable}
                       placeholder="Ex: Frete"
                       {...register("servicoDescription")}
                     />
@@ -471,6 +477,7 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
                       mt={2}
                       label="Valor venda"
                       name="servicoValue"
+                      isDisabled={!isEditable}
                       placeholder="R$ 500,00"
                       control={control}
                     />
@@ -559,7 +566,8 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
                 Subtotal: {currencyFormat(subTotalProducts)}
               </Text>
               <Text size="md">
-                Serviços: {currencyFormat(Number(unmaskText(servicoValue)) || 0)}
+                Serviços:{" "}
+                {currencyFormat(Number(unmaskText(servicoValue)) || 0)}
               </Text>
               <Flex my={2}>
                 <Text fontSize={20} fontWeight="bold">
@@ -567,7 +575,9 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
                   Total da venda:
                 </Text>
                 <Text ml={2} fontSize={20}>
-                  {currencyFormat(total + Number(unmaskText(servicoValue)) || 0)}
+                  {currencyFormat(
+                    total + (Number(unmaskText(servicoValue)) || 0)
+                  )}
                 </Text>
               </Flex>
 
@@ -600,7 +610,7 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
                     />
                   </Tooltip>
 
-                  {status === "RASCUNHO" &&
+                  {status === "RASCUNHO" && (
                     <Tooltip label="Cancelar pedido">
                       <IconButton
                         bg="red.200"
@@ -612,7 +622,7 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
                         }}
                       />
                     </Tooltip>
-                  }
+                  )}
                 </Flex>
               )}
             </Box>

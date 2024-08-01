@@ -41,7 +41,7 @@ export function Order() {
     seekSelectedPaymentOption,
   } = useOrderForm({ noFetch: true, shouldPreLoad: true });
 
-  const { setValue, reset } = useFormContext<OrderFormData>();
+  const { handleSubmit, setValue, reset } = useFormContext<OrderFormData>();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -179,8 +179,10 @@ export function Order() {
             onOpen();
           }}
           onRowDelete={(row) => {
-            seekCurrentOrder(row);
-            disclosureDestroyModal.onOpen();
+            if (row.status !== "ABERTO") {
+              seekCurrentOrder(row);
+              disclosureDestroyModal.onOpen();
+            }
           }}
           onFilterByDate={filterOrder}
         />

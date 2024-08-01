@@ -22,7 +22,7 @@ import {
   RiDeleteBinLine,
   RiEditLine,
   RiSearchLine,
-  RiQrCodeFill
+  RiQrCodeFill,
 } from "react-icons/ri";
 
 import { Column, useGlobalFilter, useTable } from "react-table";
@@ -131,7 +131,7 @@ export function DataTable<T extends object>({
           )}
 
           {!!customnButtonTable && customnButtonTable()}
-        
+
           {showGeneratedData && (
             <PDFDownloadLink
               fileName="etiquetas"
