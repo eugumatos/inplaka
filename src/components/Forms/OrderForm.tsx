@@ -233,7 +233,7 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
     const formValues = getValues();
 
     formValues.produtos = products.filter((p) => p.quantidade > 0);
-    formValues.total = total + Number(unmaskText(servicoValue)) || 0;
+    formValues.total = total + (Number(unmaskText(servicoValue)) || 0);
 
     if (formValues.produtos.length === 0) {
       toast.warning(
@@ -289,13 +289,18 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
             observacao: "",
           },
         ];
-      } else {
-        formValues.servicos = [];
-      }
+      } 
+    } else {
+      formValues.servicos = [];
     }
 
     delete formValues.servicoDescription,
       delete formValues.servicoValue,
+
+    
+    
+
+
       setValue("produtos", formValues.produtos);
     setValue("total", formValues.total);
 
