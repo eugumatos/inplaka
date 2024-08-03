@@ -12,7 +12,7 @@ import {
 import { AsyncSelect } from "@/components/Select/AsyncSelect";
 import { IClient } from "@/domains/client";
 import { IOrder } from "@/domains/order";
-import { getOrderByClient, updatePlaques } from "@/services/order";
+import { getOrder, getOrderByClient, updatePlaques } from "@/services/order";
 import { format } from "date-fns";
 
 import { toast } from "react-toastify";
@@ -23,6 +23,7 @@ import { Input } from "@/components/Input";
 import { Column } from "react-table";
 
 import { RangeDatePicker } from "@/components/Forms/RangeDatePicker";
+import { filterByDateClient } from "@/services/plaque";
 
 interface PlaqueProps {
   clients: IClient[];
@@ -41,8 +42,8 @@ export function Plaque({ clients }: PlaqueProps) {
   const [isLoadingOrders, setIsLoadingOrders] = useState(false);
 
   const [rangeDate, setRangeDate] = useState<RangeDate>({
-    startDate: new Date(),
-    endDate: new Date(),
+    startDate: null,
+    endDate: null,
   });
 
   const { control, register, watch } = useForm();
@@ -52,36 +53,20 @@ export function Plaque({ clients }: PlaqueProps) {
   const columns = useMemo(
     (): Column[] => [
       {
-        Header: "Quitada",
-        accessor: "placa_quitada",
-        Cell: ({ row }: any) => (
-          <Checkbox
-            size="md"
-            isChecked={row.original?.placaQuitada}
-            onChange={() => {
-              setOrdersByClient((previousPlaques: any) => {
-                const updatedPlaques = previousPlaques.map((item: any) => {
-                  return item.placa === row.original.placa
-                    ? {
-                        ...item,
-                        placaQuitada: !item.placaQuitada,
-                      }
-                    : { ...item };
-                });
-
-                return updatedPlaques;
-              });
-            }}
-          />
-        ),
-      },
-      {
-        Header: "Placa",
+        Header: "Numero pedido",
         accessor: "placa",
       },
       {
-        Header: "Descrição",
+        Header: "Cliente",
         accessor: "descricao",
+      },
+      {
+        Header: "Data",
+        accessor: "data",
+      },
+      {
+        Header: "Valor em aberto",
+        accessor: "aberto",
       },
     ],
     []
@@ -116,8 +101,22 @@ export function Plaque({ clients }: PlaqueProps) {
 
     try {
       setIsLoadingOrders(true);
-      const response = await getOrderByClient(client.value);
 
+      let response = [];
+
+      if (client.value && rangeDate.startDate && rangeDate.endDate) {
+        response = await filterByDateClient(
+          client.value,
+          rangeDate.startDate,
+          rangeDate.endDate
+        );
+      } else {
+        response = await getOrderByClient(client.value);
+
+        getOrder(response.pedidoVenda);
+      }
+
+      console.log(response[0]);
       setOrdersByClient(response);
       setIsLoadingOrders(false);
     } catch (error) {
@@ -185,7 +184,14 @@ export function Plaque({ clients }: PlaqueProps) {
             />
           </Box>
           <Box mt={12}>
-            <RangeDatePicker getRangeDate={rangeFilter} noSearch={true} />
+            <RangeDatePicker
+              getRangeDate={() => {}}
+              onChangeStart={(d) =>
+                setRangeDate({ ...rangeDate, startDate: d })
+              }
+              onChangeEnd={(d) => setRangeDate({ ...rangeDate, endDate: d })}
+              noSearch={true}
+            />
           </Box>
           <Button
             mt={10}

@@ -33,8 +33,8 @@ export const orderFormSchema = yup.object().shape({
       .nullable("Campo obrigatório")
       .required("Campo obrigatório"),
   }),
-  servicoValue: yup.string(),
-  servicoDescription: yup.string(),
+  servico: yup.string(),
+  servicoValor: yup.string(),
   dateCreated: yup.string(),
   valorDesconto: yup.string(),
   desconto: yup.string(),
@@ -52,12 +52,12 @@ export interface OrderFormData extends IOrderFormData {
   observacao?: string;
   percentualDesconto?: string;
   servicos: Array<{
-    servico: string,
-    quantidade: number,
-    descricao: string,
-    valorUnitario: number,
-    valorTotal: number,
-    observacao: string
+    servico: string;
+    quantidade: number;
+    descricao: string;
+    valorUnitario: number;
+    valorTotal: number;
+    observacao: string;
   }>;
   total: number;
   numero: number;

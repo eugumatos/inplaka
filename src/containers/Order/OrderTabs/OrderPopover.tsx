@@ -49,12 +49,12 @@ interface PopoverPlaqueFormProps {
   isDisabled?: boolean;
 }
 
-export const PopoverPlaqueForm = ({
+export function OrderPopover({
   product,
   updateProductPlaque,
   removeProductPlaque,
   isDisabled,
-}: PopoverPlaqueFormProps) => {
+}: PopoverPlaqueFormProps) {
   const [allPlaques, setAllPlaques] = useState([] as any);
 
   const popoverDisclosure = useDisclosure();
@@ -302,4 +302,4 @@ export const PopoverPlaqueForm = ({
       </FullModal>
     </>
   );
-};
+}

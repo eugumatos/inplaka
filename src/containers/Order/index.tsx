@@ -22,6 +22,7 @@ import { IOrder } from "@/domains/order";
 import { useOrderForm } from "./hooks/useOrderForm";
 import { OrderDrawer } from "./OrderDrawer";
 import { FinishingModal } from "./FinishingModal";
+import { OrderProductProvider } from "./contexts/OrderProductContext";
 
 export function Order() {
   const {
@@ -41,7 +42,7 @@ export function Order() {
     seekSelectedPaymentOption,
   } = useOrderForm({ noFetch: true, shouldPreLoad: true });
 
-  const { handleSubmit, setValue, reset } = useFormContext<OrderFormData>();
+  // const { handleSubmit, setValue, reset } = useFormContext<OrderFormData>();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -96,31 +97,6 @@ export function Order() {
     }
   };
 
-  const renderDestroyModal = () => {
-    return (
-      <DestroyModal
-        isOpen={disclosureDestroyModal.isOpen}
-        onClose={disclosureDestroyModal.onClose}
-        onAction={() => {
-          if (currentOrder?.id) {
-            removeOrder(currentOrder.id);
-          }
-
-          disclosureDestroyModal.onClose();
-        }}
-      />
-    );
-  };
-
-  const renderFinishingOrderModal = () => {
-    return (
-      <FinishingModal
-        isOpen={finishingModalShouldBeOpen}
-        onClose={closeFinishingModal}
-      />
-    );
-  };
-
   return (
     <Box w="100%" flex={1}>
       <Flex justifyContent="space-between" mb={4}>
@@ -131,12 +107,7 @@ export function Order() {
           bg="pink.300"
           color="gray.50"
           size="md"
-          onClick={() => {
-            setSubmitOption("CREATE");
-            setCurrentOrder(null);
-            reset({});
-            onOpen();
-          }}
+          onClick={onOpen}
           _hover={{
             bg: "pink.400",
           }}
@@ -188,19 +159,13 @@ export function Order() {
         />
       </Box>
 
-      <OrderDrawer
-        id={currentOrder?.id}
-        isOpen={isOpen}
-        onSubmit={(data: OrderFormData) => actionOrder(data, onClose)}
-        onClose={() => {
-          onClose();
-          setCurrentOrder(null);
-          reset({});
-        }}
-      />
-
-      {renderDestroyModal()}
-      {renderFinishingOrderModal()}
+      <OrderProductProvider>
+        <OrderDrawer
+          clientId={currentOrder?.id ?? ""}
+          isOpen={isOpen}
+          onClose={onClose}
+        />
+      </OrderProductProvider>
     </Box>
   );
 }
