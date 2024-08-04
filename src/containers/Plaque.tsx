@@ -1,32 +1,53 @@
-import React, { useMemo, useState, useRef, useEffect } from "react";
-import {
-  Box,
-  Button,
-  Flex,
-  Heading,
-  FormLabel,
-  HStack,
-  Card,
-  Checkbox,
-} from "@chakra-ui/react";
+import { ModalDialog } from "@/components/Modals";
 import { AsyncSelect } from "@/components/Select/AsyncSelect";
 import { IClient } from "@/domains/client";
 import { IOrder } from "@/domains/order";
 import { getOrderByClient, updatePlaques } from "@/services/order";
-import { format } from "date-fns";
+import { formatDate } from "@/utils/formatDate";
+import {
+  Box,
+  Button,
+  Card,
+  Flex,
+  FormLabel,
+  Heading,
+  useDisclosure,
+} from "@chakra-ui/react";
+import { useMemo, useState } from "react";
 
-import { toast } from "react-toastify";
-import { useForm } from "react-hook-form";
 import { DataTable } from "@/components/Table";
-import { Input } from "@/components/Input";
+import { useForm, useFormContext } from "react-hook-form";
+import { toast } from "react-toastify";
 
 import { Column } from "react-table";
 
+import { PlaqueForm } from "@/components/Forms/PlaqueFrom";
 import { RangeDatePicker } from "@/components/Forms/RangeDatePicker";
+import { currency } from "@/utils/currency";
+import { getPlaque, sendOrderPlaque } from "@/services/plaque";
+import { unmaskText } from "@/utils/unmaskText";
+
+interface IPlaques {
+  id: string;
+  dateCreated: Date;
+  dateUpdated: Date;
+  pedidoVenda: string;
+  pedidoVendaClienteNome: string;
+  pedidoVendaNumero: number;
+  pedidoVendaData: Date;
+  valorAbatido: number;
+  formaPagamento: string;
+  formaPagamentoNome: string;
+  dataRecebimento: Date;
+  valorTotal: number;
+  valorEmAbertoAnterior: number;
+  valorEmAbertoAtual: number;
+}
 
 interface PlaqueProps {
   clients: IClient[];
   orders: IOrder[];
+  plaques: IPlaques[];
 }
 
 interface RangeDate {
@@ -34,7 +55,7 @@ interface RangeDate {
   endDate: Date | null;
 }
 
-export function Plaque({ clients }: PlaqueProps) {
+export function Plaque({ clients, plaques, orders }: PlaqueProps) {
   const [client, setClient] = useState({ value: "", label: "" });
 
   const [ordersByClient, setOrdersByClient] = useState<IOrder[] | []>([]);
@@ -45,43 +66,38 @@ export function Plaque({ clients }: PlaqueProps) {
     endDate: new Date(),
   });
 
-  const { control, register, watch } = useForm();
+  const { control, register, watch, reset, handleSubmit, formState, setValue } =
+    useFormContext();
+
+  const hasErrors = formState.isValid;
 
   const currentClient = watch("cliente") as any;
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const columns = useMemo(
     (): Column[] => [
       {
-        Header: "Quitada",
-        accessor: "placa_quitada",
-        Cell: ({ row }: any) => (
-          <Checkbox
-            size="md"
-            isChecked={row.original?.placaQuitada}
-            onChange={() => {
-              setOrdersByClient((previousPlaques: any) => {
-                const updatedPlaques = previousPlaques.map((item: any) => {
-                  return item.placa === row.original.placa
-                    ? {
-                        ...item,
-                        placaQuitada: !item.placaQuitada,
-                      }
-                    : { ...item };
-                });
-
-                return updatedPlaques;
-              });
-            }}
-          />
-        ),
+        Header: "Número",
+        accessor: "numero",
       },
       {
-        Header: "Placa",
-        accessor: "placa",
+        Header: "Cliente",
+        accessor: "clienteNome",
       },
       {
-        Header: "Descrição",
-        accessor: "descricao",
+        Header: "Valor total",
+        accessor: "valorTotal",
+        Cell: ({ value }) => currency(value),
+      },
+      {
+        Header: "Data",
+        accessor: "dateCreated",
+        Cell: ({ value }) => formatDate(value),
+      },
+      {
+        Header: "Total a receber",
+        accessor: "valorEmAbertoAtual",
       },
     ],
     []
@@ -116,6 +132,7 @@ export function Plaque({ clients }: PlaqueProps) {
 
     try {
       setIsLoadingOrders(true);
+
       const response = await getOrderByClient(client.value);
 
       setOrdersByClient(response);
@@ -126,22 +143,17 @@ export function Plaque({ clients }: PlaqueProps) {
     }
   }
 
-  function updateProducts() {
-    const updatedPlaques = ordersByClient.filter(
-      (item) => item.placaQuitada === true
-    );
+  async function loadOpenValueOrders(id: string) {
+    try {
+      let response = await getPlaque(id);
 
-    updatedPlaques.forEach(async (item: any) => {
-      try {
-        await updatePlaques(item);
-      } catch (error) {
-        toast.error("Erro ao atualizar placas.");
-
-        return;
-      }
-    });
-
-    toast.success("Placas selecionadas quitadas com sucesso!");
+      setValue("valorEmAbertoAtual", currency(response[0]?.valorEmAbertoAtual));
+      setValue("valorTotal", currency(response[0]?.valorTotal));
+    } catch (error) {
+      toast.error("Erro ao carregar as informações deste pedido.");
+      onClose();
+      return;
+    }
   }
 
   function rangeFilter({ startDate, endDate }: RangeDate) {
@@ -150,6 +162,52 @@ export function Plaque({ clients }: PlaqueProps) {
       endDate,
     });
   }
+
+  async function onSubmit(data: any) {
+    try {
+      const formattedData = {
+        pedidoVenda: data?.id,
+        valorAbatido: Number(unmaskText(data?.valorAbatido)) || 0,
+        formaPagamento: data?.formaPagamento?.value,
+        dataRecebimento: data?.dataRecebimento,
+      };
+
+      await sendOrderPlaque(formattedData);
+      toast.success("Pedido editado com sucesso!.");
+      loadOrdersByClient();
+      onClose();
+      reset({});
+    } catch (error) {
+      toast.error("Erro ao editar pedido!.");
+      onClose();
+      reset({});
+      throw new Error("Erro ao editar pedido!.");
+    }
+  }
+
+  const renderFormEditModal = () => {
+    return (
+      <ModalDialog
+        maxWidth="60%"
+        textAction="Editar"
+        isOpen={isOpen}
+        onClose={() => {
+          onClose();
+          reset({});
+        }}
+        onAction={() => {
+          handleSubmit(onSubmit)();
+
+          if (hasErrors) {
+            onClose();
+            reset({});
+          }
+        }}
+      >
+        <PlaqueForm />
+      </ModalDialog>
+    );
+  };
 
   return (
     <Box w="100%" flex={1}>
@@ -161,18 +219,7 @@ export function Plaque({ clients }: PlaqueProps) {
 
       <Card bg="whiteAlpha.600" p={5}>
         <Flex w="100%" mb={10} alignItems="center" gap={5}>
-          <Box maxW="30%">
-            <FormLabel color="gray.500" fontWeight="bold">
-              Número pedido:
-            </FormLabel>
-            <Input
-              mt={4}
-              name="order_number"
-              label="Número de pedido"
-              placeholder="Ex: 1234"
-            />
-          </Box>
-          <Box mt={4}>
+          <Box w="25%" mt={4}>
             <FormLabel color="gray.500" fontWeight="bold">
               Cliente:
             </FormLabel>
@@ -205,7 +252,17 @@ export function Plaque({ clients }: PlaqueProps) {
           isLoading={isLoadingOrders}
           columns={columns}
           data={ordersByClient}
+          onRowEdit={(row) => {
+            Object.keys(row).forEach((key: any) => {
+              return setValue(key, row[key]);
+            });
+
+            loadOpenValueOrders(row.id);
+            onOpen();
+          }}
         />
+
+        {renderFormEditModal()}
       </Card>
     </Box>
   );

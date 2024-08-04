@@ -25,7 +25,7 @@ export async function getOrder(id: string): Promise<IOrder> {
 }
 
 export async function getOrderByClient(id: string): Promise<IOrder[]> {
-  const res = await fetch(`${url}/PedidoVenda/FindByClient/${id}`);
+  const res = await fetch(`${url}/PedidoVenda/findByClient/${id}`);
 
   if (!res.ok) {
     // This will activate the closest `error.js` Error Boundary
