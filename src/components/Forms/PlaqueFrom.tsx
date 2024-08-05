@@ -144,6 +144,7 @@ export function PlaqueForm() {
               setStartDate(date);
               setValue("dataRecebimento", format(date as any, "yyyy-MM-dd"));
             }}
+            maxDate={new Date()}
             startDate={startDate}
             placeholderText="Data recebimento"
             className="chakra-datepicker-input"

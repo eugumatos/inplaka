@@ -21,11 +21,13 @@ import { toast } from "react-toastify";
 
 import { Column } from "react-table";
 
+import { PlaqueFormData } from "@/schemas/PlaqueSchemaValidation";
 import { PlaqueForm } from "@/components/Forms/PlaqueFrom";
 import { RangeDatePicker } from "@/components/Forms/RangeDatePicker";
 import { currency } from "@/utils/currency";
 import { getPlaque, sendOrderPlaque } from "@/services/plaque";
 import { unmaskText } from "@/utils/unmaskText";
+import { compareDesc, parseISO } from "date-fns";
 
 interface IPlaques {
   id: string;
@@ -55,11 +57,15 @@ interface RangeDate {
   endDate: Date | null;
 }
 
-export function Plaque({ clients, plaques, orders }: PlaqueProps) {
+export function Plaque({ clients }: PlaqueProps) {
   const [client, setClient] = useState({ value: "", label: "" });
 
   const [ordersByClient, setOrdersByClient] = useState<IOrder[] | []>([]);
+  const [isLoadingOrdersByClient, setIsLoadingOrdersByClient] = useState(false);
+
+  const [orders, setOrders] = useState<IPlaques[]>([]);
   const [isLoadingOrders, setIsLoadingOrders] = useState(false);
+  const [currentOrder, setCurrentOrder] = useState("");
 
   const [rangeDate, setRangeDate] = useState<RangeDate>({
     startDate: new Date(),
@@ -74,6 +80,8 @@ export function Plaque({ clients, plaques, orders }: PlaqueProps) {
   const currentClient = watch("cliente") as any;
 
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const disclosureOrder = useDisclosure();
 
   const columns = useMemo(
     (): Column[] => [
@@ -98,6 +106,26 @@ export function Plaque({ clients, plaques, orders }: PlaqueProps) {
       {
         Header: "Total a receber",
         accessor: "valorEmAbertoAtual",
+      },
+    ],
+    []
+  );
+
+  const columnOrders = useMemo(
+    (): Column[] => [
+      {
+        Header: "Forma pagamento",
+        accessor: "formaPagamentoNome",
+      },
+      {
+        Header: "Valor abatido",
+        accessor: "valorAbatido",
+        Cell: ({ value }) => currency(value),
+      },
+      {
+        Header: "Data recebimento",
+        accessor: "dataRecebimento",
+        Cell: ({ value }) => formatDate(value),
       },
     ],
     []
@@ -131,26 +159,36 @@ export function Plaque({ clients, plaques, orders }: PlaqueProps) {
     }
 
     try {
-      setIsLoadingOrders(true);
+      setIsLoadingOrdersByClient(true);
 
       const response = await getOrderByClient(client.value);
 
       setOrdersByClient(response);
-      setIsLoadingOrders(false);
+      setIsLoadingOrdersByClient(false);
     } catch (error) {
-      setIsLoadingOrders(false);
+      setIsLoadingOrdersByClient(false);
       toast.error("Erro ao carrregar placas deste pedido.");
     }
   }
 
-  async function loadOpenValueOrders(id: string) {
+  async function loadOpenValueOrders(row: IPlaques) {
     try {
-      let response = await getPlaque(id);
+      setIsLoadingOrders(true);
+      let response = await getPlaque(row.id);
 
-      setValue("valorEmAbertoAtual", currency(response[0]?.valorEmAbertoAtual));
-      setValue("valorTotal", currency(response[0]?.valorTotal));
+      const sortedArray = response.sort((a: IPlaques, b: IPlaques) => {
+        const dateA = parseISO(String(a.dataRecebimento));
+        const dateB = parseISO(String(b.dataRecebimento));
+
+        return compareDesc(dateA, dateB);
+      });
+
+      setOrders(sortedArray);
+      setValue("valorTotal", currency(row.valorTotal));
+      setIsLoadingOrders(false);
     } catch (error) {
       toast.error("Erro ao carregar as informações deste pedido.");
+      setIsLoadingOrders(false);
       onClose();
       return;
     }
@@ -166,7 +204,7 @@ export function Plaque({ clients, plaques, orders }: PlaqueProps) {
   async function onSubmit(data: any) {
     try {
       const formattedData = {
-        pedidoVenda: data?.id,
+        pedidoVenda: currentOrder,
         valorAbatido: Number(unmaskText(data?.valorAbatido)) || 0,
         formaPagamento: data?.formaPagamento?.value,
         dataRecebimento: data?.dataRecebimento,
@@ -175,6 +213,7 @@ export function Plaque({ clients, plaques, orders }: PlaqueProps) {
       await sendOrderPlaque(formattedData);
       toast.success("Pedido editado com sucesso!.");
       loadOrdersByClient();
+      setCurrentOrder("");
       onClose();
       reset({});
     } catch (error) {
@@ -189,17 +228,49 @@ export function Plaque({ clients, plaques, orders }: PlaqueProps) {
     return (
       <ModalDialog
         maxWidth="60%"
-        textAction="Editar"
+        textAction="Criar lançamento"
         isOpen={isOpen}
-        onClose={() => {
+        onClose={onClose}
+        onAction={() => {
           onClose();
-          reset({});
+
+          setValue(
+            "valorEmAbertoAtual",
+            currency(orders[0]?.valorEmAbertoAtual ?? "")
+          );
+
+          /*
+          if (orders[0]?.valorEmAbertoAnterior) {
+            setValue("valorTotal", currency(orders[0]?.valorEmAbertoAnterior));
+          }
+          */
+
+          disclosureOrder.onOpen();
         }}
+      >
+        <Heading size="md">Pedidos a receber</Heading>
+        <Box mt={4}>
+          <DataTable
+            isLoading={isLoadingOrders}
+            columns={columnOrders}
+            data={orders}
+          />
+        </Box>
+      </ModalDialog>
+    );
+  };
+
+  const renderCreateLaunchModal = () => {
+    return (
+      <ModalDialog
+        maxWidth="60%"
+        textAction="Criar"
+        isOpen={disclosureOrder.isOpen}
+        onClose={disclosureOrder.onClose}
         onAction={() => {
           handleSubmit(onSubmit)();
-
           if (hasErrors) {
-            onClose();
+            disclosureOrder.onClose();
             reset({});
           }
         }}
@@ -249,20 +320,18 @@ export function Plaque({ clients, plaques, orders }: PlaqueProps) {
         </Flex>
 
         <DataTable
-          isLoading={isLoadingOrders}
+          isLoading={isLoadingOrdersByClient}
           columns={columns}
           data={ordersByClient}
           onRowEdit={(row) => {
-            Object.keys(row).forEach((key: any) => {
-              return setValue(key, row[key]);
-            });
-
-            loadOpenValueOrders(row.id);
+            loadOpenValueOrders(row);
+            setCurrentOrder(row.id);
             onOpen();
           }}
         />
 
         {renderFormEditModal()}
+        {renderCreateLaunchModal()}
       </Card>
     </Box>
   );
