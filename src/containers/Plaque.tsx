@@ -1,32 +1,55 @@
-import React, { useMemo, useState, useRef, useEffect } from "react";
-import {
-  Box,
-  Button,
-  Flex,
-  Heading,
-  FormLabel,
-  HStack,
-  Card,
-  Checkbox,
-} from "@chakra-ui/react";
+import { ModalDialog } from "@/components/Modals";
 import { AsyncSelect } from "@/components/Select/AsyncSelect";
 import { IClient } from "@/domains/client";
 import { IOrder } from "@/domains/order";
 import { getOrderByClient, updatePlaques } from "@/services/order";
-import { format } from "date-fns";
+import { formatDate } from "@/utils/formatDate";
+import {
+  Box,
+  Button,
+  Card,
+  Flex,
+  FormLabel,
+  Heading,
+  useDisclosure,
+} from "@chakra-ui/react";
+import { useMemo, useState } from "react";
 
-import { toast } from "react-toastify";
-import { useForm } from "react-hook-form";
 import { DataTable } from "@/components/Table";
-import { Input } from "@/components/Input";
+import { useForm, useFormContext } from "react-hook-form";
+import { toast } from "react-toastify";
 
 import { Column } from "react-table";
 
+import { PlaqueFormData } from "@/schemas/PlaqueSchemaValidation";
+import { PlaqueForm } from "@/components/Forms/PlaqueFrom";
 import { RangeDatePicker } from "@/components/Forms/RangeDatePicker";
+import { currency } from "@/utils/currency";
+import { getPlaque, sendOrderPlaque } from "@/services/plaque";
+import { unmaskText } from "@/utils/unmaskText";
+import { compareDesc, parseISO } from "date-fns";
+
+interface IPlaques {
+  id: string;
+  dateCreated: Date;
+  dateUpdated: Date;
+  pedidoVenda: string;
+  pedidoVendaClienteNome: string;
+  pedidoVendaNumero: number;
+  pedidoVendaData: Date;
+  valorAbatido: number;
+  formaPagamento: string;
+  formaPagamentoNome: string;
+  dataRecebimento: Date;
+  valorTotal: number;
+  valorEmAbertoAnterior: number;
+  valorEmAbertoAtual: number;
+}
 
 interface PlaqueProps {
   clients: IClient[];
   orders: IOrder[];
+  plaques: IPlaques[];
 }
 
 interface RangeDate {
@@ -38,50 +61,71 @@ export function Plaque({ clients }: PlaqueProps) {
   const [client, setClient] = useState({ value: "", label: "" });
 
   const [ordersByClient, setOrdersByClient] = useState<IOrder[] | []>([]);
+  const [isLoadingOrdersByClient, setIsLoadingOrdersByClient] = useState(false);
+
+  const [orders, setOrders] = useState<IPlaques[]>([]);
   const [isLoadingOrders, setIsLoadingOrders] = useState(false);
+  const [currentOrder, setCurrentOrder] = useState("");
 
   const [rangeDate, setRangeDate] = useState<RangeDate>({
     startDate: new Date(),
     endDate: new Date(),
   });
 
-  const { control, register, watch } = useForm();
+  const { control, register, watch, reset, handleSubmit, formState, setValue } =
+    useFormContext();
+
+  const hasErrors = formState.isValid;
 
   const currentClient = watch("cliente") as any;
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const disclosureOrder = useDisclosure();
 
   const columns = useMemo(
     (): Column[] => [
       {
-        Header: "Quitada",
-        accessor: "placa_quitada",
-        Cell: ({ row }: any) => (
-          <Checkbox
-            size="md"
-            isChecked={row.original?.placaQuitada}
-            onChange={() => {
-              setOrdersByClient((previousPlaques: any) => {
-                const updatedPlaques = previousPlaques.map((item: any) => {
-                  return item.placa === row.original.placa
-                    ? {
-                        ...item,
-                        placaQuitada: !item.placaQuitada,
-                      }
-                    : { ...item };
-                });
+        Header: "Número",
+        accessor: "numero",
+      },
+      {
+        Header: "Cliente",
+        accessor: "clienteNome",
+      },
+      {
+        Header: "Valor total",
+        accessor: "valorTotal",
+        Cell: ({ value }) => currency(value),
+      },
+      {
+        Header: "Data",
+        accessor: "dateCreated",
+        Cell: ({ value }) => formatDate(value),
+      },
+      {
+        Header: "Total a receber",
+        accessor: "valorEmAbertoAtual",
+      },
+    ],
+    []
+  );
 
-                return updatedPlaques;
-              });
-            }}
-          />
-        ),
+  const columnOrders = useMemo(
+    (): Column[] => [
+      {
+        Header: "Forma pagamento",
+        accessor: "formaPagamentoNome",
       },
       {
-        Header: "Placa",
-        accessor: "placa",
+        Header: "Valor abatido",
+        accessor: "valorAbatido",
+        Cell: ({ value }) => currency(value),
       },
       {
-        Header: "Descrição",
-        accessor: "descricao",
+        Header: "Data recebimento",
+        accessor: "dataRecebimento",
+        Cell: ({ value }) => formatDate(value),
       },
     ],
     []
@@ -115,33 +159,39 @@ export function Plaque({ clients }: PlaqueProps) {
     }
 
     try {
-      setIsLoadingOrders(true);
+      setIsLoadingOrdersByClient(true);
+
       const response = await getOrderByClient(client.value);
 
       setOrdersByClient(response);
-      setIsLoadingOrders(false);
+      setIsLoadingOrdersByClient(false);
     } catch (error) {
-      setIsLoadingOrders(false);
+      setIsLoadingOrdersByClient(false);
       toast.error("Erro ao carrregar placas deste pedido.");
     }
   }
 
-  function updateProducts() {
-    const updatedPlaques = ordersByClient.filter(
-      (item) => item.placaQuitada === true
-    );
+  async function loadOpenValueOrders(row: IPlaques) {
+    try {
+      setIsLoadingOrders(true);
+      let response = await getPlaque(row.id);
 
-    updatedPlaques.forEach(async (item: any) => {
-      try {
-        await updatePlaques(item);
-      } catch (error) {
-        toast.error("Erro ao atualizar placas.");
+      const sortedArray = response.sort((a: IPlaques, b: IPlaques) => {
+        const dateA = parseISO(String(a.dataRecebimento));
+        const dateB = parseISO(String(b.dataRecebimento));
 
-        return;
-      }
-    });
+        return compareDesc(dateA, dateB);
+      });
 
-    toast.success("Placas selecionadas quitadas com sucesso!");
+      setOrders(sortedArray);
+      setValue("valorTotal", currency(row.valorTotal));
+      setIsLoadingOrders(false);
+    } catch (error) {
+      toast.error("Erro ao carregar as informações deste pedido.");
+      setIsLoadingOrders(false);
+      onClose();
+      return;
+    }
   }
 
   function rangeFilter({ startDate, endDate }: RangeDate) {
@@ -150,6 +200,85 @@ export function Plaque({ clients }: PlaqueProps) {
       endDate,
     });
   }
+
+  async function onSubmit(data: any) {
+    try {
+      const formattedData = {
+        pedidoVenda: currentOrder,
+        valorAbatido: Number(unmaskText(data?.valorAbatido)) || 0,
+        formaPagamento: data?.formaPagamento?.value,
+        dataRecebimento: data?.dataRecebimento,
+      };
+
+      await sendOrderPlaque(formattedData);
+      toast.success("Pedido editado com sucesso!.");
+      loadOrdersByClient();
+      setCurrentOrder("");
+      onClose();
+      reset({});
+    } catch (error) {
+      toast.error("Erro ao editar pedido!.");
+      onClose();
+      reset({});
+      throw new Error("Erro ao editar pedido!.");
+    }
+  }
+
+  const renderFormEditModal = () => {
+    return (
+      <ModalDialog
+        maxWidth="60%"
+        textAction="Criar lançamento"
+        isOpen={isOpen}
+        onClose={onClose}
+        onAction={() => {
+          onClose();
+
+          setValue(
+            "valorEmAbertoAtual",
+            currency(orders[0]?.valorEmAbertoAtual ?? "")
+          );
+
+          /*
+          if (orders[0]?.valorEmAbertoAnterior) {
+            setValue("valorTotal", currency(orders[0]?.valorEmAbertoAnterior));
+          }
+          */
+
+          disclosureOrder.onOpen();
+        }}
+      >
+        <Heading size="md">Pedidos a receber</Heading>
+        <Box mt={4}>
+          <DataTable
+            isLoading={isLoadingOrders}
+            columns={columnOrders}
+            data={orders}
+          />
+        </Box>
+      </ModalDialog>
+    );
+  };
+
+  const renderCreateLaunchModal = () => {
+    return (
+      <ModalDialog
+        maxWidth="60%"
+        textAction="Criar"
+        isOpen={disclosureOrder.isOpen}
+        onClose={disclosureOrder.onClose}
+        onAction={() => {
+          handleSubmit(onSubmit)();
+          if (hasErrors) {
+            disclosureOrder.onClose();
+            reset({});
+          }
+        }}
+      >
+        <PlaqueForm />
+      </ModalDialog>
+    );
+  };
 
   return (
     <Box w="100%" flex={1}>
@@ -161,18 +290,7 @@ export function Plaque({ clients }: PlaqueProps) {
 
       <Card bg="whiteAlpha.600" p={5}>
         <Flex w="100%" mb={10} alignItems="center" gap={5}>
-          <Box maxW="30%">
-            <FormLabel color="gray.500" fontWeight="bold">
-              Número pedido:
-            </FormLabel>
-            <Input
-              mt={4}
-              name="order_number"
-              label="Número de pedido"
-              placeholder="Ex: 1234"
-            />
-          </Box>
-          <Box mt={4}>
+          <Box w="25%" mt={4}>
             <FormLabel color="gray.500" fontWeight="bold">
               Cliente:
             </FormLabel>
@@ -202,10 +320,18 @@ export function Plaque({ clients }: PlaqueProps) {
         </Flex>
 
         <DataTable
-          isLoading={isLoadingOrders}
+          isLoading={isLoadingOrdersByClient}
           columns={columns}
           data={ordersByClient}
+          onRowEdit={(row) => {
+            loadOpenValueOrders(row);
+            setCurrentOrder(row.id);
+            onOpen();
+          }}
         />
+
+        {renderFormEditModal()}
+        {renderCreateLaunchModal()}
       </Card>
     </Box>
   );
