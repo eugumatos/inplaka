@@ -13,6 +13,9 @@ type RangeDate = {
 interface RangeDatePickerProps {
   getRangeDate: ({ startDate, endDate }: RangeDate) => void;
   noSearch?: boolean;
+
+  onChangeDateStart?: (start: Date | null) => void;
+  onChangeDateEnd?: (end: Date | null) => void;
 }
 
 const calendarStyleProps = {
@@ -24,6 +27,8 @@ const calendarStyleProps = {
 
 export const RangeDatePicker = ({
   getRangeDate,
+  onChangeDateStart,
+  onChangeDateEnd,
   noSearch = false,
 }: RangeDatePickerProps) => {
   const [startDate, setStartDate] = useState<Date | null>(null);
@@ -39,7 +44,10 @@ export const RangeDatePicker = ({
       <Box position="relative" mr={2}>
         <DatePicker
           selected={startDate}
-          onChange={(date) => setStartDate(date)}
+          onChange={(date) => {
+            setStartDate(date);
+            if (onChangeDateStart) onChangeDateStart(date);
+          }}
           selectsStart
           startDate={startDate}
           endDate={endDate}
@@ -55,7 +63,10 @@ export const RangeDatePicker = ({
       <Box position="relative" mr={2}>
         <DatePicker
           selected={endDate}
-          onChange={(date) => setEndDate(date)}
+          onChange={(date) => {
+            setEndDate(date);
+            if (onChangeDateEnd) onChangeDateEnd(date);
+          }}
           selectsEnd
           startDate={startDate}
           endDate={endDate}

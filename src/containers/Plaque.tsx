@@ -56,8 +56,8 @@ interface PlaqueProps {
 }
 
 interface RangeDate {
-  startDate: string | null;
-  endDate: string | null;
+  startDate: Date | null;
+  endDate: Date | null;
 }
 
 export function Plaque({ clients, plaques }: PlaqueProps) {
@@ -162,35 +162,43 @@ export function Plaque({ clients, plaques }: PlaqueProps) {
   }
 
   async function loadOrdersByClient() {
-    if (client.value === "" && rangeDate?.startDate === null && rangeDate?.endDate === null) {
-      toast.warning("Você deve selecionar um cliente antes de continuar.");
+    const formattedStart = rangeDate?.startDate
+      ? format(rangeDate.startDate, "yyyy-MM-dd")
+      : null;
+    const formattedEnd = rangeDate?.endDate
+      ? format(rangeDate.endDate, "yyyy-MM-dd")
+      : null;
 
+    if (!client?.value && (!formattedStart || !formattedEnd)) {
+      toast.warning("Você deve selecionar um cliente antes de continuar.");
       return;
     }
 
     try {
-
       setIsLoadingOrdersByClient(true);
 
-      let response = []
+      let response = [];
 
-
-      if (client.value && rangeDate.startDate && rangeDate.endDate) {
-        response = await getPlaqueByClientDate(client.value, rangeDate.startDate, rangeDate.endDate)
-
-      } else if (rangeDate.startDate && rangeDate.endDate) {
-        response = await getPlaqueByDate(rangeDate.startDate, rangeDate.endDate);
-
-      } else {
+      if (client?.value && formattedStart && formattedEnd) {
+        response = await getPlaqueByClientDate(
+          client.value,
+          formattedStart,
+          formattedEnd
+        );
+      } else if (formattedStart && formattedEnd) {
+        response = await getPlaqueByDate(formattedStart, formattedEnd);
+      } else if (client?.value) {
         response = await getOrderByClient(client.value);
-
+      } else {
+        toast.warning("Informações insuficientes para carregar as placas.");
+        return;
       }
 
       setOrdersByClient(response as any);
-      setIsLoadingOrdersByClient(false);
     } catch (error) {
+      toast.error("Erro ao carregar placas deste pedido.");
+    } finally {
       setIsLoadingOrdersByClient(false);
-      toast.error("Erro ao carrregar placas deste pedido.");
     }
   }
 
@@ -218,8 +226,8 @@ export function Plaque({ clients, plaques }: PlaqueProps) {
 
   function rangeFilter({ startDate, endDate }: RangeDate) {
     setRangeDate({
-      startDate: format(startDate as any, "yyyy-MM-dd"),
-      endDate: format(endDate as any, "yyyy-MM-dd"),
+      startDate,
+      endDate,
     });
   }
 
@@ -237,7 +245,7 @@ export function Plaque({ clients, plaques }: PlaqueProps) {
       toast.success("Pedido editado com sucesso!.");
       loadOrdersByClient();
       setCurrentOrder({} as IOrder);
-      onClose();
+      disclosureOrder.onClose();
       reset({});
     } catch (error) {
       toast.error("Erro ao editar pedido!.");
@@ -259,17 +267,18 @@ export function Plaque({ clients, plaques }: PlaqueProps) {
           reset({});
 
           const filteredValues = orders
-          .map(o => o.valorEmAbertoAtual)
-          .filter(value => typeof value === 'number') as number[];
+            .map((o) => o.valorEmAbertoAtual)
+            .filter((value) => typeof value === "number") as number[];
 
-          const findReceiveOrder = filteredValues.length > 0 ? Math.min(...filteredValues) : 0;
+          const findReceiveOrder =
+            filteredValues.length > 0 ? Math.min(...filteredValues) : 0;
+
+          setValue("valorEmAbertoAtual", currency(findReceiveOrder ?? ""));
 
           setValue(
-            "valorEmAbertoAtual",
-            currency(findReceiveOrder ?? "")
+            "valorTotal",
+            currency(Number(currentOrder?.valorTotal) ?? "")
           );
-
-          setValue("valorTotal", currency(Number(currentOrder?.valorTotal) ?? ""));
 
           disclosureOrder.onOpen();
         }}
@@ -329,7 +338,16 @@ export function Plaque({ clients, plaques }: PlaqueProps) {
             />
           </Box>
           <Box mt={12}>
-            <RangeDatePicker getRangeDate={rangeFilter} noSearch={true} />
+            <RangeDatePicker
+              getRangeDate={() => {}}
+              onChangeDateStart={(start) =>
+                setRangeDate({ ...rangeDate, startDate: start })
+              }
+              onChangeDateEnd={(end) =>
+                setRangeDate({ ...rangeDate, endDate: end })
+              }
+              noSearch={true}
+            />
           </Box>
           <Button
             mt={10}
