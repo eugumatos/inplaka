@@ -66,7 +66,7 @@ export function SidebarNav() {
           Pedidos de Venda
         </NavLink>
 
-        <NavLink href="/baixa-placa" icon={BsSignpost}>
+        <NavLink href="/baixa-pedido" icon={BsSignpost}>
           Baixa de pedidos
         </NavLink>
         {/*

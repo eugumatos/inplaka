@@ -26,39 +26,38 @@ interface IPlaques {
 }
 
 interface HomeProps {
-  orders: IOrder[];
   clients: IClient[];
-  plaques: IPlaques[];
+  plaques: any;
 }
 
-export default function BaixaPlaca({ orders, clients, plaques }: HomeProps) {
+export default function BaixaPlaca({ clients, plaques }: HomeProps) {
   const formPlaque = useForm({
     resolver: yupResolver(plaqueFormSchema),
   });
 
   return (
     <FormProvider {...formPlaque}>
-      <Plaque orders={orders} clients={clients} plaques={plaques} />
+      <Plaque clients={clients} plaques={plaques} />
     </FormProvider>
   );
 }
 
 export async function getServerSideProps() {
-  const orders = await getOrders();
   const clients = await getClients();
   const plaques = await getAllPlaques();
 
-  if (!orders) {
+  const formattedPlaques = plaques.map((p: any) => {
     return {
-      notFound: true,
-    };
-  }
+      ...p,
+      numero: p?.pedidoVendaNumero,
+      clienteNome: p?.pedidoVendaClienteNome
+    }
+  })
 
   return {
     props: {
-      orders,
       clients,
-      plaques,
+      plaques: formattedPlaques,
     },
   };
 }

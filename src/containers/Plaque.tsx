@@ -3,7 +3,10 @@ import { AsyncSelect } from "@/components/Select/AsyncSelect";
 import { IClient } from "@/domains/client";
 import { IOrder } from "@/domains/order";
 import { getOrderByClient, updatePlaques } from "@/services/order";
+import { getPlaqueByClientDate, getPlaqueByDate } from "@/services/plaque";
 import { formatDate } from "@/utils/formatDate";
+import { format } from "date-fns";
+
 import {
   Box,
   Button,
@@ -31,6 +34,7 @@ import { compareDesc, parseISO } from "date-fns";
 
 interface IPlaques {
   id: string;
+  numero: string;
   dateCreated: Date;
   dateUpdated: Date;
   pedidoVenda: string;
@@ -48,28 +52,33 @@ interface IPlaques {
 
 interface PlaqueProps {
   clients: IClient[];
-  orders: IOrder[];
   plaques: IPlaques[];
 }
 
 interface RangeDate {
-  startDate: Date | null;
-  endDate: Date | null;
+  startDate: string | null;
+  endDate: string | null;
 }
 
-export function Plaque({ clients }: PlaqueProps) {
+export function Plaque({ clients, plaques }: PlaqueProps) {
   const [client, setClient] = useState({ value: "", label: "" });
 
-  const [ordersByClient, setOrdersByClient] = useState<IOrder[] | []>([]);
+  const [ordersByClient, setOrdersByClient] = useState<IPlaques[] | []>(() => {
+    if (plaques.length > 0) {
+      return plaques;
+    }
+
+    return [];
+  });
   const [isLoadingOrdersByClient, setIsLoadingOrdersByClient] = useState(false);
 
   const [orders, setOrders] = useState<IPlaques[]>([]);
   const [isLoadingOrders, setIsLoadingOrders] = useState(false);
-  const [currentOrder, setCurrentOrder] = useState("");
+  const [currentOrder, setCurrentOrder] = useState<IOrder>({} as IOrder);
 
   const [rangeDate, setRangeDate] = useState<RangeDate>({
-    startDate: new Date(),
-    endDate: new Date(),
+    startDate: null,
+    endDate: null,
   });
 
   const { control, register, watch, reset, handleSubmit, formState, setValue } =
@@ -106,6 +115,7 @@ export function Plaque({ clients }: PlaqueProps) {
       {
         Header: "Total a receber",
         accessor: "valorEmAbertoAtual",
+        Cell: ({ value }) => currency(value),
       },
     ],
     []
@@ -152,18 +162,31 @@ export function Plaque({ clients }: PlaqueProps) {
   }
 
   async function loadOrdersByClient() {
-    if (client.value === "") {
+    if (client.value === "" && rangeDate?.startDate === null && rangeDate?.endDate === null) {
       toast.warning("Você deve selecionar um cliente antes de continuar.");
 
       return;
     }
 
     try {
+
       setIsLoadingOrdersByClient(true);
 
-      const response = await getOrderByClient(client.value);
+      let response = []
 
-      setOrdersByClient(response);
+
+      if (client.value && rangeDate.startDate && rangeDate.endDate) {
+        response = await getPlaqueByClientDate(client.value, rangeDate.startDate, rangeDate.endDate)
+
+      } else if (rangeDate.startDate && rangeDate.endDate) {
+        response = await getPlaqueByDate(rangeDate.startDate, rangeDate.endDate);
+
+      } else {
+        response = await getOrderByClient(client.value);
+
+      }
+
+      setOrdersByClient(response as any);
       setIsLoadingOrdersByClient(false);
     } catch (error) {
       setIsLoadingOrdersByClient(false);
@@ -184,7 +207,6 @@ export function Plaque({ clients }: PlaqueProps) {
       });
 
       setOrders(sortedArray);
-      setValue("valorTotal", currency(row.valorTotal));
       setIsLoadingOrders(false);
     } catch (error) {
       toast.error("Erro ao carregar as informações deste pedido.");
@@ -196,24 +218,25 @@ export function Plaque({ clients }: PlaqueProps) {
 
   function rangeFilter({ startDate, endDate }: RangeDate) {
     setRangeDate({
-      startDate,
-      endDate,
+      startDate: format(startDate as any, "yyyy-MM-dd"),
+      endDate: format(endDate as any, "yyyy-MM-dd"),
     });
   }
 
   async function onSubmit(data: any) {
     try {
       const formattedData = {
-        pedidoVenda: currentOrder,
+        pedidoVenda: currentOrder?.id,
         valorAbatido: Number(unmaskText(data?.valorAbatido)) || 0,
         formaPagamento: data?.formaPagamento?.value,
+        conta: data?.conta.value,
         dataRecebimento: data?.dataRecebimento,
       };
 
       await sendOrderPlaque(formattedData);
       toast.success("Pedido editado com sucesso!.");
       loadOrdersByClient();
-      setCurrentOrder("");
+      setCurrentOrder({} as IOrder);
       onClose();
       reset({});
     } catch (error) {
@@ -233,22 +256,25 @@ export function Plaque({ clients }: PlaqueProps) {
         onClose={onClose}
         onAction={() => {
           onClose();
+          reset({});
+
+          const filteredValues = orders
+          .map(o => o.valorEmAbertoAtual)
+          .filter(value => typeof value === 'number') as number[];
+
+          const findReceiveOrder = filteredValues.length > 0 ? Math.min(...filteredValues) : 0;
 
           setValue(
             "valorEmAbertoAtual",
-            currency(orders[0]?.valorEmAbertoAtual ?? "")
+            currency(findReceiveOrder ?? "")
           );
 
-          /*
-          if (orders[0]?.valorEmAbertoAnterior) {
-            setValue("valorTotal", currency(orders[0]?.valorEmAbertoAnterior));
-          }
-          */
+          setValue("valorTotal", currency(Number(currentOrder?.valorTotal) ?? ""));
 
           disclosureOrder.onOpen();
         }}
       >
-        <Heading size="md">Pedidos a receber</Heading>
+        <Heading size="md">Pedidos a receber: {currentOrder?.numero}</Heading>
         <Box mt={4}>
           <DataTable
             isLoading={isLoadingOrders}
@@ -325,7 +351,7 @@ export function Plaque({ clients }: PlaqueProps) {
           data={ordersByClient}
           onRowEdit={(row) => {
             loadOpenValueOrders(row);
-            setCurrentOrder(row.id);
+            setCurrentOrder(row);
             onOpen();
           }}
         />

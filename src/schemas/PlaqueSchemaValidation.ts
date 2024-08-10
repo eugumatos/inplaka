@@ -3,8 +3,8 @@ import * as yup from "yup";
 export const plaqueFormSchema = yup.object().shape({
   valorEmAbertoAtual: yup.string(),
   valorTotal: yup.string(),
-  valorAbatido: yup.string(),
-  dataRecebimento: yup.string(),
+  valorAbatido: yup.string().required(),
+  dataRecebimento: yup.string().required(),
   conta: yup.object().shape({
     value: yup
       .string()

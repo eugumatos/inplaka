@@ -1,5 +1,4 @@
 import { url } from "@/constants";
-import { ICompany } from "@/domains/company";
 
 export async function getAllPlaques(): Promise<any> {
   const res = await fetch(`${url}/BaixaPedido`);
@@ -22,6 +21,40 @@ export async function getPlaque(id: string): Promise<any> {
 
   return res.json();
 }
+
+export async function getPlaqueByDate(
+  startDate: string | null,
+  endDate: string | null
+): Promise<[]> {
+  const res = await fetch(
+    `${url}/PedidoVenda/findByDate/${startDate}/${endDate}`
+  );
+
+  if (!res.ok) {
+    // This will activate the closest `error.js` Error Boundary
+    throw new Error("Failed to fetch data");
+  }
+
+  return res.json();
+}
+
+export async function getPlaqueByClientDate(
+  client: string,
+  startDate: string | null,
+  endDate: string | null
+): Promise<[]> {
+  const res = await fetch(
+    `${url}/PedidoVenda/findByClientDate/${client}/${startDate}/${endDate}`
+  );
+
+  if (!res.ok) {
+    // This will activate the closest `error.js` Error Boundary
+    throw new Error("Failed to fetch data");
+  }
+
+  return res.json();
+}
+
 
 export async function sendOrderPlaque(plaque: any) {
   const res = await fetch(`${url}/BaixaPedido`, {
