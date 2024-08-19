@@ -3,7 +3,11 @@ import { AsyncSelect } from "@/components/Select/AsyncSelect";
 import { IClient } from "@/domains/client";
 import { IOrder } from "@/domains/order";
 import { getOrderByClient, updatePlaques } from "@/services/order";
-import { getPlaqueByClientDate, getPlaqueByDate } from "@/services/plaque";
+import {
+  getAllPlaques,
+  getPlaqueByClientDate,
+  getPlaqueByDate,
+} from "@/services/plaque";
 import { formatDate } from "@/utils/formatDate";
 import { format } from "date-fns";
 
@@ -14,9 +18,12 @@ import {
   Flex,
   FormLabel,
   Heading,
+  Tooltip,
+  IconButton,
   useDisclosure,
 } from "@chakra-ui/react";
-import { useMemo, useState } from "react";
+import { PiBroomBold } from "react-icons/pi";
+import { useMemo, useState, useRef } from "react";
 
 import { DataTable } from "@/components/Table";
 import { useForm, useFormContext } from "react-hook-form";
@@ -61,7 +68,10 @@ interface RangeDate {
 }
 
 export function Plaque({ clients, plaques }: PlaqueProps) {
-  const [client, setClient] = useState({ value: "", label: "" });
+  const rangePickerRef = useRef<{ resetDates: () => void }>(null);
+
+  const initialValueClient = { value: "", label: "" };
+  const [client, setClient] = useState(initialValueClient);
 
   const [ordersByClient, setOrdersByClient] = useState<IPlaques[] | []>(() => {
     if (plaques.length > 0) {
@@ -113,7 +123,7 @@ export function Plaque({ clients, plaques }: PlaqueProps) {
         Cell: ({ value }) => formatDate(value),
       },
       {
-        Header: "Total a receber",
+        Header: "Valor em aberto",
         accessor: "valorEmAbertoAtual",
         Cell: ({ value }) => currency(value),
       },
@@ -130,7 +140,7 @@ export function Plaque({ clients, plaques }: PlaqueProps) {
       {
         Header: "Valor abatido",
         accessor: "valorAbatido",
-        Cell: ({ value }) => currency(value),
+        Cell: ({ value }) => (value === 0 ? "" : currency(value)),
       },
       {
         Header: "Data recebimento",
@@ -140,6 +150,15 @@ export function Plaque({ clients, plaques }: PlaqueProps) {
     ],
     []
   );
+
+  const handleResetClick = () => {
+    if (rangePickerRef.current) {
+      rangePickerRef.current.resetDates();
+    }
+
+    setValue("cliente", initialValueClient);
+    setClient(initialValueClient);
+  };
 
   async function clientOptions(value: string) {
     try {
@@ -161,40 +180,51 @@ export function Plaque({ clients, plaques }: PlaqueProps) {
     }
   }
 
-  async function loadOrdersByClient() {
-    const formattedStart = rangeDate?.startDate
-      ? format(rangeDate.startDate, "yyyy-MM-dd")
-      : null;
-    const formattedEnd = rangeDate?.endDate
-      ? format(rangeDate.endDate, "yyyy-MM-dd")
-      : null;
-
-    if (!client?.value && (!formattedStart || !formattedEnd)) {
-      toast.warning("Você deve selecionar um cliente antes de continuar.");
-      return;
-    }
-
+  async function loadOrders() {
     try {
-      setIsLoadingOrdersByClient(true);
+      setIsLoadingOrders(true);
+      const response = await getAllPlaques();
 
+      setOrdersByClient(response as any);
+      setIsLoadingOrders(false);
+    } catch (error) {
+      setIsLoadingOrders(false);
+
+      toast.error("Erro ao carregar pedidos");
+    }
+  }
+
+  async function loadOrdersByClient() {
+    try {
+      const formattedStart = rangeDate?.startDate
+        ? format(rangeDate.startDate, "yyyy-MM-dd")
+        : null;
+      const formattedEnd = rangeDate?.endDate
+        ? format(rangeDate.endDate, "yyyy-MM-dd")
+        : null;
+
+      setIsLoadingOrdersByClient(true);
       let response = [];
 
       if (client?.value && formattedStart && formattedEnd) {
+        // Fetch plaques by client and date range
         response = await getPlaqueByClientDate(
           client.value,
           formattedStart,
           formattedEnd
         );
       } else if (formattedStart && formattedEnd) {
+        // Fetch plaques by date range
         response = await getPlaqueByDate(formattedStart, formattedEnd);
       } else if (client?.value) {
+        // Fetch orders by client
         response = await getOrderByClient(client.value);
       } else {
-        toast.warning("Informações insuficientes para carregar as placas.");
-        return;
+        // Fetch all plaques
+        response = await getAllPlaques();
       }
 
-      setOrdersByClient(response as any);
+      setOrdersByClient(response);
     } catch (error) {
       toast.error("Erro ao carregar placas deste pedido.");
     } finally {
@@ -205,7 +235,8 @@ export function Plaque({ clients, plaques }: PlaqueProps) {
   async function loadOpenValueOrders(row: IPlaques) {
     try {
       setIsLoadingOrders(true);
-      let response = await getPlaque(row.id);
+
+      let response = await getPlaque(row?.id);
 
       const sortedArray = response.sort((a: IPlaques, b: IPlaques) => {
         const dateA = parseISO(String(a.dataRecebimento));
@@ -243,7 +274,7 @@ export function Plaque({ clients, plaques }: PlaqueProps) {
 
       await sendOrderPlaque(formattedData);
       toast.success("Pedido editado com sucesso!.");
-      loadOrdersByClient();
+      loadOrders();
       setCurrentOrder({} as IOrder);
       disclosureOrder.onClose();
       reset({});
@@ -266,14 +297,24 @@ export function Plaque({ clients, plaques }: PlaqueProps) {
           onClose();
           reset({});
 
-          const filteredValues = orders
-            .map((o) => o.valorEmAbertoAtual)
-            .filter((value) => typeof value === "number") as number[];
+          const totalAbatido = orders
+            .map((o) => o.valorAbatido)
+            .filter((value) => typeof value === "number")
+            .reduce((sum, value) => sum + (value as number), 0);
 
-          const findReceiveOrder =
-            filteredValues.length > 0 ? Math.min(...filteredValues) : 0;
+          const totalAberto =
+            currentOrder?.valorTotal &&
+            currentOrder?.valorTotal - totalAbatido <= currentOrder?.valorTotal
+              ? currentOrder?.valorTotal - totalAbatido
+              : 0;
 
-          setValue("valorEmAbertoAtual", currency(findReceiveOrder ?? ""));
+          if (totalAberto === 0) {
+            toast.warning("Não existe valores em abertos para este pedido!");
+
+            return;
+          }
+
+          setValue("valorEmAbertoAtual", currency(totalAberto ?? ""));
 
           setValue(
             "valorTotal",
@@ -339,6 +380,7 @@ export function Plaque({ clients, plaques }: PlaqueProps) {
           </Box>
           <Box mt={12}>
             <RangeDatePicker
+              ref={rangePickerRef}
               getRangeDate={() => {}}
               onChangeDateStart={(start) =>
                 setRangeDate({ ...rangeDate, startDate: start })
@@ -349,8 +391,23 @@ export function Plaque({ clients, plaques }: PlaqueProps) {
               noSearch={true}
             />
           </Box>
+          <Box mt="auto">
+            <Tooltip label="Limpar filtro">
+              <IconButton
+                aria-label="Limpar filtro"
+                bg="teal.400"
+                icon={<PiBroomBold color="#fff" />}
+                onClick={() => {
+                  handleResetClick();
+                }}
+                _hover={{
+                  bg: "teal.500",
+                }}
+              />
+            </Tooltip>
+          </Box>
           <Button
-            mt={10}
+            mt="auto"
             fontSize={15}
             bg="pink.300"
             color="gray.50"

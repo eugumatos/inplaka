@@ -1,7 +1,7 @@
 import { url } from "@/constants";
 
 export async function getAllPlaques(): Promise<any> {
-  const res = await fetch(`${url}/BaixaPedido`);
+  const res = await fetch(`${url}/PedidoVenda/findAllAberto`);
 
   if (!res.ok) {
     // This will activate the closest `error.js` Error Boundary
@@ -54,7 +54,6 @@ export async function getPlaqueByClientDate(
 
   return res.json();
 }
-
 
 export async function sendOrderPlaque(plaque: any) {
   const res = await fetch(`${url}/BaixaPedido`, {

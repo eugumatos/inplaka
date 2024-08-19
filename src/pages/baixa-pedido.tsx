@@ -46,18 +46,10 @@ export async function getServerSideProps() {
   const clients = await getClients();
   const plaques = await getAllPlaques();
 
-  const formattedPlaques = plaques.map((p: any) => {
-    return {
-      ...p,
-      numero: p?.pedidoVendaNumero,
-      clienteNome: p?.pedidoVendaClienteNome
-    }
-  })
-
   return {
     props: {
       clients,
-      plaques: formattedPlaques,
+      plaques,
     },
   };
 }
