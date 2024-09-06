@@ -7,7 +7,7 @@ import {
   FormErrorMessage,
 } from "@chakra-ui/react";
 import { NumericFormat } from "react-number-format";
-import { Controller, FieldError, useForm } from "react-hook-form";
+import { Controller, FieldError } from "react-hook-form";
 
 interface InputCurrencyBaseProps extends InputProps {
   mt?: number;
@@ -17,12 +17,16 @@ interface InputCurrencyBaseProps extends InputProps {
   label?: string;
   error?: FieldError;
   isRequired?: boolean;
+  maxValue?: number;
 }
 
 const InputCurrencyBase: ForwardRefRenderFunction<
   HTMLInputElement,
   InputCurrencyBaseProps
-> = ({ name, control, label, isRequired, error, maxW, mt, ...rest }, ref) => {
+> = (
+  { name, control, label, isRequired, error, maxW, mt, maxValue, ...rest },
+  ref
+) => {
   const calculateMarginB = mt && mt + 2;
 
   return (
@@ -42,7 +46,14 @@ const InputCurrencyBase: ForwardRefRenderFunction<
               name={name}
               as={NumericFormat}
               value={value}
-              onChange={onChange}
+              onChange={(e) => {
+                const numericValue = parseFloat(
+                  e.target.value.replace(/[^\d.-]/g, "")
+                );
+                if (!maxValue || numericValue <= maxValue) {
+                  onChange(e);
+                }
+              }}
               prefix="R$ "
               color="gray.800"
               borderColor="gray.100"

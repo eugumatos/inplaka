@@ -1,5 +1,5 @@
 .chakra-datepicker-input {
-  width: 200px; /* Adjust the width as needed */
+  width: 100%; /* Adjust the width as needed */
   padding: 0.5rem;
   border: 1px solid #cbd5e0; /* Chakra UI's default border color */
   border-radius: 0.25rem;
@@ -9,10 +9,21 @@
   background: transparent;
 }
 
+.react-datepicker-wrapper {
+  width: 100%;
+}
+.chakra-datepicker-full {
+  width: 100%;
+}
+
 .chakra-datepicker-input::placeholder {
   color: #a0aec0; /* Chakra UI's default placeholder color */
 }
 
 .async-select-props {
   border-color: #bcbcbd;
+}
+
+.chakra-datepicker-error {
+  border: 2px solid #e53e3e;
 }

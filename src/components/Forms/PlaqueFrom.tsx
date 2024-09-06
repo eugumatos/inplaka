@@ -1,6 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
-import { Box, Divider, Flex, Heading, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Divider,
+  Flex,
+  Heading,
+  Text,
+  FormErrorMessage,
+} from "@chakra-ui/react";
 import { AccountFormData } from "@/schemas/AccountSchemaValidation";
 import { Input } from "@/components/Input";
 import { InputCurrency } from "@/components/Input/InputCurrency";
@@ -12,6 +19,7 @@ import { getFormPayments } from "@/services/form-payment";
 import DatePicker from "react-datepicker";
 import { format } from "date-fns";
 import { PlaqueFormData } from "@/schemas/PlaqueSchemaValidation";
+import { unmaskText } from "@/utils/unmaskText";
 
 export function PlaqueForm() {
   const {
@@ -23,6 +31,26 @@ export function PlaqueForm() {
   } = useFormContext<PlaqueFormData>();
 
   const [startDate, setStartDate] = useState<Date | null>(null);
+
+  const valorEmAbertoAtual = watch("valorEmAbertoAtual");
+  const valorAbatido = watch("valorAbatido");
+
+  useEffect(() => {
+    if (valorEmAbertoAtual && valorAbatido) {
+      const valorEmAbertoAtualNumber = parseFloat(
+        unmaskText(valorEmAbertoAtual)
+      );
+      const valorAbatidoNumber = parseFloat(unmaskText(valorAbatido));
+
+      if (valorAbatidoNumber > valorEmAbertoAtualNumber) {
+        // Clear the valorAbatido field
+        setValue("valorAbatido", "");
+        toast.warning(
+          "O valor abatido não pode ser maior que o valor em aberto."
+        );
+      }
+    }
+  }, [valorAbatido, valorEmAbertoAtual, setValue]);
 
   async function accountOptions(value: string) {
     try {
@@ -89,6 +117,7 @@ export function PlaqueForm() {
           <Flex direction="column" flex={1} gap={2}>
             <Flex gap={2}>
               <Text>Valor a ser abatido </Text>
+              <Text color="red.500">*</Text>
             </Flex>
             <InputCurrency
               mt={2}
@@ -136,7 +165,8 @@ export function PlaqueForm() {
 
         <Flex direction="column" flex={1} gap={2} mt={1}>
           <Flex gap={2}>
-            <Text>Data recebimento </Text>
+            <Text>Data recebimento</Text>
+            <Text color="red.500">*</Text>
           </Flex>
           <DatePicker
             selected={startDate}
@@ -147,8 +177,15 @@ export function PlaqueForm() {
             maxDate={new Date()}
             startDate={startDate}
             placeholderText="Data recebimento"
-            className="chakra-datepicker-input"
+            className={`chakra-datepicker-input ${
+              errors?.dataRecebimento && "chakra-datepicker-error"
+            }`}
           />
+          {errors?.dataRecebimento && (
+            <Text fontSize="sm" color="red.400">
+              {errors.dataRecebimento.message}
+            </Text>
+          )}
         </Flex>
       </Box>
     </form>
