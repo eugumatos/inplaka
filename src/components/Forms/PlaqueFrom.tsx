@@ -168,24 +168,26 @@ export function PlaqueForm() {
             <Text>Data recebimento</Text>
             <Text color="red.500">*</Text>
           </Flex>
-          <DatePicker
-            selected={startDate}
-            onChange={(date) => {
-              setStartDate(date);
-              setValue("dataRecebimento", format(date as any, "yyyy-MM-dd"));
-            }}
-            maxDate={new Date()}
-            startDate={startDate}
-            placeholderText="Data recebimento"
-            className={`chakra-datepicker-input ${
-              errors?.dataRecebimento && "chakra-datepicker-error"
-            }`}
-          />
-          {errors?.dataRecebimento && (
-            <Text fontSize="sm" color="red.400">
-              {errors.dataRecebimento.message}
-            </Text>
-          )}
+          <Box maxW="25%">
+            <DatePicker
+              selected={startDate}
+              onChange={(date) => {
+                setStartDate(date);
+                setValue("dataRecebimento", format(date as any, "yyyy-MM-dd"));
+              }}
+              maxDate={new Date()}
+              startDate={startDate}
+              placeholderText="Data recebimento"
+              className={`chakra-datepicker-input ${
+                errors?.dataRecebimento && "chakra-datepicker-error"
+              }`}
+            />
+            {errors?.dataRecebimento && (
+              <Text fontSize="sm" color="red.400">
+                {errors.dataRecebimento.message}
+              </Text>
+            )}
+          </Box>
         </Flex>
       </Box>
     </form>
