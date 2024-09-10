@@ -26,15 +26,15 @@ export default function ContaPagar({ bills }: BillProps) {
 }
 
 export async function getServerSideProps() {
-  const accounts = await getBills();
+  const bills = await getBills();
 
-  if (!accounts) {
+  if (!bills) {
     return {
       notFound: true,
     };
   }
 
   return {
-    props: { accounts },
+    props: { bills },
   };
 }

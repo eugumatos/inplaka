@@ -18,6 +18,7 @@ import { AsyncSelect } from "@/components/Select/AsyncSelect";
 import { getSuppliers } from "@/services/supplier";
 import DatePicker from "react-datepicker";
 import { getAccounts } from "@/services/account";
+import { useBills } from "@/contexts/BillContext";
 
 export function BillForm() {
   const {
@@ -28,54 +29,14 @@ export function BillForm() {
     formState: { errors },
   } = useFormContext<BillFormData>();
 
+  const { supplierOptions, paymentFormOptions } = useBills();
+
   const currentSupplier = watch("fornecedor") as any;
   const currentPaymentForm = watch("forma_pagamento") as any;
 
   const currentDateIssueForm = watch("data_emissao") as any;
   const currentDueDateForm = watch("data_vencimento") as any;
   const currentDatePayment = watch("data_pagamento") as any;
-
-  const supplierOptions = useCallback(async (value: string) => {
-    try {
-      const suppliers = await getSuppliers();
-
-      const options = suppliers
-        .map((supplier) => ({
-          value: supplier.id,
-          label: supplier.apelido,
-        }))
-        .filter((item: { label: string }) =>
-          item.label.toLocaleUpperCase().includes(value.toUpperCase())
-        );
-
-      return options;
-    } catch (error) {
-      toast.warning("Erro ao carregar fornecedores");
-
-      return [];
-    }
-  }, []);
-
-  const accountOptions = useCallback(async (value: string) => {
-    try {
-      const accounts = await getAccounts();
-
-      const options = accounts
-        .map((account) => ({
-          value: account.id,
-          label: account.descricao,
-        }))
-        .filter((item: { label: string }) =>
-          item.label.toLocaleUpperCase().includes(value.toUpperCase())
-        );
-
-      return options;
-    } catch (error) {
-      toast.warning("Erro ao carregar contas");
-
-      return [];
-    }
-  }, []);
 
   return (
     <form>
@@ -138,7 +99,7 @@ export function BillForm() {
             </Flex>
             <AsyncSelect
               control={control}
-              loadOptions={accountOptions}
+              loadOptions={paymentFormOptions}
               value={currentPaymentForm}
               error={errors?.forma_pagamento?.label}
               {...register("forma_pagamento")}
@@ -230,6 +191,7 @@ export function BillForm() {
               placeholder="R$ 1.200"
               control={control}
               error={errors.valor}
+              isRequired
             />
           </Flex>
           <Flex mt={4} gap={2} alignItems="center">

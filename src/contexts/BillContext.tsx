@@ -1,4 +1,10 @@
-import { ReactNode, createContext, useReducer, useContext } from "react";
+import {
+  ReactNode,
+  createContext,
+  useReducer,
+  useContext,
+  useCallback,
+} from "react";
 import { BillFormData } from "@/schemas/BillSchemaValidation";
 import { IBill } from "@/domains/bill";
 import { billReducer } from "@/reducers/billReducer";
@@ -8,10 +14,19 @@ import {
   getBills,
   updateBill,
 } from "@/services/biils";
+import { getFormPayments } from "@/services/form-payment";
+import { getSuppliers } from "@/services/supplier";
+import { ISupplier } from "@/domains/supplier";
+import { IFormPayment } from "@/domains/form-payment";
 import { toast } from "react-toastify";
 import currency from "currency.js";
 import { unmaskText } from "@/utils/unmaskText";
 import { format } from "date-fns";
+
+interface SelectProps {
+  label: string;
+  value: string;
+}
 
 interface BillContextProps {
   children?: ReactNode;
@@ -22,6 +37,8 @@ interface BillProviderProps {
   isLoading: boolean;
   isError: boolean;
   bills: Array<IBill>;
+  supplierOptions: (value: string) => Promise<SelectProps[]>;
+  paymentFormOptions: (value: string) => Promise<SelectProps[]>;
   addBill: (bill: BillFormData) => void;
   editBill: (bill: BillFormData) => void;
   removeBill: (bill: IBill) => void;
@@ -35,6 +52,46 @@ function BillProvider({ bills = [], children }: BillContextProps) {
     isLoading: false,
     isError: false,
   });
+
+  async function supplierOptions(value: string) {
+    try {
+      const sellers = await getSuppliers();
+      const options = sellers
+        .map((seller) => ({
+          value: seller.id,
+          label: seller.apelido,
+        }))
+        .filter((item) =>
+          item.label.toLocaleUpperCase().includes(value.toUpperCase())
+        );
+
+      return options;
+    } catch (error) {
+      toast.warning("Erro ao carregar fornecedores.");
+
+      return [];
+    }
+  }
+
+  async function paymentFormOptions(value: string) {
+    try {
+      const sellers = await getFormPayments();
+      const options = sellers
+        .map((seller) => ({
+          value: seller.id,
+          label: seller.descricao,
+        }))
+        .filter((item) =>
+          item.label.toLocaleUpperCase().includes(value.toUpperCase())
+        );
+
+      return options;
+    } catch (error) {
+      toast.warning("Erro ao carregar formas de pagamento.");
+
+      return [];
+    }
+  }
 
   async function addBill(bill: BillFormData) {
     try {
@@ -132,6 +189,8 @@ function BillProvider({ bills = [], children }: BillContextProps) {
         addBill,
         removeBill,
         editBill,
+        supplierOptions,
+        paymentFormOptions,
       }}
     >
       {children}

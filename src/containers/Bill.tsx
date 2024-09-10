@@ -14,9 +14,18 @@ import { IBill } from "@/domains/bill";
 import { filterText } from "@/utils/filterText";
 import { currency } from "@/utils/currency";
 import { upper } from "@/utils/upper";
+import { formatDate } from "@/utils/formatDate";
 
 export function Bill() {
-  const { bills, isLoading, addBill, editBill, removeBill } = useBills();
+  const {
+    bills,
+    isLoading,
+    addBill,
+    editBill,
+    removeBill,
+    supplierOptions,
+    paymentFormOptions,
+  } = useBills();
 
   const [currentBill, setCurrentBill] = useState<IBill | null>(null);
 
@@ -43,16 +52,17 @@ export function Bill() {
       {
         Header: "Data da Emissão",
         accessor: "data_Emissao",
-        Cell: ({ value }) => new Date(value).toLocaleDateString(),
+        Cell: ({ value }) => formatDate(value),
       },
       {
         Header: "Data de Vencimento",
         accessor: "data_Vencimento",
-        Cell: ({ value }) => new Date(value).toLocaleDateString(),
+        Cell: ({ value }) => formatDate(value),
       },
       {
         Header: "Valor total",
         accessor: "valor",
+        Cell: ({ value }) => currency(value),
       },
     ],
     []
@@ -63,6 +73,26 @@ export function Bill() {
 
     if (findBill) {
       setCurrentBill(findBill);
+    }
+  };
+
+  const seekSupplierSelectedOption = async (id: string) => {
+    const findSupplier = (await supplierOptions("")).find(
+      (supplier) => supplier.value === id
+    );
+
+    if (findSupplier) {
+      return findSupplier;
+    }
+  };
+
+  const seekPaymentFormSelectedOption = async (id: string) => {
+    const findPaymentForm = (await paymentFormOptions("")).find(
+      (paymentForm) => paymentForm.value === id
+    );
+
+    if (findPaymentForm) {
+      return findPaymentForm;
     }
   };
 
@@ -149,7 +179,24 @@ export function Bill() {
         columns={columns}
         data={bills}
         onRowEdit={(row) => {
-          Object.keys(row).forEach((key: any) => {
+          Object.keys(row).forEach(async (key: any) => {
+            if (key === "fornecedor") {
+              const supplier = await seekSupplierSelectedOption(row.fornecedor);
+
+              return setValue(key, supplier);
+            }
+
+            if (key === "forma_Pagamento") {
+              const formPayment = await seekPaymentFormSelectedOption(
+                row.forma_Pagamento
+              );
+
+              return setValue(
+                "forma_pagamento",
+                formPayment ?? { value: "", label: "" }
+              );
+            }
+
             return setValue(key, row[key]);
           });
 

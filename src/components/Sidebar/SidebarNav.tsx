@@ -15,6 +15,7 @@ import {
   RiBox3Line,
   RiFundsBoxLine,
   RiGovernmentLine,
+  RiBillLine,
 } from "react-icons/ri";
 import { BsSignpost } from "react-icons/bs";
 
@@ -69,11 +70,10 @@ export function SidebarNav() {
         <NavLink href="/baixa-pedido" icon={BsSignpost}>
           Baixa de pedidos
         </NavLink>
-        {/*
-            <NavLink href="/baixa-placa" icon={BsSignpost}>
-              Contas a pagar
-            </NavLink>
-          */}
+
+        <NavLink href="/contas-pagar" icon={RiBillLine}>
+          Contas a pagar
+        </NavLink>
 
         <NavLink href="/estoque" icon={RiBox3Line}>
           Estoque
