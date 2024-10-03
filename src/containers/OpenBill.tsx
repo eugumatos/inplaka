@@ -18,12 +18,12 @@ import { toast } from "react-toastify";
 import { OpenBillFormData } from "@/schemas/OpenBillSchemaValidation";
 
 export function OpenBill() {
-  const { openBills, isLoading, editOpenBill } = useOpenBills();
+  const { openBills, isLoading, editOpenBill, paymentFormOptions } = useOpenBills();
 
   const [instalments, setInstalments] = useState<any>([]);
   const [loadingInstalments, setLoadingInstalments] = useState(false);
 
-  const { handleSubmit, reset, formState } =
+  const { handleSubmit, reset, formState, setValue } =
     useFormContext<OpenBillFormData>();
 
   const hasErrors = formState.isValid;
@@ -76,6 +76,16 @@ export function OpenBill() {
     []
   );
 
+  const seekPaymentFormSelectedOption = async (id: string) => {
+    const findPaymentForm = (await paymentFormOptions("")).find(
+      (paymentForm) => paymentForm.value === id
+    );
+
+    if (findPaymentForm) {
+      return findPaymentForm;
+    }
+  };
+
   const searchOpenBill = async (id: string, instalment: number) => {
     try {
       disclosureEditTable.onOpen();
@@ -104,14 +114,11 @@ export function OpenBill() {
     return (
       <ModalDialog
         maxWidth="60%"
-        textAction="Pagar"
         isOpen={disclosureEditTable.isOpen}
+        noAction={true}
         onClose={() => {
           disclosureEditTable.onClose()
           reset({});
-        }}
-        onAction={() => {
-          disclosureFormEditModal.onOpen()
         }}
       >
         <Heading size="md">Parcelas</Heading>
@@ -120,6 +127,25 @@ export function OpenBill() {
             isLoading={loadingInstalments}
             columns={columnsInstalments}
             data={instalments}
+            onRowEdit={(row) => {
+              Object.keys(row).forEach(async (key: any) => {
+                if (key === "forma_Pagamento") {
+                  const formPayment = await seekPaymentFormSelectedOption(
+                    row.forma_Pagamento
+                  );
+
+                  return setValue(
+                    "forma_pagamento",
+                    formPayment ?? { value: "", label: "" }
+                  );
+                }
+              });
+
+              setValue('valor', row?.valor_Parcela);
+              setValue('data_pagamento', row?.data_Pagamento);
+
+              disclosureFormEditModal.onOpen();
+            }}
           />
         </Box>
       </ModalDialog>
@@ -130,7 +156,7 @@ export function OpenBill() {
     return (
       <ModalDialog
         maxWidth="70%"
-        textAction="Editar"
+        textAction="Pagar"
         isOpen={disclosureFormEditModal.isOpen}
         onClose={disclosureFormEditModal.onClose}
         onAction={() => {

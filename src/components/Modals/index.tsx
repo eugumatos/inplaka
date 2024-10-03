@@ -13,10 +13,11 @@ interface ModalDialogProps {
   isOpen: boolean;
   maxWidth: string;
   textAction?: string;
+  noAction?: boolean;
 
   children: ReactNode;
   onClose: () => void;
-  onAction: () => void;
+  onAction?: () => void;
 }
 
 export function ModalDialog({
@@ -26,6 +27,7 @@ export function ModalDialog({
   onClose,
   onAction,
   children,
+  noAction = false
 }: ModalDialogProps) {
   return (
     <Modal
@@ -43,6 +45,7 @@ export function ModalDialog({
 
         <ModalFooter>
           <Button
+            hidden={noAction}
             onClick={onAction}
             bg="pink.300"
             color="gray.50"

@@ -29,14 +29,12 @@ export function BillForm() {
     formState: { errors },
   } = useFormContext<BillFormData>();
 
-  const { supplierOptions, paymentFormOptions } = useBills();
+  const { supplierOptions } = useBills();
 
   const currentSupplier = watch("fornecedor") as any;
-  const currentPaymentForm = watch("forma_pagamento") as any;
 
   const currentDateIssueForm = watch("data_emissao") as any;
   const currentDueDateForm = watch("data_vencimento") as any;
-  const currentDatePayment = watch("data_pagamento") as any;
 
   return (
     <form>
