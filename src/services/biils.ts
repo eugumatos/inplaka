@@ -2,6 +2,7 @@ import { url } from "@/constants";
 import { BillFormData } from "@/schemas/BillSchemaValidation";
 import { OpenBillFormData } from "@/schemas/OpenBillSchemaValidation";
 import { IBill } from "@/domains/bill";
+import { IOpenBill } from "@/domains/open-bill";
 
 export async function getBills(): Promise<IBill[]> {
   const res = await fetch(`${url}/ContasPagar`);
@@ -23,7 +24,7 @@ export async function getOpenBillsInstalment(): Promise<IBill> {
   return res.json();
 }
 
-export async function getOpenBillInstalment(id: string, instalment: number): Promise<IBill> {
+export async function getOpenBillInstalment(id: string, instalment: number): Promise<IOpenBill> {
   const res = await fetch(`${url}/ContasPagar/${id}/${instalment}`);
 
   if (!res.ok) {
