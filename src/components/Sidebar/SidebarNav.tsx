@@ -75,6 +75,10 @@ export function SidebarNav() {
           Contas a pagar
         </NavLink>
 
+        <NavLink href="/baixa-contas" icon={RiBillLine}>
+          Baixa contas
+        </NavLink>
+
         <NavLink href="/estoque" icon={RiBox3Line}>
           Estoque
         </NavLink>
