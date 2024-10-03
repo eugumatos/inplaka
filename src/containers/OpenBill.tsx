@@ -104,6 +104,7 @@ export function OpenBill() {
     return (
       <ModalDialog
         maxWidth="60%"
+        textAction="Pagar"
         isOpen={disclosureEditTable.isOpen}
         onClose={() => {
           disclosureEditTable.onClose()

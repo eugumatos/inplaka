@@ -79,7 +79,7 @@ export function BillForm() {
         </Flex>
 
         <Flex gap={4} alignItems="center">
-          <Box flex={1}>
+          <Box mt="-8px" flex={1}>
             <Flex>
               <FormLabel>Fornecedor</FormLabel>
               <Text color="red.500">*</Text>
@@ -90,19 +90,6 @@ export function BillForm() {
               value={currentSupplier}
               error={errors?.fornecedor?.label}
               {...register("fornecedor")}
-            />
-          </Box>
-          <Box flex={1}>
-            <Flex>
-              <FormLabel>Forma pagamento</FormLabel>
-              <Text color="red.500">*</Text>
-            </Flex>
-            <AsyncSelect
-              control={control}
-              loadOptions={paymentFormOptions}
-              value={currentPaymentForm}
-              error={errors?.forma_pagamento?.label}
-              {...register("forma_pagamento")}
             />
           </Box>
           <Box flex={1}>
@@ -119,6 +106,16 @@ export function BillForm() {
               isRequired
             />
           </Box>
+          <Flex>
+            <InputCurrency
+              name="valor"
+              label="Valor"
+              placeholder="R$ 1.200"
+              control={control}
+              error={errors.valor}
+              isRequired
+            />
+          </Flex>
         </Flex>
 
         <Flex mt={5} gap={4} alignItems="center">
@@ -131,9 +128,8 @@ export function BillForm() {
               selected={currentDateIssueForm}
               onChange={(date) => setValue("data_emissao", date as any)}
               placeholderText="Data da Emissão"
-              className={`chakra-datepicker-input ${
-                errors?.data_emissao && "chakra-datepicker-error"
-              }`}
+              className={`chakra-datepicker-input ${errors?.data_emissao && "chakra-datepicker-error"
+                }`}
             />
             {errors?.data_emissao && (
               <Text fontSize="sm" color="red.400">
@@ -151,9 +147,8 @@ export function BillForm() {
               selected={currentDueDateForm}
               onChange={(date) => setValue("data_vencimento", date as any)}
               placeholderText="Data de Vencimento"
-              className={`chakra-datepicker-input ${
-                errors?.data_vencimento && "chakra-datepicker-error"
-              }`}
+              className={`chakra-datepicker-input ${errors?.data_vencimento && "chakra-datepicker-error"
+                }`}
             />
             {errors?.data_vencimento && (
               <Text fontSize="sm" color="red.400">
@@ -161,39 +156,6 @@ export function BillForm() {
               </Text>
             )}
           </Box>
-
-          <Box flex={1}>
-            <Flex gap={2}>
-              <Text>Data do Pagamento</Text>
-              <Text color="red.500">*</Text>
-            </Flex>
-            <DatePicker
-              selected={currentDatePayment}
-              onChange={(date) => setValue("data_pagamento", date as any)}
-              placeholderText="Data do Pagamento"
-              className={`chakra-datepicker-input ${
-                errors?.data_pagamento && "chakra-datepicker-error"
-              }`}
-            />
-            {errors?.data_pagamento && (
-              <Text fontSize="sm" color="red.400">
-                {errors.data_pagamento.message}
-              </Text>
-            )}
-          </Box>
-        </Flex>
-
-        <Flex mt={10} gap={4} alignItems="center">
-          <Flex>
-            <InputCurrency
-              name="valor"
-              label="Valor"
-              placeholder="R$ 1.200"
-              control={control}
-              error={errors.valor}
-              isRequired
-            />
-          </Flex>
           <Flex mt={4} gap={2} alignItems="center">
             <Checkbox size="md" {...register("recorrente")}>
               Conta Recorrente

@@ -16,10 +16,7 @@ import {
 } from "@/services/biils";
 import { getFormPayments } from "@/services/form-payment";
 import { getSuppliers } from "@/services/supplier";
-import { ISupplier } from "@/domains/supplier";
-import { IFormPayment } from "@/domains/form-payment";
 import { toast } from "react-toastify";
-import currency from "currency.js";
 import { unmaskText } from "@/utils/unmaskText";
 import { format } from "date-fns";
 
@@ -100,12 +97,7 @@ function BillProvider({ bills = [], children }: BillContextProps) {
           new Date(bill.data_vencimento) as any,
           "yyyy-MM-dd"
         ),
-        data_pagamento: format(
-          new Date(bill.data_pagamento) as any,
-          "yyyy-MM-dd"
-        ),
         data_emissao: format(new Date(bill.data_emissao) as any, "yyyy-MM-dd"),
-        forma_pagamento: bill.forma_pagamento.value,
         fornecedor: bill.fornecedor.value,
         valor: unmaskText(bill.valor),
       });
@@ -131,12 +123,7 @@ function BillProvider({ bills = [], children }: BillContextProps) {
           new Date(bill.data_vencimento) as any,
           "yyyy-MM-dd"
         ),
-        data_pagamento: format(
-          new Date(bill.data_pagamento) as any,
-          "yyyy-MM-dd"
-        ),
         data_emissao: format(new Date(bill.data_emissao) as any, "yyyy-MM-dd"),
-        forma_pagamento: bill.forma_pagamento.value,
         fornecedor: bill.fornecedor.value,
         valor: unmaskText(bill.valor),
       });

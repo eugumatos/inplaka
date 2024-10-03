@@ -24,7 +24,6 @@ export function Bill() {
     editBill,
     removeBill,
     supplierOptions,
-    paymentFormOptions,
   } = useBills();
 
   const [currentBill, setCurrentBill] = useState<IBill | null>(null);
@@ -83,16 +82,6 @@ export function Bill() {
 
     if (findSupplier) {
       return findSupplier;
-    }
-  };
-
-  const seekPaymentFormSelectedOption = async (id: string) => {
-    const findPaymentForm = (await paymentFormOptions("")).find(
-      (paymentForm) => paymentForm.value === id
-    );
-
-    if (findPaymentForm) {
-      return findPaymentForm;
     }
   };
 
@@ -184,17 +173,6 @@ export function Bill() {
               const supplier = await seekSupplierSelectedOption(row.fornecedor);
 
               return setValue(key, supplier);
-            }
-
-            if (key === "forma_Pagamento") {
-              const formPayment = await seekPaymentFormSelectedOption(
-                row.forma_Pagamento
-              );
-
-              return setValue(
-                "forma_pagamento",
-                formPayment ?? { value: "", label: "" }
-              );
             }
 
             return setValue(key, row[key]);
