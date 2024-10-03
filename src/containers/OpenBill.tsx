@@ -87,7 +87,7 @@ export function OpenBill() {
 
         return {
           ...i,
-          conta: allInstallments.nome_Conta
+          conta: allInstallments?.nome_Conta
         }
       })
 

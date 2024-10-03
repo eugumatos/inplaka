@@ -7,6 +7,8 @@ export interface IOpenBill {
   valor: string;
   valor_pago: string
   forma_pagamento: string;
+  parcelas: Array<any>;
+  nome_Conta: string;
 }
 
 
