@@ -63,13 +63,27 @@ function OpenBillProvider({ openBills = [], children }: OpenBillContextProps) {
 
   async function editOpenBill(openBill: OpenBillFormData) {
     try {
+      const formattedValue = {
+        id: openBill?.id,
+        id_Conta: openBill?.id_Conta,
+        nro_Parcela: Number(openBill?.nro_Parcela),
+        data_Pagamento: new Date(openBill?.data_pagamento),
+        valor_Pago: openBill?.valor_Pago,
+        documento: openBill?.documento,
+        data_Vencimento: openBill?.data_Vencimento,
+        forma_pagamento: openBill?.forma_pagamento?.value,
+        status: openBill?.status,
+        valor_Parcela: openBill?.valor_Parcela,
+      } as any;
+
       dispatch(loadingOpenBillAction());
 
-      await updateOpenBillInstalment(openBill);
+      await updateOpenBillInstalment(formattedValue);
 
-      dispatch(editOpenBillAction(openBill));
+      dispatch(editOpenBillAction(formattedValue));
 
       toast.success("Parcela editada com sucesso!");
+
     } catch (error) {
       dispatch(errorOpenBillAction());
       toast.error("Erro ao editar parcela");

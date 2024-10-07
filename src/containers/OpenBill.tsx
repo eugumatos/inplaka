@@ -51,7 +51,7 @@ export function OpenBill() {
     (): Column[] => [
       {
         Header: "Conta",
-        accessor: "conta",
+        accessor: "nome_conta",
         Cell: ({ value }) => filterText(upper(value), 20),
       },
       {
@@ -139,6 +139,8 @@ export function OpenBill() {
                     formPayment ?? { value: "", label: "" }
                   );
                 }
+
+                setValue(key, row[key]);
               });
 
               setValue('valor', row?.valor_Parcela);
