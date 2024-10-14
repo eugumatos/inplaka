@@ -51,7 +51,7 @@ export function OpenBill() {
     (): Column[] => [
       {
         Header: "Conta",
-        accessor: "nome_conta",
+        accessor: "nome_Conta",
         Cell: ({ value }) => filterText(upper(value), 20),
       },
       {

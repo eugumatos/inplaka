@@ -1,5 +1,5 @@
 import React, { useState, forwardRef, useImperativeHandle } from "react";
-import { Box, Flex, IconButton, Tooltip } from "@chakra-ui/react";
+import { Box, Flex, FormLabel, IconButton, Tooltip } from "@chakra-ui/react";
 import { RiCalendar2Line, RiSearch2Line } from "react-icons/ri";
 import DatePicker from "react-datepicker";
 
@@ -50,6 +50,7 @@ export const RangeDatePicker = forwardRef(
     return (
       <Flex>
         <Box position="relative" mr={2}>
+
           <DatePicker
             selected={startDate}
             onChange={(date) => {
@@ -69,6 +70,7 @@ export const RangeDatePicker = forwardRef(
           />
         </Box>
         <Box position="relative" mr={2}>
+
           <DatePicker
             selected={endDate}
             onChange={(date) => {

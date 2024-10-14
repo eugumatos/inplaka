@@ -1,10 +1,17 @@
-import React, { useState } from "react";
-import { Box, Heading, Text, Button } from "@chakra-ui/react";
+import React, { useState, useRef } from "react";
+import { useForm } from "react-hook-form";
+import { Box, Heading, Flex, Text, Button } from "@chakra-ui/react";
 import { filterOrderByDate } from "@/services/order";
 import { RangeDatePicker } from "@/components/Forms/RangeDatePicker";
+import { AsyncSelect } from "@/components/Select/AsyncSelect";
+import { Select } from "@/components/Select";
+import { Input } from "@/components/Input";
 import { format } from "date-fns";
 import { toast } from "react-toastify";
+import { SalleFormData } from "@/schemas/SalleSchemaValidation";
 import { PDFDownloadLink } from "@react-pdf/renderer";
+import { getClients } from "@/services/clients";
+import { getOrderSalle } from "@/services/order";
 import { PDFDocument } from "./document";
 
 type RangeDate = {
@@ -12,46 +19,76 @@ type RangeDate = {
   endDate: Date | null;
 };
 
+type SelectProps = {
+  value: string;
+  label: string;
+}
+
 export function Sales() {
+  const [currentClient, setCurrentClient] = useState<SelectProps>();
+
+  const { register, control, handleSubmit, reset } = useForm<SalleFormData>();
+
   const [filteredOrders, setFilteredOrders] = useState<any[]>([]);
   const [filteredDate, setFilteredDate] = useState({ start: "", end: "" });
 
-  async function filterOrder({ startDate, endDate }: RangeDate) {
+  const rangePickerRef = useRef<{ resetDates: () => void }>(null);
+
+  const [rangeDate, setRangeDate] = useState<RangeDate>({
+    startDate: null,
+    endDate: null,
+  });
+
+  function resetForm() {
+    if (rangePickerRef.current) {
+      rangePickerRef.current.resetDates();
+    }
+
+    reset({});
+  }
+
+  async function clientOptions(value: string): Promise<SelectProps[]> {
     try {
-      if (!startDate || !endDate) return;
+      const clients = await getClients();
 
-      const orders = await filterOrderByDate(
-        format(startDate, "yyyy-MM-dd"),
-        format(endDate, "yyyy-MM-dd")
-      );
+      const options = clients
+        .map((client) => ({
+          value: client.id,
+          label: client.apelido,
+        }))
+        .filter((item) =>
+          item.label.toLocaleUpperCase().includes(value.toUpperCase())
+        );
 
-      setFilteredDate({
-        start: format(startDate, "dd/MM/yyyy"),
-        end: format(endDate, "dd/MM/yyyy"),
-      });
-
-      setFilteredOrders(orders);
-
-      toast.success(`Foi encontrado um total de ${orders.length} pedidos.`);
+      return options;
     } catch (error) {
-      toast.error("Erro buscar pedidos.");
+      toast.warning("Erro ao carregar clientes");
+
+      return [];
     }
   }
 
-  /*
-  useEffect(() => {
-    async function getServices() {
-      try {
-        const data = await getClients();
-
-      } catch (error) {
-        throw new Error("Erro ao buscar clientes");
+  async function handleSearchSales(data: SalleFormData) {
+    try {
+      const formData = {
+        idCliente: data.cliente?.value,
+        dateIni: rangeDate.startDate && format(rangeDate.startDate, "yyyy-MM-dd"),
+        dateFim: rangeDate.endDate && format(rangeDate.endDate, "yyyy-MM-dd"),
+        status: data.status,
+        idPedido: data.numero_pedido
       }
-    }
 
-    getServices();
-  });
-  */
+      const res = await getOrderSalle();
+
+      toast.success(`Foi encontrado um total de ${res.length} pedidos.`);
+
+      setFilteredOrders(res as any);
+
+      resetForm();
+    } catch (error) {
+      toast.error('Erro ao buscar pedidos.')
+    }
+  }
 
   return (
     <Box w="100%" flex={1}>
@@ -60,7 +97,61 @@ export function Sales() {
           Vendas
         </Heading>
       </Box>
-      <RangeDatePicker getRangeDate={filterOrder} />
+
+      <Box background="#fff" padding={5} borderRadius={10}>
+        <form onSubmit={handleSubmit(handleSearchSales)}>
+          <Flex gap={4} alignItems="center">
+            <Flex flex={1}>
+              <Select
+                mt={4}
+                label="Status"
+                defaultOption="ATIVO"
+                {...register("status")}
+              >
+                <option value="">Selecione uma opção</option>
+                <option value="ATIVO">ATIVO</option>
+                <option value="INATIVO">INATIVO</option>
+              </Select>
+            </Flex>
+            <Flex flex={1}>
+              <AsyncSelect
+                mt={-10}
+                label="Cliente"
+                control={control}
+                value={currentClient}
+                loadOptions={clientOptions}
+                onChangeOption={setCurrentClient}
+                {...register('cliente')}
+              />
+            </Flex>
+            <Flex flex={1}>
+              <Input
+                mt={4}
+                type="number"
+                label="Número pedido"
+                placeholder="Ex: 1265"
+                {...register("numero_pedido")}
+              />
+            </Flex>
+          </Flex>
+
+          <Flex>
+            <RangeDatePicker
+              ref={rangePickerRef}
+              getRangeDate={() => { }}
+              onChangeDateStart={(start) =>
+                setRangeDate({ ...rangeDate, startDate: start })
+              }
+              onChangeDateEnd={(end) =>
+                setRangeDate({ ...rangeDate, endDate: end })
+              }
+              noSearch
+            />
+            <Button type="submit" color="#fff" bg="teal.400">BUSCAR</Button>
+          </Flex>
+        </form>
+      </Box>
+
 
       <Box mt={10}>
         <Text size="md">Pedidos encontrados: {filteredOrders.length}</Text>
@@ -80,7 +171,7 @@ export function Sales() {
               mt={3}
               bg="pink.300"
               color="gray.50"
-              onClick={() => {}}
+              onClick={() => { }}
               _hover={{
                 bg: "pink.400",
               }}
@@ -90,6 +181,6 @@ export function Sales() {
           </PDFDownloadLink>
         )}
       </Box>
-    </Box>
+    </Box >
   );
 }
