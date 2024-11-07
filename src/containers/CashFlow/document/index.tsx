@@ -52,17 +52,20 @@ export function PDFDocument({ orders, startDate, total }: DocumentProps) {
 
             <View style={styles.table}>
               <View style={[{ border: "2px solid #000" }, styles.columns]}>
-                <View style={{ width: 150 }}>
-                  <Text style={styles.columnText}>Código</Text>
-                </View>
                 <View style={{ width: 200 }}>
                   <Text style={styles.columnText}>Descrição</Text>
+                </View>
+                <View style={{ width: 300, textAlign: "right" }}>
+                  <Text style={styles.columnText}>Conta</Text>
                 </View>
                 <View style={{ width: 300, textAlign: "right" }}>
                   <Text style={styles.columnText}>Forma de Pagamento</Text>
                 </View>
                 <View style={{ width: 300, textAlign: "right" }}>
-                  <Text style={styles.columnText}>Data de Emissão</Text>
+                  <Text style={styles.columnText}>Tipo</Text>
+                </View>
+                <View style={{ width: 300, textAlign: "right" }}>
+                  <Text style={styles.columnText}>Emissão</Text>
                 </View>
                 <View style={{ width: 300, textAlign: "right" }}>
                   <Text style={styles.columnText}>Valor</Text>
@@ -82,33 +85,38 @@ export function PDFDocument({ orders, startDate, total }: DocumentProps) {
                         styles.columns,
                       ]}
                     >
-                      <View style={{ width: 150 }}>
-                        <Text style={styles.columnText}>
-                          {orderItem?.numero}
-                        </Text>
-                      </View>
                       <View style={{ width: 200 }}>
                         <Text style={styles.columnText}>
-                          {orderItem?.clienteNome}
+                          {orderItem?.descricao}
                         </Text>
                       </View>
 
                       <View style={{ width: 300, textAlign: "right" }}>
                         <Text style={styles.columnText}>
-                          {orderItem?.formaPagamentoNome}
+                          {orderItem?.contaBancaria}
+                        </Text>
+                      </View>
+                      <View style={{ width: 300, textAlign: "right" }}>
+                        <Text style={styles.columnText}>
+                          {orderItem?.formaPagamento}
+                        </Text>
+                      </View>
+                      <View style={{ width: 300, textAlign: "right" }}>
+                        <Text style={styles.columnText}>
+                          {orderItem?.tipo}
                         </Text>
                       </View>
                       <View style={{ width: 300, textAlign: "right" }}>
                         <Text style={styles.columnText}>
                           {format(
-                            parseISO(orderItem?.dateCreated),
+                            parseISO(orderItem?.emissao),
                             "dd/MM/yyyy"
                           )}
                         </Text>
                       </View>
                       <View style={{ width: 300, textAlign: "right" }}>
                         <Text style={styles.columnText}>
-                          {currency(orderItem?.valorTotal)}
+                          {currency(orderItem?.valor)}
                         </Text>
                       </View>
                     </View>
