@@ -146,6 +146,22 @@ export async function getPlaques(id: string): Promise<IOrder[]> {
 
 export async function filterOrderByDate(
   startDate: string,
+  endDate: string
+): Promise<IOrder[]> {
+  const res = await fetch(
+    `${url}/PedidoVenda/findByDate/${startDate}/${endDate}`
+  );
+
+  if (!res.ok) {
+    // This will activate the closest `error.js` Error Boundary
+    throw new Error("Failed to fetch data");
+  }
+
+  return res.json();
+}
+
+export async function filterOrderByDateBank(
+  startDate: string,
   endDate: string,
   bankId: string
 ): Promise<IOrder[]> {

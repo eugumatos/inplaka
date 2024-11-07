@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { Box, Heading, Button, Flex } from "@chakra-ui/react";
-import { filterOrderByDate } from "@/services/order";
+import { filterOrderByDateBank } from "@/services/order";
 import { RangeDatePicker } from "@/components/Forms/RangeDatePicker";
 import { format } from "date-fns";
 import { toast } from "react-toastify";
@@ -54,7 +54,7 @@ export function CashFlow() {
 
   async function filterAccount() {
     try {
-      const orders = await filterOrderByDate(
+      const orders = await filterOrderByDateBank(
         rangeDate.startDate instanceof Date ? rangeDate.startDate.toISOString() : "",
         rangeDate.endDate instanceof Date ? rangeDate.endDate.toISOString() : "",
         currentAccount?.value || "",
