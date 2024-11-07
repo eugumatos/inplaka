@@ -185,7 +185,10 @@ export function Plaque({ clients, plaques }: PlaqueProps) {
       setIsLoadingOrders(true);
       const response = await getAllPlaques();
 
-      setOrdersByClient(response as any);
+      const formattedPlaques = response.filter((p: any) => p.valorEmAbertoAtual > 0);
+
+      setOrdersByClient(formattedPlaques as any);
+
       setIsLoadingOrders(false);
     } catch (error) {
       setIsLoadingOrders(false);
@@ -207,24 +210,22 @@ export function Plaque({ clients, plaques }: PlaqueProps) {
       let response = [];
 
       if (client?.value && formattedStart && formattedEnd) {
-        // Fetch plaques by client and date range
         response = await getPlaqueByClientDate(
           client.value,
           formattedStart,
           formattedEnd
         );
       } else if (formattedStart && formattedEnd) {
-        // Fetch plaques by date range
         response = await getPlaqueByDate(formattedStart, formattedEnd);
       } else if (client?.value) {
-        // Fetch orders by client
         response = await getOrderByClient(client.value);
       } else {
-        // Fetch all plaques
         response = await getAllPlaques();
       }
 
-      setOrdersByClient(response);
+      const formattedPlaques = response.filter((p: any) => p.valorEmAbertoAtual > 0);
+
+      setOrdersByClient(formattedPlaques);
     } catch (error) {
       toast.error("Erro ao carregar placas deste pedido.");
     } finally {
@@ -304,7 +305,7 @@ export function Plaque({ clients, plaques }: PlaqueProps) {
 
           const totalAberto =
             currentOrder?.valorTotal &&
-            currentOrder?.valorTotal - totalAbatido <= currentOrder?.valorTotal
+              currentOrder?.valorTotal - totalAbatido <= currentOrder?.valorTotal
               ? currentOrder?.valorTotal - totalAbatido
               : 0;
 
@@ -381,7 +382,7 @@ export function Plaque({ clients, plaques }: PlaqueProps) {
           <Box mt={12}>
             <RangeDatePicker
               ref={rangePickerRef}
-              getRangeDate={() => {}}
+              getRangeDate={() => { }}
               onChangeDateStart={(start) =>
                 setRangeDate({ ...rangeDate, startDate: start })
               }

@@ -34,6 +34,11 @@ export async function getServerSideProps() {
   const products = await getProducts();
   const services = await getServices();
 
+  const formattedOrders = orders.map(o => ({
+    ...o,
+    status: o.valorEmAbertoAtual === 0 ? "QUITADO" : o.status
+  }));
+
   if (!orders) {
     return {
       notFound: true,
@@ -42,7 +47,7 @@ export async function getServerSideProps() {
 
   return {
     props: {
-      orders,
+      orders: formattedOrders,
       products,
       services,
     },

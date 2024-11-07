@@ -105,12 +105,12 @@ export function Sales() {
               <Select
                 mt={4}
                 label="Status"
-                defaultOption="ATIVO"
+                defaultOption="EM ABERTO"
                 {...register("status")}
               >
                 <option value="">Selecione uma opção</option>
-                <option value="ATIVO">ATIVO</option>
-                <option value="INATIVO">INATIVO</option>
+                <option value="EM ABERTO">EM ABERTO</option>
+                <option value="QUITADO">QUITADO</option>
               </Select>
             </Flex>
             <Flex flex={1}>
@@ -163,6 +163,7 @@ export function Sales() {
                 orders={filteredOrders}
                 startDate={filteredDate.start}
                 endDate={filteredDate.end}
+                total={filteredOrders.reduce((sum, item) => sum + item.valorTotal, 0)}
               />
             }
             fileName={`relatorio-xpto${format(new Date(), "dd-MM-yyyy")}`}

@@ -8,9 +8,10 @@ type DocumentProps = {
   orders: Array<any>;
   startDate: string;
   endDate: string;
+  total: number;
 };
 
-export function PDFDocument({ orders, startDate, endDate }: DocumentProps) {
+export function PDFDocument({ orders, startDate, endDate, total }: DocumentProps) {
   return (
     <Document>
       <Page size="A4" style={styles.page} orientation="landscape">
@@ -131,6 +132,10 @@ export function PDFDocument({ orders, startDate, endDate }: DocumentProps) {
                   </>
                 );
               })}
+
+              <View style={{ padding: 10, backgroundColor: 'white', textAlign: 'right' }}>
+                <Text style={[styles.description, { fontSize: 14 }]}>Total de todas as vendas: {currency(total)}</Text>
+              </View>
             </View>
           </View>
         </View>

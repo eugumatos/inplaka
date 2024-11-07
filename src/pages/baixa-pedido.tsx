@@ -46,10 +46,14 @@ export async function getServerSideProps() {
   const clients = await getClients();
   const plaques = await getAllPlaques();
 
+  console.log(plaques)
+
+  const formattedPlaques = plaques.filter((p: any) => p.valorEmAbertoAtual > 0);
+
   return {
     props: {
       clients,
-      plaques,
+      plaques: formattedPlaques,
     },
   };
 }
