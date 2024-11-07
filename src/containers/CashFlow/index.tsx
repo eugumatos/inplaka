@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { Box, Heading, Button, Flex } from "@chakra-ui/react";
+import { Box, Heading, Button, Flex, Tooltip, IconButton } from "@chakra-ui/react";
 import { filterOrderByDateBank } from "@/services/order";
 import { RangeDatePicker } from "@/components/Forms/RangeDatePicker";
 import { format } from "date-fns";
@@ -11,6 +11,7 @@ import { AsyncSelect } from "@/components/Select/AsyncSelect";
 import { AccountReportFormData } from "@/schemas/AccountReportSchemaValidation";
 import { useForm } from "react-hook-form";
 import { getAccounts } from "@/services/account";
+import { PiBroomBold } from "react-icons/pi";
 
 type RangeDate = {
   startDate: Date | null;
@@ -21,7 +22,7 @@ export function CashFlow() {
   const [filteredOrders, setFilteredOrders] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
 
-  const { register, control, handleSubmit, reset } = useForm<AccountReportFormData>();
+  const { register, control, handleSubmit } = useForm<AccountReportFormData>();
   const rangePickerRef = useRef<{ resetDates: () => void }>(null);
 
   const [currentAccount, setCurrentAccount] = useState<any | null>(null);
@@ -30,6 +31,8 @@ export function CashFlow() {
     startDate: null,
     endDate: null,
   });
+
+
 
   async function accountBankOptions(value: string) {
     try {
@@ -74,6 +77,21 @@ export function CashFlow() {
     }
   }
 
+  function clearFilters() {
+    setCurrentAccount(null);
+
+    setRangeDate({
+      startDate: null,
+      endDate: null,
+    });
+
+    rangePickerRef.current?.resetDates();
+
+    setFilteredOrders([]);
+    setTotal(0);
+  }
+
+
   return (
     <Box w="100%" flex={1}>
       <Box mb={8}>
@@ -110,6 +128,20 @@ export function CashFlow() {
               />
               <Button type="submit" color="#fff" bg="teal.400">BUSCAR</Button>
             </Flex>
+            <Tooltip label="Limpar filtros">
+              <IconButton
+                mt={5}
+                aria-label="Limpar filtro"
+                bg="teal.400"
+                icon={<PiBroomBold color="#fff" />}
+                onClick={() => {
+                  clearFilters()
+                }}
+                _hover={{
+                  bg: "teal.500",
+                }}
+              />
+            </Tooltip>
           </Flex>
         </form>
       </Box>
@@ -125,7 +157,7 @@ export function CashFlow() {
                 total={currency(total)}
               />
             }
-            fileName={`relatorio-xpto-${format(new Date(), "dd-MM-yyyy")}`}
+            fileName={`relatorio-caixa-${format(new Date(), "dd-MM-yyyy")}`}
           >
             <Button
               mt={3}

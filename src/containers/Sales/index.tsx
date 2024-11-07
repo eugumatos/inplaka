@@ -166,7 +166,7 @@ export function Sales() {
                 total={filteredOrders.reduce((sum, item) => sum + item.valorTotal, 0)}
               />
             }
-            fileName={`relatorio-xpto${format(new Date(), "dd-MM-yyyy")}`}
+            fileName={`relatorio-vendas${format(new Date(), "dd-MM-yyyy")}`}
           >
             <Button
               mt={3}

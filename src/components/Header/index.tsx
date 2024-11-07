@@ -40,7 +40,14 @@ export function Header() {
 
       <Logo />
 
-      {isWideVersion && <SearchBox />}
+      {/*
+        {isWideVersion && <SearchBox />}
+
+        <Flex align="center" ml="auto">
+          <NotificationNav />
+          <Profile showProfileData={isWideVersion} />
+        </Flex>
+      */}
 
       <Flex align="center" ml="auto">
         <NotificationNav />
