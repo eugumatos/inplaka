@@ -178,7 +178,7 @@ export async function filterOrderByDateBank(
   const queryString = new URLSearchParams(filteredFormData as any).toString();
 
   const res = await fetch(
-    `${url}/RelatorioContas/findRelatorioContas/${queryString}`
+    `${url}/RelatorioContas/findRelatorioContas?${queryString}`
   );
 
   if (!res.ok) {
