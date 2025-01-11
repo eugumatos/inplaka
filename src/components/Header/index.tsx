@@ -1,15 +1,17 @@
-import { Flex, IconButton, Icon, useBreakpointValue } from "@chakra-ui/react";
+import { Flex, Icon, IconButton, useBreakpointValue } from "@chakra-ui/react";
 import { RiMenuLine } from "react-icons/ri";
 
-import { Profile } from "./Profile";
-import { NotificationNav } from "./NotificationNav";
-import { SearchBox } from "./SearchBox";
 import { Logo } from "./Logo";
+import { NotificationNav } from "./NotificationNav";
+import { Profile } from "./Profile";
 
+import { AuthContext } from "@/contexts/AuthContext";
 import { useSidebarDrawer } from "@/contexts/SidebarDrawerContext";
+import { useContext } from "react";
 
 export function Header() {
   const { onOpen } = useSidebarDrawer();
+  const { user, signOut } = useContext(AuthContext);
 
   const isWideVersion = useBreakpointValue({
     base: false,
@@ -50,8 +52,12 @@ export function Header() {
       */}
 
       <Flex align="center" ml="auto">
-        <NotificationNav />
-        <Profile showProfileData={isWideVersion} />
+        <NotificationNav signOut={signOut} />
+        <Profile
+          showProfileData={isWideVersion}
+          name={user?.name}
+          email={user?.email}
+        />
       </Flex>
     </Flex>
   );

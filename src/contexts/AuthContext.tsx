@@ -2,7 +2,8 @@ import { url } from "@/constants";
 import Router from "next/router";
 
 import { destroyCookie, setCookie } from "nookies";
-import { createContext, ReactNode, useEffect, useState } from "react";
+import { createContext, ReactNode, useState } from "react";
+import { toast } from "react-toastify";
 
 type AuthProviderProps = {
   children: ReactNode;
@@ -15,7 +16,8 @@ type SignInCredentials = {
 
 interface User {
   email: string;
-  // permissions: string[];
+  name: string;
+  permissions: string[];
   // roles: string[];
 }
 
@@ -33,7 +35,7 @@ let authChannel: BroadcastChannel;
 export const signOut = () => {
   destroyCookie(undefined, "nextauth.token");
 
-  authChannel.postMessage("signOut");
+  // authChannel.postMessage("signOut");
 
   Router.push("/login");
 };
@@ -42,6 +44,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User>();
   const isAuthenticated = !!user;
 
+  /*
   useEffect(() => {
     authChannel = new BroadcastChannel("auth");
 
@@ -56,6 +59,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     };
   }, []);
+  */
 
   async function signIn({ email, password }: SignInCredentials) {
     try {
@@ -74,19 +78,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
         throw new Error("Invalid credentials");
       }
 
-      const { token } = await response.json();
+      const { token, user } = await response.json();
 
       setCookie(undefined, "nextauth.token", token, {
         maxAge: 60 * 60 * 24 * 30, // 30 days
         path: "/",
       });
 
+      const allowedRoutes = user.rotasPermitidas.map((r: any) => r.caminho);
+
       setUser({
         email,
+        name: user.name,
+        permissions: user.allowedRoutes,
       });
 
       Router.push("/");
     } catch (error) {
+      toast.error("Erro ao fazer login.");
       console.error("Error during sign in:", error);
     }
   }

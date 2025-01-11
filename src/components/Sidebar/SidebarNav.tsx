@@ -1,95 +1,128 @@
 import { Stack } from "@chakra-ui/react";
+import { BsSignpost } from "react-icons/bs";
 import {
-  RiUser3Line,
-  RiDashboardLine,
+  RiAccountPinBoxLine,
+  RiBankCard2Line,
+  RiBillLine,
+  RiBox3Line,
   RiBuilding2Line,
   RiContactsLine,
-  RiMindMap,
-  RiAccountPinBoxLine,
-  RiStoreLine,
-  RiProductHuntLine,
-  RiShoppingCartLine,
-  RiBankCard2Line,
-  RiUserSharedLine,
-  RiServiceLine,
-  RiBox3Line,
+  RiDashboardLine,
   RiFundsBoxLine,
   RiGovernmentLine,
-  RiBillLine,
+  RiMindMap,
+  RiProductHuntLine,
+  RiServiceLine,
+  RiShoppingCartLine,
+  RiStoreLine,
+  RiUser3Line,
+  RiUserSharedLine,
 } from "react-icons/ri";
-import { BsSignpost } from "react-icons/bs";
 
-import { NavSection } from "./NavSection";
+import { Can } from "../Can";
 import { NavLink } from "./NavLink";
+import { NavSection } from "./NavSection";
 
 export function SidebarNav() {
   return (
     <Stack spacing="12" align="flex-start" mb={5}>
       <NavSection title="ADMIN">
-        <NavLink href="/" icon={RiDashboardLine} color="gray.500">
-          Dashboard
-        </NavLink>
-        <NavLink href="/usuario" icon={RiContactsLine}>
-          Usuários
-        </NavLink>
+        <Can permissions={["/"]}>
+          <NavLink href="/" icon={RiDashboardLine} color="gray.500">
+            Dashboard
+          </NavLink>
+        </Can>
+        <Can permissions={["/usuario"]}>
+          <NavLink href="/usuario" icon={RiContactsLine}>
+            Usuários
+          </NavLink>
+        </Can>
       </NavSection>
       <NavSection title="GERAL">
-        <NavLink href="/empresa" icon={RiBuilding2Line}>
-          Empresas
-        </NavLink>
-        <NavLink href="/conta" icon={RiAccountPinBoxLine}>
-          Contas
-        </NavLink>
-        <NavLink href="/cliente" icon={RiUser3Line}>
-          Clientes
-        </NavLink>
-        <NavLink href="/vendedor" icon={RiStoreLine}>
-          Vendedores
-        </NavLink>
-        <NavLink href="/fornecedor" icon={RiUserSharedLine}>
-          Fornecedores
-        </NavLink>
-        <NavLink href="/produto" icon={RiProductHuntLine}>
-          Produtos
-        </NavLink>
-        <NavLink href="/servico" icon={RiServiceLine}>
-          Serviços
-        </NavLink>
-        <NavLink href="/forma-pagamento" icon={RiBankCard2Line}>
-          Formas de Pagamento
-        </NavLink>
-        <NavLink href="/condicao-pagamento" icon={RiMindMap}>
-          Condições de Pagamento
-        </NavLink>
+        <Can permissions={["/empresa"]}>
+          <NavLink href="/empresa" icon={RiBuilding2Line}>
+            Empresas
+          </NavLink>
+        </Can>
+        <Can permissions={["/conta"]}>
+          <NavLink href="/conta" icon={RiAccountPinBoxLine}>
+            Contas
+          </NavLink>
+        </Can>
+        <Can permissions={["/cliente"]}>
+          <NavLink href="/cliente" icon={RiUser3Line}>
+            Clientes
+          </NavLink>
+        </Can>
+        <Can permissions={["/vendedor"]}>
+          <NavLink href="/vendedor" icon={RiStoreLine}>
+            Vendedores
+          </NavLink>
+        </Can>
+        <Can permissions={["/fornecedor"]}>
+          <NavLink href="/fornecedor" icon={RiUserSharedLine}>
+            Fornecedores
+          </NavLink>
+        </Can>
+        <Can permissions={["/produto"]}>
+          <NavLink href="/produto" icon={RiProductHuntLine}>
+            Produtos
+          </NavLink>
+        </Can>
+        <Can permissions={["/servico"]}>
+          <NavLink href="/servico" icon={RiServiceLine}>
+            Serviços
+          </NavLink>
+        </Can>
+        <Can permissions={["/forma-pagamento"]}>
+          <NavLink href="/forma-pagamento" icon={RiBankCard2Line}>
+            Formas de Pagamento
+          </NavLink>
+        </Can>
+        <Can permissions={["/condicao-pagamento"]}>
+          <NavLink href="/condicao-pagamento" icon={RiMindMap}>
+            Condições de Pagamento
+          </NavLink>
+        </Can>
       </NavSection>
       <NavSection title="PEDIDOS">
-        <NavLink href="/pedido" icon={RiShoppingCartLine}>
-          Pedidos de Venda
-        </NavLink>
-
-        <NavLink href="/baixa-pedido" icon={BsSignpost}>
-          Baixa de pedidos
-        </NavLink>
-
-        <NavLink href="/contas-pagar" icon={RiBillLine}>
-          Contas a pagar
-        </NavLink>
-
-        <NavLink href="/baixa-contas" icon={RiBillLine}>
-          Baixa contas
-        </NavLink>
-
-        <NavLink href="/estoque" icon={RiBox3Line}>
-          Estoque
-        </NavLink>
+        <Can permissions={["/pedido"]}>
+          <NavLink href="/pedido" icon={RiShoppingCartLine}>
+            Pedidos de Venda
+          </NavLink>
+        </Can>
+        <Can permissions={["/baixa-pedido"]}>
+          <NavLink href="/baixa-pedido" icon={BsSignpost}>
+            Baixa de pedidos
+          </NavLink>
+        </Can>
+        <Can permissions={["/contas-pagar"]}>
+          <NavLink href="/contas-pagar" icon={RiBillLine}>
+            Contas a pagar
+          </NavLink>
+        </Can>
+        <Can permissions={["/baixa-contas"]}>
+          <NavLink href="/baixa-contas" icon={RiBillLine}>
+            Baixa contas
+          </NavLink>
+        </Can>
+        <Can permissions={["/estoque"]}>
+          <NavLink href="/estoque" icon={RiBox3Line}>
+            Estoque
+          </NavLink>
+        </Can>
       </NavSection>
       <NavSection title="RELATÓRIOS">
-        <NavLink href="/vendas" icon={RiFundsBoxLine}>
-          Vendas
-        </NavLink>
-        <NavLink href="/caixa" icon={RiGovernmentLine}>
-          Caixa
-        </NavLink>
+        <Can permissions={["/vendas"]}>
+          <NavLink href="/vendas" icon={RiFundsBoxLine}>
+            Vendas
+          </NavLink>
+        </Can>
+        <Can permissions={["/caixa"]}>
+          <NavLink href="/caixa" icon={RiGovernmentLine}>
+            Caixa
+          </NavLink>
+        </Can>
       </NavSection>
     </Stack>
   );

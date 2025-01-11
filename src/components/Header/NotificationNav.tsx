@@ -1,7 +1,11 @@
 import { HStack, Icon } from "@chakra-ui/react";
-import { RiNotificationLine, RiUserAddLine } from "react-icons/ri";
+import { RiLogoutBoxLine, RiNotificationLine } from "react-icons/ri";
 
-export function NotificationNav() {
+type NotificationNavProps = {
+  signOut: () => void;
+};
+
+export function NotificationNav({ signOut }: NotificationNavProps) {
   return (
     <HStack
       spacing={["6", "8"]}
@@ -12,7 +16,16 @@ export function NotificationNav() {
       borderColor="gray.700"
     >
       <Icon as={RiNotificationLine} color="blue.100" fontSize="20" />
-      <Icon as={RiUserAddLine} fontSize="20" />
+      <Icon
+        onClick={() => signOut()}
+        as={RiLogoutBoxLine}
+        fontSize="20"
+        color="bg.gray.100"
+        cursor="pointer"
+        _hover={{
+          bg: "gray.200",
+        }}
+      />
     </HStack>
   );
 }
