@@ -1,7 +1,7 @@
 import { url } from "@/constants";
 import Router from "next/router";
 
-import { destroyCookie, setCookie } from "nookies";
+import { destroyCookie, parseCookies, setCookie } from "nookies";
 import { createContext, ReactNode, useState } from "react";
 import { toast } from "react-toastify";
 
@@ -28,6 +28,20 @@ interface AuthContextData {
   isAuthenticated: boolean;
 }
 
+function getUserFromCookies(): User | undefined {
+  const { "nextauth.user": userCookie } = parseCookies();
+
+  if (userCookie) {
+    try {
+      return JSON.parse(userCookie) as User;
+    } catch (error) {
+      console.error("Failed to parse user from cookie:", error);
+      signOut();
+    }
+  }
+  return undefined;
+}
+
 export const AuthContext = createContext({} as AuthContextData);
 
 let authChannel: BroadcastChannel;
@@ -41,25 +55,8 @@ export const signOut = () => {
 };
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [user, setUser] = useState<User>();
+  const [user, setUser] = useState<User | undefined>(getUserFromCookies());
   const isAuthenticated = !!user;
-
-  /*
-  useEffect(() => {
-    authChannel = new BroadcastChannel("auth");
-
-    authChannel.onmessage = (message) => {
-      switch (message.data) {
-        case "signOut":
-          signOut();
-          authChannel.close();
-          break;
-        default:
-          break;
-      }
-    };
-  }, []);
-  */
 
   async function signIn({ email, password }: SignInCredentials) {
     try {
@@ -85,12 +82,31 @@ export function AuthProvider({ children }: AuthProviderProps) {
         path: "/",
       });
 
+      setCookie(undefined, "nextauth.user", user.id, {
+        maxAge: 60 * 60 * 24 * 30, // 30 days
+        path: "/",
+      });
+
       const allowedRoutes = user.rotasPermitidas.map((r: any) => r.caminho);
+
+      setCookie(
+        undefined,
+        "nextauth.user",
+        JSON.stringify({
+          email,
+          name: user.name,
+          permissions: allowedRoutes,
+        }),
+        {
+          maxAge: 60 * 60 * 24 * 30, // 30 days
+          path: "/",
+        }
+      );
 
       setUser({
         email,
         name: user.name,
-        permissions: user.allowedRoutes,
+        permissions: allowedRoutes,
       });
 
       Router.push("/");

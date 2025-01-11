@@ -9,6 +9,8 @@ type UseCanParams = {
 export function useCan({ permissions }: UseCanParams) {
   const { user, isAuthenticated } = useContext(AuthContext);
 
+  console.log(user);
+
   if (!isAuthenticated) {
     return false;
   }

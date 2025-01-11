@@ -14,7 +14,6 @@ export function validateUserPermissions({
   user,
   permissions,
 }: ValidateUserPermissionsParams) {
-  console.log(permissions);
   if (permissions && permissions?.length > 0) {
     const hasAllPermissions = permissions.every((permission) => {
       return user?.permissions.includes(permission);
