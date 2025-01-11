@@ -1,22 +1,23 @@
 import {
-  Flex,
-  SimpleGrid,
   Box,
+  Flex,
   Heading,
-  Text,
-  Icon,
   HStack,
+  Icon,
+  SimpleGrid,
+  Text,
   theme,
 } from "@chakra-ui/react";
 import {
   RiAccountPinBoxLine,
-  RiUser3Line,
-  RiShoppingCartLine,
   RiProductHuntLine,
-  RiUserSharedLine,
   RiServiceLine,
+  RiShoppingCartLine,
+  RiUser3Line,
+  RiUserSharedLine,
 } from "react-icons/ri";
 
+import { withSSRAuth } from "@/utils/hoc/withSSRAuth";
 import dynamic from "next/dynamic";
 
 const Chart = dynamic(() => import("react-apexcharts"), {
@@ -180,3 +181,9 @@ export default function Dashboard() {
     </Flex>
   );
 }
+
+export const getServerSideProps = withSSRAuth(async (ctx) => {
+  return {
+    props: {},
+  };
+});

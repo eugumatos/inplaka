@@ -1,10 +1,11 @@
-import { getOpenBillsInstalment } from "@/services/biils";
-import { FormProvider, useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { IOpenBill } from "@/domains/open-bill";
-import { openBillFormSchema } from "@/schemas/OpenBillSchemaValidation";
 import { OpenBill } from "@/containers/OpenBill";
 import { OpenBillProvider } from "@/contexts/OpenBillContext";
+import { IOpenBill } from "@/domains/open-bill";
+import { openBillFormSchema } from "@/schemas/OpenBillSchemaValidation";
+import { getOpenBillsInstalment } from "@/services/biils";
+import { withSSRAuth } from "@/utils/hoc/withSSRAuth";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { FormProvider, useForm } from "react-hook-form";
 
 interface OpenBillsProps {
   openBills: IOpenBill[];
@@ -24,7 +25,7 @@ export default function BaixaContas({ openBills }: OpenBillsProps) {
   );
 }
 
-export async function getServerSideProps() {
+export const getServerSideProps = withSSRAuth(async (ctx) => {
   const openBills = await getOpenBillsInstalment();
 
   return {
@@ -32,4 +33,4 @@ export async function getServerSideProps() {
       openBills,
     },
   };
-}
+});

@@ -1,12 +1,10 @@
 import { Plaque } from "@/containers/Plaque";
 import { IClient } from "@/domains/client";
-import { IOrder } from "@/domains/order";
 import { plaqueFormSchema } from "@/schemas/PlaqueSchemaValidation";
 import { getClients } from "@/services/clients";
-import { getOrders } from "@/services/order";
 import { getAllPlaques } from "@/services/plaque";
-import { FormProvider, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { FormProvider, useForm } from "react-hook-form";
 
 interface IPlaques {
   id: string;
@@ -45,8 +43,6 @@ export default function BaixaPlaca({ clients, plaques }: HomeProps) {
 export async function getServerSideProps() {
   const clients = await getClients();
   const plaques = await getAllPlaques();
-
-  console.log(plaques)
 
   const formattedPlaques = plaques.filter((p: any) => p.valorEmAbertoAtual > 0);
 

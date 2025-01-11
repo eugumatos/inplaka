@@ -1,14 +1,15 @@
-import { FormProvider, useForm } from "react-hook-form";
 import { getAccounts } from "@/services/account";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { FormProvider, useForm } from "react-hook-form";
 
 import { Account } from "@/containers/Account";
 import { AccountProvider } from "@/contexts/AccountContext";
+import { IAccount } from "@/domains/account";
 import {
   AccountFormData,
   accountFormSchema,
 } from "@/schemas/AccountSchemaValidation";
-import { IAccount } from "@/domains/account";
+import { withSSRAuth } from "@/utils/hoc/withSSRAuth";
 
 interface AccountProps {
   accounts: IAccount[];
@@ -28,7 +29,7 @@ export default function Conta({ accounts }: AccountProps) {
   );
 }
 
-export async function getServerSideProps() {
+export const getServerSideProps = withSSRAuth(async (ctx) => {
   const accounts = await getAccounts();
 
   if (!accounts) {
@@ -40,4 +41,4 @@ export async function getServerSideProps() {
   return {
     props: { accounts }, // will be passed to the page component as props
   };
-}
+});

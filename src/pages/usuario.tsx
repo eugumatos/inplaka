@@ -1,11 +1,12 @@
-import { FormProvider, useForm } from "react-hook-form";
 import { getUsers } from "@/services/user";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { FormProvider, useForm } from "react-hook-form";
 
 import { User } from "@/containers/User";
 import { UserProvider } from "@/contexts/UserContext";
-import { UserFormData, userFormSchema } from "@/schemas/UserSchemaValidation";
 import { IUser } from "@/domains/user";
+import { UserFormData, userFormSchema } from "@/schemas/UserSchemaValidation";
+import { withSSRAuth } from "@/utils/hoc/withSSRAuth";
 
 interface UserProps {
   users: IUser[];
@@ -25,8 +26,8 @@ export default function Usuario({ users }: UserProps) {
   );
 }
 
-export async function getServerSideProps() {
-  const users = await getUsers();
+export const getServerSideProps = withSSRAuth(async (ctx) => {
+  const users = await getUsers(ctx);
 
   if (!users) {
     return {
@@ -35,6 +36,6 @@ export async function getServerSideProps() {
   }
 
   return {
-    props: { users }, // will be passed to the page component as props
+    props: { users },
   };
-}
+});

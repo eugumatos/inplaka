@@ -1,14 +1,15 @@
-import { FormProvider, useForm } from "react-hook-form";
 import { getFormPayments } from "@/services/form-payment";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { FormProvider, useForm } from "react-hook-form";
 
+import { FormPayment } from "@/containers/FormPayment";
+import { FormPaymentProvider } from "@/contexts/FormPaymentContext";
+import { IFormPayment } from "@/domains/form-payment";
 import {
   FormPaymentFormData,
   formPaymentFormSchema,
 } from "@/schemas/FormPaymentSchemaValidation";
-import { FormPayment } from "@/containers/FormPayment";
-import { FormPaymentProvider } from "@/contexts/FormPaymentContext";
-import { IFormPayment } from "@/domains/form-payment";
+import { withSSRAuth } from "@/utils/hoc/withSSRAuth";
 
 interface FormPaymentProps {
   formPayments: IFormPayment[];
@@ -28,7 +29,7 @@ export default function FormaPagamento({ formPayments }: FormPaymentProps) {
   );
 }
 
-export async function getServerSideProps() {
+export const getServerSideProps = withSSRAuth(async (ctx) => {
   const formPayments = await getFormPayments();
 
   if (!formPayments) {
@@ -40,4 +41,4 @@ export async function getServerSideProps() {
   return {
     props: { formPayments }, // will be passed to the page component as props
   };
-}
+});

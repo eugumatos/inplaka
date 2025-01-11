@@ -1,22 +1,33 @@
-import type { AppProps } from "next/app";
-import { ChakraProvider } from "@chakra-ui/react";
-import { ToastContainer } from "react-toastify";
+import { Layout } from "@/components/Layout";
 import { SidebarDrawerProvider } from "@/contexts/SidebarDrawerContext";
 import { theme } from "@/styles/theme";
-import { Layout } from "@/components/Layout";
+import { ChakraProvider } from "@chakra-ui/react";
+import type { AppProps } from "next/app";
+import { ToastContainer } from "react-toastify";
 
+import { AuthProvider } from "@/contexts/AuthContext";
 import "react-toastify/dist/ReactToastify.css";
 import "../styles/date-picker.css";
 
-export default function App({ Component, pageProps }: AppProps) {
+export default function App({ Component, pageProps, router }: AppProps) {
+  const isLoginPage = router.pathname === "/login";
+
   return (
-    <ChakraProvider theme={theme}>
-      <SidebarDrawerProvider>
-        <Layout>
-          <Component {...pageProps} />
+    <AuthProvider>
+      <ChakraProvider theme={theme}>
+        <SidebarDrawerProvider>
+          {isLoginPage ? (
+            <>
+              <Component {...pageProps} />
+            </>
+          ) : (
+            <Layout>
+              <Component {...pageProps} />
+            </Layout>
+          )}
           <ToastContainer />
-        </Layout>
-      </SidebarDrawerProvider>
-    </ChakraProvider>
+        </SidebarDrawerProvider>
+      </ChakraProvider>
+    </AuthProvider>
   );
 }

@@ -1,7 +1,6 @@
-import { useForm, FormProvider } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { FormProvider, useForm } from "react-hook-form";
 
-import { getStock } from "@/services/stock";
 import { Stock } from "@/containers/Stock";
 import { StockProvider } from "@/contexts/StockContext";
 import { IStock } from "@/domains/stock";
@@ -9,6 +8,8 @@ import {
   StockFormData,
   stockFormSchema,
 } from "@/schemas/StockSchemaValidation";
+import { getStock } from "@/services/stock";
+import { withSSRAuth } from "@/utils/hoc/withSSRAuth";
 
 interface StockProps {
   stock: IStock[];
@@ -28,7 +29,7 @@ export default function Estoque({ stock }: StockProps) {
   );
 }
 
-export async function getServerSideProps() {
+export const getServerSideProps = withSSRAuth(async (ctx) => {
   const stock = await getStock();
 
   if (!stock) {
@@ -40,4 +41,4 @@ export async function getServerSideProps() {
   return {
     props: { stock }, // will be passed to the page component as props
   };
-}
+});

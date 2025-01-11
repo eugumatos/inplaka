@@ -1,14 +1,15 @@
-import { FormProvider, useForm } from "react-hook-form";
 import { getServices } from "@/services/service";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { FormProvider, useForm } from "react-hook-form";
 
 import { Service } from "@/containers/Service";
 import { ServiceProvider } from "@/contexts/ServiceContext";
+import { IService } from "@/domains/service";
 import {
   ServiceFormData,
   serviceFormSchema,
 } from "@/schemas/ServiceSchemaValidation";
-import { IService } from "@/domains/service";
+import { withSSRAuth } from "@/utils/hoc/withSSRAuth";
 
 interface ServiceProps {
   services: IService[];
@@ -28,7 +29,7 @@ export default function Servico({ services }: ServiceProps) {
   );
 }
 
-export async function getServerSideProps() {
+export const getServerSideProps = withSSRAuth(async (ctx) => {
   const services = await getServices();
 
   if (!services) {
@@ -40,4 +41,4 @@ export async function getServerSideProps() {
   return {
     props: { services }, // will be passed to the page component as props
   };
-}
+});

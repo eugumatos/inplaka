@@ -8,6 +8,7 @@ import {
 import { getOrders } from "@/services/order";
 import { getProducts } from "@/services/product";
 import { getServices } from "@/services/service";
+import { withSSRAuth } from "@/utils/hoc/withSSRAuth";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormProvider, useForm } from "react-hook-form";
 
@@ -29,14 +30,14 @@ export default function Pedido({ orders }: HomeProps) {
   );
 }
 
-export async function getServerSideProps() {
+export const getServerSideProps = withSSRAuth(async (ctx) => {
   const orders = await getOrders();
   const products = await getProducts();
   const services = await getServices();
 
-  const formattedOrders = orders.map(o => ({
+  const formattedOrders = orders.map((o) => ({
     ...o,
-    status: o.valorEmAbertoAtual === 0 ? "QUITADO" : o.status
+    status: o.valorEmAbertoAtual === 0 ? "QUITADO" : o.status,
   }));
 
   if (!orders) {
@@ -52,4 +53,4 @@ export async function getServerSideProps() {
       services,
     },
   };
-}
+});

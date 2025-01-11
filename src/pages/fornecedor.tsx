@@ -1,14 +1,15 @@
-import { FormProvider, useForm } from "react-hook-form";
-import { getSupplier, getSuppliers } from "@/services/supplier";
+import { getSuppliers } from "@/services/supplier";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { FormProvider, useForm } from "react-hook-form";
 
 import { Supplier } from "@/containers/Supplier";
 import { SupplierProvider } from "@/contexts/SupplierContext";
+import { ISupplier } from "@/domains/supplier";
 import {
   SupplierFormData,
   supplierFormSchema,
 } from "@/schemas/SupplierSchemaValidation";
-import { ISupplier } from "@/domains/supplier";
+import { withSSRAuth } from "@/utils/hoc/withSSRAuth";
 
 interface SupplierProps {
   suppliers: ISupplier[];
@@ -28,7 +29,7 @@ export default function Fornecedor({ suppliers }: SupplierProps) {
   );
 }
 
-export async function getServerSideProps() {
+export const getServerSideProps = withSSRAuth(async (ctx) => {
   const suppliers = await getSuppliers();
 
   if (!suppliers) {
@@ -40,4 +41,4 @@ export async function getServerSideProps() {
   return {
     props: { suppliers }, // will be passed to the page component as props
   };
-}
+});

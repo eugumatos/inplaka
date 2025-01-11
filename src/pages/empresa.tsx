@@ -1,14 +1,15 @@
-import { FormProvider, useForm } from "react-hook-form";
 import { getCompanies } from "@/services/company";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { FormProvider, useForm } from "react-hook-form";
 
+import { Company } from "@/containers/Company";
+import { CompanyProvider } from "@/contexts/CompanyContext";
 import { ICompany } from "@/domains/company";
 import {
   CompanyFormData,
   companyFormSchema,
 } from "@/schemas/CompanySchemaValidation";
-import { Company } from "@/containers/Company";
-import { CompanyProvider } from "@/contexts/CompanyContext";
+import { withSSRAuth } from "@/utils/hoc/withSSRAuth";
 
 interface HomeProps {
   companies: ICompany[];
@@ -28,7 +29,7 @@ export default function Home({ companies }: HomeProps) {
   );
 }
 
-export async function getServerSideProps() {
+export const getServerSideProps = withSSRAuth(async (ctx) => {
   const companies = await getCompanies();
 
   if (!companies) {
@@ -40,4 +41,4 @@ export async function getServerSideProps() {
   return {
     props: { companies }, // will be passed to the page component as props
   };
-}
+});

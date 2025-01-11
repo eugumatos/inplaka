@@ -1,12 +1,18 @@
 import { url } from "@/constants";
-import { UserFormData } from "@/schemas/UserSchemaValidation";
 import { IUser } from "@/domains/user";
+import { UserFormData } from "@/schemas/UserSchemaValidation";
+import { getAuthToken } from "@/utils/getAuthToken";
 
-export async function getUsers(): Promise<IUser[]> {
-  const res = await fetch(`${url}/Users`);
+export async function getUsers(ctx?: any): Promise<IUser[]> {
+  const token = getAuthToken(ctx);
+
+  const res = await fetch(`${url}/Users`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
   if (!res.ok) {
-    // This will activate the closest `error.js` Error Boundary
     throw new Error("Failed to fetch data");
   }
 
@@ -14,10 +20,15 @@ export async function getUsers(): Promise<IUser[]> {
 }
 
 export async function getUser(id: string): Promise<IUser> {
-  const res = await fetch(`${url}/Users/${id}`);
+  const token = getAuthToken();
+
+  const res = await fetch(`${url}/Users/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
   if (!res.ok) {
-    // This will activate the closest `error.js` Error Boundary
     throw new Error("Failed to fetch data");
   }
 
@@ -25,35 +36,50 @@ export async function getUser(id: string): Promise<IUser> {
 }
 
 export async function createUser(user: UserFormData) {
-  await fetch(`${url}/Users`, {
+  const token = getAuthToken();
+
+  const res = await fetch(`${url}/Users`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(user),
   });
+
+  if (!res.ok) {
+    throw new Error("Failed to create data");
+  }
 }
 
 export async function destroyUser(id: string): Promise<void> {
-  const res = await fetch(`${url}/Users/${id}`, { method: "delete" });
+  const token = getAuthToken();
+
+  const res = await fetch(`${url}/Users/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
   if (!res.ok) {
-    // This will activate the closest `error.js` Error Boundary
     throw new Error("Failed to delete data");
   }
 }
 
 export async function updateUser(user: UserFormData) {
+  const token = getAuthToken();
+
   const res = await fetch(`${url}/Users`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(user),
   });
 
   if (!res.ok) {
-    // This will activate the closest `error.js` Error Boundary
-    throw new Error("Failed to delete data");
+    throw new Error("Failed to update data");
   }
 }
