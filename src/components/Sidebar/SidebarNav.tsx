@@ -10,6 +10,7 @@ import {
   RiDashboardLine,
   RiFundsBoxLine,
   RiGovernmentLine,
+  RiLockLine,
   RiMindMap,
   RiProductHuntLine,
   RiServiceLine,
@@ -36,7 +37,7 @@ export function SidebarNav() {
 
   return (
     <Stack spacing="12" align="flex-start" mb={5}>
-      {hasPermissions(["/", "/usuario"]) && (
+      {hasPermissions(["/", "/usuario", "/permissoes"]) && (
         <NavSection title="ADMIN">
           <Can permissions={["/"]}>
             <NavLink href="/" icon={RiDashboardLine} color="gray.500">
@@ -46,6 +47,11 @@ export function SidebarNav() {
           <Can permissions={["/usuario"]}>
             <NavLink href="/usuario" icon={RiContactsLine}>
               Usuários
+            </NavLink>
+          </Can>
+          <Can permissions={["/permissoes"]}>
+            <NavLink href="/permissoes" icon={RiLockLine}>
+              Permissoes
             </NavLink>
           </Can>
         </NavSection>

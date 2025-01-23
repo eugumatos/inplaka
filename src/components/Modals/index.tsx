@@ -1,19 +1,20 @@
-import { ReactNode } from "react";
 import {
+  Button,
   Modal,
-  ModalOverlay,
-  ModalContent,
   ModalBody,
   ModalCloseButton,
+  ModalContent,
   ModalFooter,
-  Button,
+  ModalOverlay,
 } from "@chakra-ui/react";
+import { ReactNode } from "react";
 
 interface ModalDialogProps {
   isOpen: boolean;
   maxWidth: string;
   textAction?: string;
   noAction?: boolean;
+  noCancel?: boolean;
 
   children: ReactNode;
   onClose: () => void;
@@ -27,7 +28,8 @@ export function ModalDialog({
   onClose,
   onAction,
   children,
-  noAction = false
+  noAction = false,
+  noCancel = false,
 }: ModalDialogProps) {
   return (
     <Modal
@@ -57,6 +59,7 @@ export function ModalDialog({
             {textAction}
           </Button>
           <Button
+            hidden={noCancel}
             bg="gray.100"
             color="gray.700"
             _hover={{
