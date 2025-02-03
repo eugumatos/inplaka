@@ -2,7 +2,6 @@ import { PermissionsContainer } from "@/containers/Permissions";
 import { PermissionsProvider } from "@/contexts/PermissionsContext";
 import { IPermissions } from "@/domains/permissions";
 import { getAllPermissions } from "@/services/permissions";
-import { withSSRAuth } from "@/utils/hoc/withSSRAuth";
 
 export default function Permissions({
   permissions,
@@ -16,7 +15,7 @@ export default function Permissions({
   );
 }
 
-export const getServerSideProps = withSSRAuth(async (ctx) => {
+export const getServerSideProps = async (ctx) => {
   const permissions = await getAllPermissions();
 
   if (!permissions) {
@@ -28,4 +27,4 @@ export const getServerSideProps = withSSRAuth(async (ctx) => {
   return {
     props: { permissions },
   };
-});
+};

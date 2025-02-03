@@ -20,6 +20,16 @@ export async function getPermissionsById(id: string): Promise<any> {
   return res.json();
 }
 
+export async function getRolePermissionsById(id: string): Promise<any> {
+  const res = await fetch(`${url}/RotaRole/getByIdRole/${id}`);
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch data");
+  }
+
+  return res.json();
+}
+
 export async function getAllRoutes(): Promise<any> {
   const res = await fetch(`${url}/Rota`);
 
@@ -30,9 +40,22 @@ export async function getAllRoutes(): Promise<any> {
   return res.json();
 }
 
+export async function destroyRelation(
+  idRole: string,
+  idRota: string
+): Promise<void> {
+  const res = await fetch(`${url}/RotaRole/${idRole}/${idRota}`, {
+    method: "DELETE",
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to delete data");
+  }
+}
+
 export async function updatePermissions(permission: any): Promise<any> {
   const res = await fetch(`${url}/RotaRole`, {
-    method: "PUT",
+    method: "POST",
     headers: {
       "Content-Type": "application/json",
     },

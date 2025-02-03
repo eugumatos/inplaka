@@ -1,4 +1,5 @@
 import {
+  destroyRelation,
   getAllRoutes,
   getPermissionsById,
   updatePermissions,
@@ -10,7 +11,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { toast } from "react-toastify";
 
 interface Route {
-  id: number;
+  id: string;
   nome: string;
 }
 
@@ -88,19 +89,28 @@ export function PermissionForm({ id }: { id: string }) {
   const [inaccessibleRoutes, setInaccessibleRoutes] = useState<Route[]>([]);
 
   useEffect(() => {
+    console.log("idRole", id);
+
     async function fetchData() {
       try {
         const allRoutes: Route[] = await getAllRoutes();
 
         const permissions = await getPermissionsById(id);
+
         const accessibleRouteIds = permissions.rotasPermitidas.map(
           (rota: { id: number }) => rota.id
         );
 
-        const accessible = allRoutes.filter((route) =>
+        console.log(permissions);
+
+        const enhancedRoutes = allRoutes.map((route) => ({
+          ...route,
+        }));
+
+        const accessible = enhancedRoutes.filter((route) =>
           accessibleRouteIds.includes(route.id)
         );
-        const inaccessible = allRoutes.filter(
+        const inaccessible = enhancedRoutes.filter(
           (route) => !accessibleRouteIds.includes(route.id)
         );
 
@@ -134,6 +144,9 @@ export function PermissionForm({ id }: { id: string }) {
 
   const handleDropInInaccessible = async (item: Route) => {
     try {
+      console.log(id, item.id);
+
+      await destroyRelation(id, item.id);
       await updatePermissions({
         idRota: item.id,
         idRole: id,
