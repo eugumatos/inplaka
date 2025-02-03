@@ -15,7 +15,7 @@ export default function Permissions({
   );
 }
 
-export const getServerSideProps = async (ctx) => {
+export const getServerSideProps = async () => {
   const permissions = await getAllPermissions();
 
   if (!permissions) {
