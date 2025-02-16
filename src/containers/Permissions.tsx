@@ -9,7 +9,7 @@ import { usePermissions } from "@/contexts/PermissionsContext";
 import { filterText } from "@/utils/filterText";
 
 export function PermissionsContainer() {
-  const { permissions, isLoading } = usePermissions();
+  const { permissions, refetchPermissions, isLoading } = usePermissions();
   const disclosureFormEditModal = useDisclosure();
 
   const [id, setId] = useState("");
@@ -35,7 +35,7 @@ export function PermissionsContainer() {
         noCancel
         noAction
       >
-        <PermissionForm id={id} />
+        <PermissionForm id={id} refetch={refetchPermissions} />
       </ModalDialog>
     );
   };
@@ -49,6 +49,7 @@ export function PermissionsContainer() {
       </Flex>
 
       <DataTable
+        isLoading={isLoading}
         columns={columns}
         onRowEdit={(row) => {
           setId(row.id);

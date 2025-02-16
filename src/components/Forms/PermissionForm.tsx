@@ -84,13 +84,17 @@ function DroppableArea({ title, items, onDrop }: DroppableAreaProps) {
   );
 }
 
-export function PermissionForm({ id }: { id: string }) {
+export function PermissionForm({
+  id,
+  refetch,
+}: {
+  id: string;
+  refetch: VoidFunction;
+}) {
   const [accessibleRoutes, setAccessibleRoutes] = useState<Route[]>([]);
   const [inaccessibleRoutes, setInaccessibleRoutes] = useState<Route[]>([]);
 
   useEffect(() => {
-    console.log("idRole", id);
-
     async function fetchData() {
       try {
         const allRoutes: Route[] = await getAllRoutes();
@@ -100,8 +104,6 @@ export function PermissionForm({ id }: { id: string }) {
         const accessibleRouteIds = permissions.rotasPermitidas.map(
           (rota: { id: number }) => rota.id
         );
-
-        console.log(permissions);
 
         const enhancedRoutes = allRoutes.map((route) => ({
           ...route,
@@ -144,13 +146,9 @@ export function PermissionForm({ id }: { id: string }) {
 
   const handleDropInInaccessible = async (item: Route) => {
     try {
-      console.log(id, item.id);
-
       await destroyRelation(id, item.id);
-      await updatePermissions({
-        idRota: item.id,
-        idRole: id,
-      });
+
+      await refetch();
 
       setInaccessibleRoutes((prev) => [...prev, item]);
       setAccessibleRoutes((prev) =>

@@ -13,6 +13,7 @@ interface PermissionsProviderProps {
   isLoading: boolean;
   isError: boolean;
   permissions: Array<IPermissions>;
+  refetchPermissions: VoidFunction;
   editPermission: (permission: { idRota: string; idRole: string }) => void;
 }
 
@@ -29,6 +30,18 @@ function PermissionsProvider({
     isLoading: false,
     isError: false,
   });
+
+  async function refetchPermissions() {
+    try {
+      dispatch({ type: "LOADING" });
+
+      const updatedPermissions = await getAllPermissions();
+
+      dispatch({ type: "RELOAD_PERMISSIONS", payload: updatedPermissions });
+    } catch (error) {
+      dispatch({ type: "ERROR" });
+    }
+  }
 
   async function editPermission(permissions: {
     idRota: string;
@@ -56,6 +69,7 @@ function PermissionsProvider({
         isLoading: state.isLoading,
         permissions: state.permissions,
 
+        refetchPermissions,
         editPermission,
       }}
     >
