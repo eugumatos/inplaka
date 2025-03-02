@@ -1,8 +1,8 @@
-import { ReactNode, createContext, useReducer, useContext } from "react";
 import { IUser } from "@/domains/user";
 import { userReducer } from "@/reducers/userReducer";
-import { createUser, destroyUser, updateUser, getUsers } from "@/services/user";
 import { UserFormData } from "@/schemas/UserSchemaValidation";
+import { createUser, destroyUser, getUsers, updateUser } from "@/services/user";
+import { ReactNode, createContext, useContext, useReducer } from "react";
 import { toast } from "react-toastify";
 
 interface UserContextProps {
@@ -39,7 +39,12 @@ function UserProvider({ users = [], children }: UserContextProps) {
     try {
       dispatch({ type: "LOADING" });
 
-      await createUser(user);
+      const newUser = {
+        ...user,
+        role: user.role.value,
+      };
+
+      await createUser(newUser as never);
 
       const newUsers = await getUsers();
 
@@ -56,7 +61,12 @@ function UserProvider({ users = [], children }: UserContextProps) {
     try {
       dispatch({ type: "LOADING" });
 
-      await updateUser(user);
+      const newUser = {
+        ...user,
+        role: user.role.value,
+      };
+
+      await updateUser(newUser as never);
       const newUsers = await getUsers();
 
       dispatch({ type: "RELOAD_USERS", payload: newUsers });

@@ -11,6 +11,7 @@ import { DestroyModal } from "@/components/Modals/DestroyModal";
 import { DataTable } from "@/components/Table";
 
 import { IUser } from "@/domains/user";
+import { getAllRoles } from "@/services/role";
 import { filterText } from "@/utils/filterText";
 import { upper } from "@/utils/upper";
 
@@ -48,6 +49,14 @@ export function User() {
     ],
     []
   );
+
+  const seekAminSelectedOption = async (id: string) => {
+    const findAdmin = (await getAllRoles()).find((role) => role.id === id);
+
+    if (findAdmin) {
+      return findAdmin;
+    }
+  };
 
   const seekCurrentCompany = (user: IUser) => {
     const findUser = users.find((u) => u.id === user.id);
@@ -140,7 +149,13 @@ export function User() {
         columns={columns}
         data={users}
         onRowEdit={(row) => {
-          Object.keys(row).forEach((key: any) => {
+          Object.keys(row).forEach(async (key: any) => {
+            if (key === "role") {
+              const admin = await seekAminSelectedOption(row.role);
+
+              return setValue(key, { label: admin?.nome, value: admin?.id });
+            }
+
             return setValue(key, row[key]);
           });
 

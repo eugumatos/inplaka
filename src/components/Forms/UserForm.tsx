@@ -1,20 +1,22 @@
 import { Input } from "@/components/Input";
-import { Select } from "@/components/Select";
 import { UserFormData } from "@/schemas/UserSchemaValidation";
+import { getAllRoles } from "@/services/role";
 import {
   Box,
   Flex,
+  FormLabel,
   Heading,
-  InputGroup,
-  Input as InputChakra,
-  InputRightElement,
   IconButton,
+  Input as InputChakra,
+  InputGroup,
+  InputRightElement,
   Text,
   useDisclosure,
 } from "@chakra-ui/react";
-import { RiEyeFill, RiEyeOffFill } from "react-icons/ri";
 import { useFormContext } from "react-hook-form";
-import { userRoleTitle } from "@/contexts/UserContext";
+import { RiEyeFill, RiEyeOffFill } from "react-icons/ri";
+import { toast } from "react-toastify";
+import { AsyncSelect } from "../Select/AsyncSelect";
 
 interface UserFormProps {
   isUpdate?: boolean;
@@ -22,11 +24,37 @@ interface UserFormProps {
 
 export function UserForm({ isUpdate }: UserFormProps) {
   const {
+    watch,
+    control,
     register,
     formState: { errors },
   } = useFormContext<UserFormData>();
 
   const { isOpen, onToggle } = useDisclosure();
+
+  const currentRole = watch("role") as any;
+
+  console.log(currentRole);
+
+  async function roleOptions(value: string) {
+    try {
+      const roles = await getAllRoles();
+      const options = roles
+        .map((role) => ({
+          value: role.id,
+          label: role.nome,
+        }))
+        .filter((item) =>
+          item.label.toLocaleUpperCase().includes(value.toUpperCase())
+        );
+
+      return options;
+    } catch (error) {
+      toast.warning("Erro ao carregar fornecedores.");
+
+      return [];
+    }
+  }
 
   return (
     <form>
@@ -82,12 +110,17 @@ export function UserForm({ isUpdate }: UserFormProps) {
           </Box>
 
           <Box flex={1} maxW="49%">
-            <Select label="Cargo" error={errors.role} {...register("role")}>
-              <option value={userRoleTitle.ADMINISTRADOR}>ADMINISTRADOR</option>
-              <option value={userRoleTitle.VENDEDOR}>VENDEDOR</option>
-              <option value={userRoleTitle.FINANCEIRO}>FINANCEIRO</option>
-              <option value={userRoleTitle.BACKOFFICE}>BACKOFFICE</option>
-            </Select>
+            <Flex>
+              <FormLabel>Administrador</FormLabel>
+              <Text color="red.500">*</Text>
+            </Flex>
+            <AsyncSelect
+              control={control}
+              loadOptions={roleOptions}
+              value={currentRole}
+              error={errors?.role?.label}
+              {...register("role")}
+            />
           </Box>
         </Flex>
       </Box>
