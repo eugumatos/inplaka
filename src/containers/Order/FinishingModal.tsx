@@ -1,21 +1,21 @@
+import { useOrder } from "@/contexts/OrderContext";
+import { IClient } from "@/domains/client";
+import { getClients } from "@/services/clients";
+import { currency } from "@/utils/currency";
 import {
+  Button,
   Modal,
-  ModalOverlay,
-  ModalHeader,
-  ModalContent,
   ModalBody,
   ModalCloseButton,
+  ModalContent,
   ModalFooter,
-  Button,
+  ModalHeader,
+  ModalOverlay,
 } from "@chakra-ui/react";
 import { PDFDownloadLink } from "@react-pdf/renderer";
-import { PDFDocument } from "./document";
-import { useOrder } from "@/contexts/OrderContext";
-import { getClients } from "@/services/clients";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { IClient } from "@/domains/client";
-import { currency } from "@/utils/currency";
+import { PDFDocument } from "./document";
 
 interface DestroyModalProps {
   description?: string;

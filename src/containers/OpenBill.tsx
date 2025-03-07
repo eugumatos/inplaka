@@ -1,24 +1,24 @@
 import { useOpenBills } from "@/contexts/OpenBillContext";
-import { BillFormData } from "@/schemas/BillSchemaValidation";
-import { Box, Button, Flex, Heading, useDisclosure } from "@chakra-ui/react";
+import { Box, Flex, Heading, useDisclosure } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { Column } from "react-table";
 
-import { ModalDialog } from "@/components/Modals";
 import { OpenBillForm } from "@/components/Forms/OpenBillForm";
+import { ModalDialog } from "@/components/Modals";
 import { DataTable } from "@/components/Table";
 
-import { filterText } from "@/utils/filterText";
-import { currency } from "@/utils/currency";
-import { upper } from "@/utils/upper";
-import { formatDate } from "@/utils/formatDate";
-import { getOpenBillInstalment } from "@/services/biils";
-import { toast } from "react-toastify";
 import { OpenBillFormData } from "@/schemas/OpenBillSchemaValidation";
+import { getOpenBillInstalment } from "@/services/biils";
+import { currency } from "@/utils/currency";
+import { filterText } from "@/utils/filterText";
+import { formatDate } from "@/utils/formatDate";
+import { upper } from "@/utils/upper";
+import { toast } from "react-toastify";
 
 export function OpenBill() {
-  const { openBills, isLoading, editOpenBill, paymentFormOptions } = useOpenBills();
+  const { openBills, isLoading, editOpenBill, paymentFormOptions } =
+    useOpenBills();
 
   const [instalments, setInstalments] = useState<any>([]);
   const [loadingInstalments, setLoadingInstalments] = useState(false);
@@ -45,7 +45,7 @@ export function OpenBill() {
       },
     ],
     []
-  )
+  );
 
   const columns = useMemo(
     (): Column[] => [
@@ -94,21 +94,20 @@ export function OpenBill() {
       const allInstallments = await getOpenBillInstalment(id, instalment);
 
       const formattedInstalments = allInstallments?.parcelas.map((i: any) => {
-
         return {
           ...i,
-          conta: allInstallments?.nome_Conta
-        }
-      })
+          conta: allInstallments?.nome_Conta,
+        };
+      });
 
       setInstalments(formattedInstalments);
     } catch (error) {
-      toast.error('Erro ao carregar parcelas.')
+      toast.error("Erro ao carregar parcelas.");
       disclosureEditTable.onClose();
     } finally {
       setLoadingInstalments(false);
     }
-  }
+  };
 
   const renderEditTable = () => {
     return (
@@ -117,7 +116,7 @@ export function OpenBill() {
         isOpen={disclosureEditTable.isOpen}
         noAction={true}
         onClose={() => {
-          disclosureEditTable.onClose()
+          disclosureEditTable.onClose();
           reset({});
         }}
       >
@@ -143,8 +142,8 @@ export function OpenBill() {
                 setValue(key, row[key]);
               });
 
-              setValue('valor', row?.valor_Parcela);
-              setValue('data_pagamento', row?.data_Pagamento);
+              setValue("valor", row?.valor_Parcela);
+              setValue("data_pagamento", row?.data_Pagamento);
 
               disclosureFormEditModal.onOpen();
             }}
@@ -173,8 +172,8 @@ export function OpenBill() {
       >
         <OpenBillForm />
       </ModalDialog>
-    )
-  }
+    );
+  };
 
   return (
     <Box w="100%" flex={1}>

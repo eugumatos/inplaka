@@ -1,5 +1,4 @@
-import React from "react";
-import { Document, Page, View, Text } from "@react-pdf/renderer";
+import { Document, Page, Text, View } from "@react-pdf/renderer";
 import { styles } from "./styles";
 
 type DocumentProps = {
@@ -135,11 +134,9 @@ export function PDFDocument({
                 <View style={styles.contentTotal}>
                   <View style={styles.descriptionTotal}>
                     <View style={{ textAlign: "right" }}>
-                      {/*
                       <Text style={[styles.totalText, { fontWeight: "bold" }]}>
-                        Total dos produtos:
+                        Total dos serviços: {order?.totalServices}
                       </Text>
-                      */}
                     </View>
                     <Text style={styles.totalText}></Text>
                   </View>

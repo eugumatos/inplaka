@@ -2,6 +2,7 @@ export interface IService {
   id: string;
   status: string;
   descricao: string;
+  valorUnitario: number;
   valor_venda: number;
   nao_usar_para_nota_fiscal: boolean | string;
   codigo_servico_nfse: string;

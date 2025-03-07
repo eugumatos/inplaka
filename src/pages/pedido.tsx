@@ -35,11 +35,6 @@ export const getServerSideProps = withSSRAuth(async (ctx) => {
   const products = await getProducts();
   const services = await getServices();
 
-  const formattedOrders = orders.map((o) => ({
-    ...o,
-    status: o.valorEmAbertoAtual === 0 ? "QUITADO" : o.status,
-  }));
-
   if (!orders) {
     return {
       notFound: true,
@@ -48,7 +43,7 @@ export const getServerSideProps = withSSRAuth(async (ctx) => {
 
   return {
     props: {
-      orders: formattedOrders,
+      orders,
       products,
       services,
     },

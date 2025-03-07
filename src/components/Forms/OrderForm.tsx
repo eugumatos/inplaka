@@ -1,55 +1,53 @@
-import { useMemo, useRef, useEffect, useState } from "react";
+import { Input } from "@/components/Input";
+import { InputCurrency } from "@/components/Input/InputCurrency";
+import { InputQuantity } from "@/components/Input/InputQuantity";
+import { AsyncSelect } from "@/components/Select/AsyncSelect";
+import { DataTable } from "@/components/Table";
+import { FinishingModal } from "@/containers/Order/FinishingModal";
+import { useOrderForm } from "@/containers/Order/hooks/useOrderForm";
+import { PopoverPlaqueForm } from "@/containers/Order/PopoverPlaqueForm";
+import { useOrder } from "@/contexts/OrderContext";
+import { useDebounce } from "@/hooks/useDebounce";
+import { OrderFormData } from "@/schemas/OrderSchemaValidation";
+import { currency as currencyFormat } from "@/utils/currency";
+import { filterText } from "@/utils/filterText";
+import { formatDate } from "@/utils/formatDate";
+import { unmaskText } from "@/utils/unmaskText";
+import { upper } from "@/utils/upper";
 import {
   Box,
+  Button,
+  Checkbox,
   Divider,
   Flex,
-  Heading,
   FormLabel,
+  Heading,
   HStack,
-  Button,
-  VStack,
   Icon,
-  Text,
-  Tabs,
+  IconButton,
+  Tab,
   TabList,
   TabPanel,
   TabPanels,
-  Tab,
-  Checkbox,
-  IconButton,
-  useDisclosure,
+  Tabs,
+  Text,
   Tooltip,
+  useDisclosure,
+  VStack,
 } from "@chakra-ui/react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useFormContext } from "react-hook-form";
 import {
   RiArrowDownSLine,
-  RiUser3Line,
-  RiStoreLine,
   RiBox3Line,
   RiCloseFill,
-  RiPrinterLine,
   RiDraftLine,
+  RiPrinterLine,
+  RiStoreLine,
+  RiUser3Line,
 } from "react-icons/ri";
 import { Column } from "react-table";
-import { Input } from "@/components/Input";
-import { useFormContext } from "react-hook-form";
-import { useDebounce } from "@/hooks/useDebounce";
-import { Select } from "@/components/Select";
-import { AsyncSelect } from "@/components/Select/AsyncSelect";
-import { PopoverPlaqueForm } from "@/containers/Order/PopoverPlaqueForm";
-import { OrderFormData } from "@/schemas/OrderSchemaValidation";
-import { DataTable } from "@/components/Table";
-import { InputQuantity } from "@/components/Input/InputQuantity";
-import { InputCurrency } from "@/components/Input/InputCurrency";
-import { filterText } from "@/utils/filterText";
-import { currency as currencyFormat } from "@/utils/currency";
-import { useOrderForm } from "@/containers/Order/hooks/useOrderForm";
 import { toast } from "react-toastify";
-import currency from "currency.js";
-import { upper } from "@/utils/upper";
-import { FinishingModal } from "@/containers/Order/FinishingModal";
-import { useOrder } from "@/contexts/OrderContext";
-import { formatDate } from "@/utils/formatDate";
-import { unmaskText } from "@/utils/unmaskText";
 
 interface IPlaque {
   descricao: string;
@@ -289,18 +287,13 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
             observacao: "",
           },
         ];
-      } 
+      }
     } else {
       formValues.servicos = [];
     }
 
     delete formValues.servicoDescription,
       delete formValues.servicoValue,
-
-    
-    
-
-
       setValue("produtos", formValues.produtos);
     setValue("total", formValues.total);
 
@@ -571,8 +564,7 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
                 Subtotal: {currencyFormat(subTotalProducts)}
               </Text>
               <Text size="md">
-                Serviços:{" "}
-                {currencyFormat(Number(unmaskText(servicoValue)) || 0)}
+                Serviços: {currencyFormat(subTotalServices)}
               </Text>
               <Flex my={2}>
                 <Text fontSize={20} fontWeight="bold">

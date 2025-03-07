@@ -1,17 +1,17 @@
-import { useState, useCallback, useEffect } from "react";
-import { toast } from "react-toastify";
-import { getClients } from "@/services/clients";
-import { getSellers } from "@/services/seller";
-import { getFormPayments } from "@/services/form-payment";
-import { IProduct } from "@/domains/product";
-import { IService } from "@/domains/service";
-import { getProducts, getProductByClient } from "@/services/product";
-import { getServices } from "@/services/service";
-import { getOrder, getPlaques } from "@/services/order";
 import { IClient } from "@/domains/client";
-import { upper } from "@/utils/upper";
-import { ISeller } from "@/domains/seller";
 import { IFormPayment } from "@/domains/form-payment";
+import { IProduct } from "@/domains/product";
+import { ISeller } from "@/domains/seller";
+import { IService } from "@/domains/service";
+import { getClients } from "@/services/clients";
+import { getFormPayments } from "@/services/form-payment";
+import { getOrder, getPlaques } from "@/services/order";
+import { getProductByClient, getProducts } from "@/services/product";
+import { getSellers } from "@/services/seller";
+import { getServices } from "@/services/service";
+import { upper } from "@/utils/upper";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 interface SelectProps {
   label: string;
@@ -308,6 +308,7 @@ export function useOrderForm({
     const selectedProducts = products.filter(
       (product) => product.quantidade > 0
     );
+
     const selectedServices = services.filter(
       (service) => service.quantidade > 0
     );
@@ -317,7 +318,7 @@ export function useOrderForm({
     }, 0);
 
     const totalServices = selectedServices.reduce((acc, cartItem) => {
-      return acc + cartItem.quantidade * Number(cartItem.valor_venda);
+      return acc + cartItem.quantidade * Number(cartItem.valorUnitario);
     }, 0);
 
     return {

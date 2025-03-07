@@ -1,17 +1,11 @@
-import { useFormContext } from "react-hook-form";
-import {
-  Box,
-  Flex,
-  Heading,
-  Text,
-  FormLabel,
-} from "@chakra-ui/react";
 import { Input } from "@/components/Input";
 import { InputCurrency } from "@/components/Input/InputCurrency";
 import { AsyncSelect } from "@/components/Select/AsyncSelect";
-import DatePicker from "react-datepicker";
 import { useOpenBills } from "@/contexts/OpenBillContext";
 import { OpenBillFormData } from "@/schemas/OpenBillSchemaValidation";
+import { Box, Flex, FormLabel, Heading, Text } from "@chakra-ui/react";
+import DatePicker from "react-datepicker";
+import { useFormContext } from "react-hook-form";
 
 export function OpenBillForm() {
   const {
@@ -25,8 +19,7 @@ export function OpenBillForm() {
   const { paymentFormOptions } = useOpenBills();
 
   const currentPaymentForm = watch("forma_pagamento") as any;
-
-  const currentDatePayment = watch("data_pagamento") as any;
+  const currentDatePayment = (watch("data_pagamento") as any) || new Date();
 
   return (
     <form>
@@ -76,8 +69,9 @@ export function OpenBillForm() {
             selected={currentDatePayment}
             onChange={(date) => setValue("data_pagamento", date as any)}
             placeholderText="Data do Pagamento"
-            className={`chakra-datepicker-input ${errors?.data_pagamento && "chakra-datepicker-error"
-              }`}
+            className={`chakra-datepicker-input ${
+              errors?.data_pagamento && "chakra-datepicker-error"
+            }`}
           />
           {errors?.data_pagamento && (
             <Text fontSize="sm" color="red.400">

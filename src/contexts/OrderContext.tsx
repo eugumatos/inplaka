@@ -1,5 +1,16 @@
 import { IOrder } from "@/domains/order";
+import { IProduct } from "@/domains/product";
 import { orderReducer } from "@/reducers/orderReducer";
+import { OrderFormData } from "@/schemas/OrderSchemaValidation";
+import {
+  createOrder,
+  destroyOrder,
+  filterOrderByDate,
+  getOrders,
+} from "@/services/order";
+import { formatDate } from "@/utils/formatDate";
+import { generateCode } from "@/utils/generateCode";
+import { format } from "date-fns";
 import {
   ReactNode,
   createContext,
@@ -7,18 +18,7 @@ import {
   useReducer,
   useState,
 } from "react";
-import {
-  createOrder,
-  getOrders,
-  destroyOrder,
-  filterOrderByDate,
-} from "@/services/order";
-import { OrderFormData } from "@/schemas/OrderSchemaValidation";
-import { generateCode } from "@/utils/generateCode";
-import { formatDate } from "@/utils/formatDate";
 import { toast } from "react-toastify";
-import { format } from "date-fns";
-import { IProduct } from "@/domains/product";
 
 type RangeDate = {
   startDate: Date | null;
