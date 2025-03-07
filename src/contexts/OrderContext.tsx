@@ -30,6 +30,7 @@ interface SetterOrderProps {
   dateCreated: string;
   produtos: IProduct[];
   numero: number;
+  totalServices: number;
   total: number;
 }
 
@@ -324,6 +325,7 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
     produtos,
     numero,
     total,
+    totalServices,
     dateCreated,
   }: SetterOrderProps) {
     setCurrentOrderNumber(numero);
@@ -332,6 +334,7 @@ function OrderProvider({ orders = [], children }: OrderContextProps) {
       dateCreated,
       produtos,
       total,
+      totalServices,
     });
   }
 

@@ -66,6 +66,7 @@ export function FinishingModal({
           value: currency(p.valorUnitario),
         };
       }),
+      totalServices: currency(order.totalServices),
       total: currency(order.total),
     };
   };

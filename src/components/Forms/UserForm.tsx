@@ -34,8 +34,6 @@ export function UserForm({ isUpdate }: UserFormProps) {
 
   const currentRole = watch("role") as any;
 
-  console.log(currentRole);
-
   async function roleOptions(value: string) {
     try {
       const roles = await getAllRoles();

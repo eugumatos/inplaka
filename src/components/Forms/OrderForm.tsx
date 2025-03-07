@@ -331,6 +331,7 @@ export function OrderForm({ id, onSubmit }: OrderFormProps) {
       dateCreated: formatDate(formValues.dateCreated || ""),
       produtos: formattedProducts,
       numero: formValues.numero,
+      totalServices: subTotalServices,
       total: total - Number(formValues.valorDesconto),
     });
   };
