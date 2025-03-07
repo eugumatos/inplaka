@@ -86,6 +86,7 @@ function BillProvider({ bills = [], children }: BillContextProps) {
   async function addBill(bill: BillFormData) {
     try {
       Object.assign(bill, {
+        qtdParcelas: bill.qtdparcelas,
         data_vencimento: format(
           new Date(bill.data_vencimento) as any,
           "yyyy-MM-dd"
@@ -112,6 +113,7 @@ function BillProvider({ bills = [], children }: BillContextProps) {
   async function editBill(bill: BillFormData) {
     try {
       Object.assign(bill, {
+        qtdParcelas: bill.qtdparcelas,
         data_vencimento: format(
           new Date(bill.data_vencimento) as any,
           "yyyy-MM-dd"

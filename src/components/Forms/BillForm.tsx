@@ -1,24 +1,19 @@
-import { useCallback } from "react";
 import { useFormContext } from "react-hook-form";
-import { toast } from "react-toastify";
 
-import {
-  Box,
-  Divider,
-  Flex,
-  Heading,
-  Text,
-  Checkbox,
-  FormLabel,
-} from "@chakra-ui/react";
-import { BillFormData } from "@/schemas/BillSchemaValidation";
 import { Input } from "@/components/Input";
 import { InputCurrency } from "@/components/Input/InputCurrency";
 import { AsyncSelect } from "@/components/Select/AsyncSelect";
-import { getSuppliers } from "@/services/supplier";
-import DatePicker from "react-datepicker";
-import { getAccounts } from "@/services/account";
 import { useBills } from "@/contexts/BillContext";
+import { BillFormData } from "@/schemas/BillSchemaValidation";
+import {
+  Box,
+  Checkbox,
+  Flex,
+  FormLabel,
+  Heading,
+  Text,
+} from "@chakra-ui/react";
+import DatePicker from "react-datepicker";
 
 export function BillForm() {
   const {
@@ -39,7 +34,7 @@ export function BillForm() {
   return (
     <form>
       <Box mt={10}>
-        <Heading size="md">Dados da Fatura</Heading>
+        <Heading size="md">Dados da Conta</Heading>
 
         <Flex gap={4} alignItems="center">
           <Flex flex={1}>
@@ -92,15 +87,15 @@ export function BillForm() {
           </Box>
           <Box flex={1}>
             <Flex>
-              <FormLabel>Parcela</FormLabel>
+              <FormLabel>Qtd Parcelas</FormLabel>
               <Text color="red.500">*</Text>
             </Flex>
             <Input
               label=""
               placeholder="Ex: 1"
               type="number"
-              {...register("parcela")}
-              error={errors?.parcela}
+              {...register("qtdparcelas")}
+              error={errors?.qtdparcelas}
               isRequired
             />
           </Box>
@@ -126,8 +121,9 @@ export function BillForm() {
               selected={currentDateIssueForm}
               onChange={(date) => setValue("data_emissao", date as any)}
               placeholderText="Data da Emissão"
-              className={`chakra-datepicker-input ${errors?.data_emissao && "chakra-datepicker-error"
-                }`}
+              className={`chakra-datepicker-input ${
+                errors?.data_emissao && "chakra-datepicker-error"
+              }`}
             />
             {errors?.data_emissao && (
               <Text fontSize="sm" color="red.400">
@@ -145,8 +141,9 @@ export function BillForm() {
               selected={currentDueDateForm}
               onChange={(date) => setValue("data_vencimento", date as any)}
               placeholderText="Data de Vencimento"
-              className={`chakra-datepicker-input ${errors?.data_vencimento && "chakra-datepicker-error"
-                }`}
+              className={`chakra-datepicker-input ${
+                errors?.data_vencimento && "chakra-datepicker-error"
+              }`}
             />
             {errors?.data_vencimento && (
               <Text fontSize="sm" color="red.400">
