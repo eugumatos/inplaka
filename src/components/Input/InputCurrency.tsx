@@ -1,13 +1,13 @@
-import { forwardRef, ForwardRefRenderFunction } from "react";
 import {
+  FormControl,
+  FormErrorMessage,
+  FormLabel,
   Input,
   InputProps,
-  FormControl,
-  FormLabel,
-  FormErrorMessage,
 } from "@chakra-ui/react";
-import { NumericFormat } from "react-number-format";
+import { forwardRef, ForwardRefRenderFunction } from "react";
 import { Controller, FieldError } from "react-hook-form";
+import { NumericFormat } from "react-number-format";
 
 interface InputCurrencyBaseProps extends InputProps {
   mt?: number;
@@ -39,26 +39,27 @@ const InputCurrencyBase: ForwardRefRenderFunction<
     >
       <Controller
         control={control}
-        render={({ field: { onChange, name, value } }) => (
+        render={({ field: { onChange, value } }) => (
           <>
             {!!label && <FormLabel htmlFor={name}>{label}</FormLabel>}
-            <Input
+            <NumericFormat
+              customInput={Input}
               name={name}
-              as={NumericFormat}
               value={value}
-              onChange={(e) => {
-                const numericValue = parseFloat(
-                  e.target.value.replace(/[^\d.-]/g, "")
-                );
+              onValueChange={(values) => {
+                const numericValue = values.floatValue ?? 0;
                 if (!maxValue || numericValue <= maxValue) {
-                  onChange(e);
+                  onChange(numericValue);
                 }
               }}
               prefix="R$ "
               color="gray.800"
               borderColor="gray.100"
-              thousandSeparator=","
-              decimalSeparator="."
+              thousandSeparator="."
+              decimalSeparator=","
+              allowNegative={false}
+              decimalScale={2}
+              fixedDecimalScale
               {...rest}
             />
           </>

@@ -11,24 +11,19 @@ import { DestroyModal } from "@/components/Modals/DestroyModal";
 import { DataTable } from "@/components/Table";
 
 import { IBill } from "@/domains/bill";
-import { filterText } from "@/utils/filterText";
 import { currency } from "@/utils/currency";
-import { upper } from "@/utils/upper";
+import { filterText } from "@/utils/filterText";
 import { formatDate } from "@/utils/formatDate";
+import { lower } from "@/utils/lower";
+import { upper } from "@/utils/upper";
 
 export function Bill() {
-  const {
-    bills,
-    isLoading,
-    addBill,
-    editBill,
-    removeBill,
-    supplierOptions,
-  } = useBills();
+  const { bills, isLoading, addBill, editBill, removeBill, supplierOptions } =
+    useBills();
 
   const [currentBill, setCurrentBill] = useState<IBill | null>(null);
 
-  const { handleSubmit, reset, setValue, formState } =
+  const { handleSubmit, reset, setValue, formState, clearErrors } =
     useFormContext<BillFormData>();
 
   const hasErrors = formState.isValid;
@@ -91,7 +86,10 @@ export function Bill() {
         maxWidth="70%"
         textAction="Criar"
         isOpen={disclosureFormCreateModal.isOpen}
-        onClose={disclosureFormCreateModal.onClose}
+        onClose={() => {
+          disclosureFormCreateModal.onClose();
+          clearErrors();
+        }}
         onAction={() => {
           handleSubmit(addBill)();
 
@@ -111,7 +109,10 @@ export function Bill() {
         maxWidth="70%"
         textAction="Editar"
         isOpen={disclosureFormEditModal.isOpen}
-        onClose={disclosureFormEditModal.onClose}
+        onClose={() => {
+          disclosureFormEditModal.onClose();
+          clearErrors();
+        }}
         onAction={() => {
           handleSubmit(editBill)();
 
@@ -175,7 +176,7 @@ export function Bill() {
               return setValue(key, supplier);
             }
 
-            return setValue(key, row[key]);
+            return setValue(lower(key) as any, row[key]);
           });
 
           disclosureFormEditModal.onOpen();
