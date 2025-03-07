@@ -1,13 +1,6 @@
-import {
-  ReactNode,
-  createContext,
-  useReducer,
-  useContext,
-  useCallback,
-} from "react";
-import { BillFormData } from "@/schemas/BillSchemaValidation";
 import { IBill } from "@/domains/bill";
 import { billReducer } from "@/reducers/billReducer";
+import { BillFormData } from "@/schemas/BillSchemaValidation";
 import {
   createBill,
   destroyBill,
@@ -16,9 +9,9 @@ import {
 } from "@/services/biils";
 import { getFormPayments } from "@/services/form-payment";
 import { getSuppliers } from "@/services/supplier";
-import { toast } from "react-toastify";
-import { unmaskText } from "@/utils/unmaskText";
 import { format } from "date-fns";
+import { ReactNode, createContext, useContext, useReducer } from "react";
+import { toast } from "react-toastify";
 
 interface SelectProps {
   label: string;
@@ -99,7 +92,7 @@ function BillProvider({ bills = [], children }: BillContextProps) {
         ),
         data_emissao: format(new Date(bill.data_emissao) as any, "yyyy-MM-dd"),
         fornecedor: bill.fornecedor.value,
-        valor: unmaskText(bill.valor),
+        valor: bill.valor,
       });
 
       dispatch({ type: "LOADING" });
@@ -125,7 +118,7 @@ function BillProvider({ bills = [], children }: BillContextProps) {
         ),
         data_emissao: format(new Date(bill.data_emissao) as any, "yyyy-MM-dd"),
         fornecedor: bill.fornecedor.value,
-        valor: unmaskText(bill.valor),
+        valor: bill.valor,
       });
 
       dispatch({ type: "LOADING" });

@@ -9,7 +9,8 @@ import { forwardRef, ForwardRefRenderFunction } from "react";
 import { Controller, FieldError } from "react-hook-form";
 import { NumericFormat } from "react-number-format";
 
-interface InputCurrencyBaseProps extends InputProps {
+interface InputCurrencyBaseProps
+  extends Omit<InputProps, "type" | "defaultValue"> {
   mt?: number;
   maxW?: string;
   control: any;
@@ -39,16 +40,21 @@ const InputCurrencyBase: ForwardRefRenderFunction<
     >
       <Controller
         control={control}
+        name={name}
         render={({ field: { onChange, value } }) => (
           <>
             {!!label && <FormLabel htmlFor={name}>{label}</FormLabel>}
             <NumericFormat
               customInput={Input}
+              getInputRef={ref} // Passa a ref corretamente
               name={name}
-              value={value}
+              value={value ?? ""} // Garante que seja string ou vazio
               onValueChange={(values) => {
-                const numericValue = values.floatValue ?? 0;
-                if (!maxValue || numericValue <= maxValue) {
+                const numericValue = values.floatValue ?? null;
+                if (
+                  !maxValue ||
+                  (numericValue !== null && numericValue <= maxValue)
+                ) {
                   onChange(numericValue);
                 }
               }}
@@ -64,7 +70,6 @@ const InputCurrencyBase: ForwardRefRenderFunction<
             />
           </>
         )}
-        name={name}
       />
 
       {!!error && <FormErrorMessage>{error?.message}</FormErrorMessage>}
