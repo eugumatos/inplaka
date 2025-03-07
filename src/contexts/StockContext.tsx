@@ -1,9 +1,9 @@
-import { ReactNode, createContext, useReducer, useContext } from "react";
-import { stockReducer } from "@/reducers/stockReducer";
 import { IStock } from "@/domains/stock";
-import { getStock, updateStock } from "@/services/stock";
-import { toast } from "react-toastify";
+import { stockReducer } from "@/reducers/stockReducer";
 import { StockFormData } from "@/schemas/StockSchemaValidation";
+import { getStock, updateStock } from "@/services/stock";
+import { ReactNode, createContext, useContext, useReducer } from "react";
+import { toast } from "react-toastify";
 
 interface StockContextProps {
   children?: ReactNode;
@@ -30,16 +30,17 @@ function StockProvider({ stock = [], children }: StockContextProps) {
 
   async function editStock(stock: StockFormData) {
     try {
+      console.log("aqui");
       dispatch({ type: "LOADING" });
 
-      stock = {
+      let formattedStock = {
         descricao: "ACERTO MANUAL",
         produto: stock.produto,
         quantidade: stock.quantidade,
         codigoMovimento: stock.codigoMovimento,
       };
 
-      await updateStock(stock);
+      await updateStock(formattedStock);
       const stockList = await getStock();
 
       dispatch({ type: "RELOAD_STOCK", payload: stockList });

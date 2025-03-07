@@ -1,24 +1,30 @@
-import React, { useMemo } from "react";
 import { Box, Flex, Heading, useDisclosure } from "@chakra-ui/react";
+import { useMemo } from "react";
 import { useFormContext } from "react-hook-form";
 import { Column } from "react-table";
 
+import { StockForm } from "@/components/Forms/StockForm";
 import { ModalDialog } from "@/components/Modals";
 import { DataTable } from "@/components/Table";
-import { StockForm } from "@/components/Forms/StockForm";
 
-import { filterText } from "@/utils/filterText";
-import { currency } from "@/utils/currency";
 import { useStock } from "@/contexts/StockContext";
 import { StockFormData } from "@/schemas/StockSchemaValidation";
+import { currency } from "@/utils/currency";
+import { filterText } from "@/utils/filterText";
 
 export function Stock() {
   const { stock, isLoading, editStock } = useStock();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const { handleSubmit, reset, setValue, formState } =
-    useFormContext<StockFormData>();
+  const {
+    handleSubmit,
+    reset,
+    setValue,
+    formState: { errors, isValid },
+  } = useFormContext<StockFormData>();
+
+  console.log(errors);
 
   const columns = useMemo(
     (): Column[] => [
@@ -45,7 +51,7 @@ export function Stock() {
     []
   );
 
-  const hasErrors = formState.isValid;
+  const hasErrors = isValid;
 
   const renderEditFormModal = () => {
     return (
