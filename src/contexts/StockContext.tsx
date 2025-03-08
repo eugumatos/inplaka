@@ -30,7 +30,6 @@ function StockProvider({ stock = [], children }: StockContextProps) {
 
   async function editStock(stock: StockFormData) {
     try {
-      console.log("aqui");
       dispatch({ type: "LOADING" });
 
       let formattedStock = {

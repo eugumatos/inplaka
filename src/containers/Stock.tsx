@@ -9,7 +9,6 @@ import { DataTable } from "@/components/Table";
 
 import { useStock } from "@/contexts/StockContext";
 import { StockFormData } from "@/schemas/StockSchemaValidation";
-import { currency } from "@/utils/currency";
 import { filterText } from "@/utils/filterText";
 
 export function Stock() {
@@ -24,8 +23,6 @@ export function Stock() {
     formState: { errors, isValid },
   } = useFormContext<StockFormData>();
 
-  console.log(errors);
-
   const columns = useMemo(
     (): Column[] => [
       {
@@ -34,18 +31,8 @@ export function Stock() {
         Cell: ({ value }) => filterText(value),
       },
       {
-        Header: "Quantidade",
-        accessor: "quantidade",
-      },
-      {
-        Header: "Saldo anterior",
-        accessor: "saldoAnterior",
-        Cell: ({ value }) => currency(value),
-      },
-      {
         Header: "Saldo atual",
-        accessor: "saldoAtual",
-        Cell: ({ value }) => currency(value),
+        accessor: "quantidade",
       },
     ],
     []
@@ -56,7 +43,7 @@ export function Stock() {
   const renderEditFormModal = () => {
     return (
       <ModalDialog
-        maxWidth="40%"
+        maxWidth="30%"
         textAction="Editar"
         isOpen={isOpen}
         onClose={onClose}

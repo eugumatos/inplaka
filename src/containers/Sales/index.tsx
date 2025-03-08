@@ -1,17 +1,16 @@
-import React, { useState, useRef } from "react";
-import { useForm } from "react-hook-form";
-import { Box, Heading, Flex, Text, Button } from "@chakra-ui/react";
-import { filterOrderByDate } from "@/services/order";
 import { RangeDatePicker } from "@/components/Forms/RangeDatePicker";
-import { AsyncSelect } from "@/components/Select/AsyncSelect";
-import { Select } from "@/components/Select";
 import { Input } from "@/components/Input";
-import { format } from "date-fns";
-import { toast } from "react-toastify";
+import { Select } from "@/components/Select";
+import { AsyncSelect } from "@/components/Select/AsyncSelect";
 import { SalleFormData } from "@/schemas/SalleSchemaValidation";
-import { PDFDownloadLink } from "@react-pdf/renderer";
 import { getClients } from "@/services/clients";
 import { getOrderSalle } from "@/services/order";
+import { Box, Button, Flex, Heading, Text } from "@chakra-ui/react";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import { format } from "date-fns";
+import { useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 import { PDFDocument } from "./document";
 
 type RangeDate = {
@@ -22,7 +21,7 @@ type RangeDate = {
 type SelectProps = {
   value: string;
   label: string;
-}
+};
 
 export function Sales() {
   const [currentClient, setCurrentClient] = useState<SelectProps>();
@@ -71,14 +70,18 @@ export function Sales() {
   async function handleSearchSales(data: SalleFormData) {
     try {
       const formData = {
-        idCliente: data.cliente?.value,
-        dateIni: rangeDate.startDate && format(rangeDate.startDate, "yyyy-MM-dd"),
-        dateFim: rangeDate.endDate && format(rangeDate.endDate, "yyyy-MM-dd"),
+        idClient: data.cliente?.value,
+        startDate: rangeDate.startDate
+          ? format(rangeDate.startDate, "yyyy-MM-dd")
+          : undefined,
+        endDate: rangeDate.endDate
+          ? format(rangeDate.endDate, "yyyy-MM-dd")
+          : undefined,
         status: data.status,
-        idPedido: data.numero_pedido
-      }
+        idOrder: String(data.numero_pedido),
+      };
 
-      const res = await getOrderSalle();
+      const res = await getOrderSalle(formData);
 
       toast.success(`Foi encontrado um total de ${res.length} pedidos.`);
 
@@ -86,7 +89,7 @@ export function Sales() {
 
       resetForm();
     } catch (error) {
-      toast.error('Erro ao buscar pedidos.')
+      toast.error("Erro ao buscar pedidos.");
     }
   }
 
@@ -121,7 +124,7 @@ export function Sales() {
                 value={currentClient}
                 loadOptions={clientOptions}
                 onChangeOption={setCurrentClient}
-                {...register('cliente')}
+                {...register("cliente")}
               />
             </Flex>
             <Flex flex={1}>
@@ -138,7 +141,7 @@ export function Sales() {
           <Flex>
             <RangeDatePicker
               ref={rangePickerRef}
-              getRangeDate={() => { }}
+              getRangeDate={() => {}}
               onChangeDateStart={(start) =>
                 setRangeDate({ ...rangeDate, startDate: start })
               }
@@ -147,11 +150,12 @@ export function Sales() {
               }
               noSearch
             />
-            <Button type="submit" color="#fff" bg="teal.400">BUSCAR</Button>
+            <Button type="submit" color="#fff" bg="teal.400">
+              BUSCAR
+            </Button>
           </Flex>
         </form>
       </Box>
-
 
       <Box mt={10}>
         <Text size="md">Pedidos encontrados: {filteredOrders.length}</Text>
@@ -163,7 +167,10 @@ export function Sales() {
                 orders={filteredOrders}
                 startDate={filteredDate.start}
                 endDate={filteredDate.end}
-                total={filteredOrders.reduce((sum, item) => sum + item.valorTotal, 0)}
+                total={filteredOrders.reduce(
+                  (sum, item) => sum + item.valorTotal,
+                  0
+                )}
               />
             }
             fileName={`relatorio-vendas${format(new Date(), "dd-MM-yyyy")}`}
@@ -172,7 +179,7 @@ export function Sales() {
               mt={3}
               bg="pink.300"
               color="gray.50"
-              onClick={() => { }}
+              onClick={() => {}}
               _hover={{
                 bg: "pink.400",
               }}
@@ -182,6 +189,6 @@ export function Sales() {
           </PDFDownloadLink>
         )}
       </Box>
-    </Box >
+    </Box>
   );
 }

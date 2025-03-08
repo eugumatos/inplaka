@@ -1,25 +1,16 @@
-import { useEffect, useState } from "react";
-import { useFormContext } from "react-hook-form";
-import {
-  Box,
-  Divider,
-  Flex,
-  Heading,
-  Text,
-  FormErrorMessage,
-} from "@chakra-ui/react";
-import { AccountFormData } from "@/schemas/AccountSchemaValidation";
 import { Input } from "@/components/Input";
 import { InputCurrency } from "@/components/Input/InputCurrency";
-import { Select } from "@/components/Select";
-import { AsyncSelect } from "../Select/AsyncSelect";
-import { toast } from "react-toastify";
+import { PlaqueFormData } from "@/schemas/PlaqueSchemaValidation";
 import { getAccounts } from "@/services/account";
 import { getFormPayments } from "@/services/form-payment";
-import DatePicker from "react-datepicker";
-import { format } from "date-fns";
-import { PlaqueFormData } from "@/schemas/PlaqueSchemaValidation";
 import { unmaskText } from "@/utils/unmaskText";
+import { Box, Divider, Flex, Heading, Text } from "@chakra-ui/react";
+import { format } from "date-fns";
+import { useEffect, useState } from "react";
+import DatePicker from "react-datepicker";
+import { useFormContext } from "react-hook-form";
+import { toast } from "react-toastify";
+import { AsyncSelect } from "../Select/AsyncSelect";
 
 export function PlaqueForm() {
   const {
@@ -40,7 +31,7 @@ export function PlaqueForm() {
       const valorEmAbertoAtualNumber = parseFloat(
         unmaskText(valorEmAbertoAtual)
       );
-      const valorAbatidoNumber = parseFloat(unmaskText(valorAbatido));
+      const valorAbatidoNumber = parseFloat(valorAbatido);
 
       if (valorAbatidoNumber > valorEmAbertoAtualNumber) {
         // Clear the valorAbatido field

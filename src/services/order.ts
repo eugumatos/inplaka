@@ -1,6 +1,6 @@
 import { url } from "@/constants";
-import { OrderFormData } from "@/schemas/OrderSchemaValidation";
 import { IOrder } from "@/domains/order";
+import { OrderFormData } from "@/schemas/OrderSchemaValidation";
 
 export async function getOrders(): Promise<IOrder[]> {
   const res = await fetch(`${url}/PedidoVenda`);
@@ -24,13 +24,27 @@ export async function getOrder(id: string): Promise<IOrder> {
   return res.json();
 }
 
-export async function getOrderSalle(idClient?: string, startDate?: string, endDate?: string, status?: string, idOrder?: string): Promise<IOrder> {
+interface OrderFilter {
+  idClient?: string;
+  startDate?: string;
+  endDate?: string;
+  status?: string;
+  idOrder?: string;
+}
+
+export async function getOrderSalle({
+  idClient,
+  startDate,
+  endDate,
+  status,
+  idOrder,
+}: OrderFilter): Promise<IOrder> {
   const formData = {
     idCliente: idClient,
     dateIni: startDate,
     dateFim: endDate,
     status: status,
-    idPedido: idOrder
+    idPedido: idOrder,
   };
 
   // Remove any undefined or null values from formData
@@ -43,7 +57,7 @@ export async function getOrderSalle(idClient?: string, startDate?: string, endDa
 
   // Make the fetch request using the constructed URL with query parameters
   const res = await fetch(`${url}/PedidoVenda/findRelatorio?${queryString}`, {
-    method: 'GET'
+    method: "GET",
   });
 
   if (!res.ok) {
@@ -168,7 +182,7 @@ export async function filterOrderByDateBank(
   const formData = {
     dateIni: startDate,
     dateFim: endDate,
-    contaBancariaId: bankId
+    contaBancariaId: bankId,
   };
 
   const filteredFormData = Object.fromEntries(
