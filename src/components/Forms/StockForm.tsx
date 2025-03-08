@@ -13,10 +13,14 @@ export function StockForm() {
   } = useFormContext<StockFormData>();
 
   const { produtoNome, saldoAtual } = getValues();
-  const [lastQtd, setLastQtd] = useState<string | null>(null);
+  const [lastQtd, setLastQtd] = useState<number | null>(null);
 
   useEffect(() => {
-    if (saldoAtual) setLastQtd(saldoAtual);
+    const saldoNumerico = Number(saldoAtual); // Ou use o operador "+" como atalho: +saldoAtual
+
+    if (!isNaN(saldoNumerico) && saldoNumerico >= 0) {
+      setLastQtd(saldoNumerico);
+    }
   }, []);
 
   return (
