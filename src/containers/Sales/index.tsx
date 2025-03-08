@@ -70,7 +70,7 @@ export function Sales() {
   async function handleSearchSales(data: SalleFormData) {
     try {
       const formData = {
-        idClient: data.cliente?.value,
+        idClient: currentClient?.value,
         startDate: rangeDate.startDate
           ? format(rangeDate.startDate, "yyyy-MM-dd")
           : undefined,
