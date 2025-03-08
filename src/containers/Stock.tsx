@@ -32,7 +32,7 @@ export function Stock() {
       },
       {
         Header: "Saldo atual",
-        accessor: "quantidade",
+        accessor: "saldoAtual",
       },
     ],
     []

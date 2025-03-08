@@ -6,6 +6,7 @@ export const stockFormSchema = yup.object().shape({
   produto: yup.string(),
   produtoNome: yup.string().nullable().optional(),
   quantidade: yup.number(),
+  saldoAtual: yup.string().nullable().optional(),
 });
 
 export type StockFormData = yup.InferType<typeof stockFormSchema>;

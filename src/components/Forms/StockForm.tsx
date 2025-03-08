@@ -12,11 +12,11 @@ export function StockForm() {
     formState: { errors },
   } = useFormContext<StockFormData>();
 
-  const { produtoNome, quantidade } = getValues();
-  const [lastQtd, setLastQtd] = useState<number | null>(null);
+  const { produtoNome, saldoAtual } = getValues();
+  const [lastQtd, setLastQtd] = useState<string | null>(null);
 
   useEffect(() => {
-    if (quantidade) setLastQtd(quantidade);
+    if (saldoAtual) setLastQtd(saldoAtual);
   }, []);
 
   return (

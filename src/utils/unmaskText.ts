@@ -1,3 +1,3 @@
-export const unmaskText = (text: string) => {
-  return text?.replace(/[^\d]/g, "");
+export const unmaskText = (text: any): string => {
+  return String(text || "").replace(/[^\d]/g, "");
 };
